@@ -107,10 +107,16 @@ select{width:100%;background:var(--card);border:1.5px solid var(--border);border
 .bar-fill{height:100%;background:var(--accent);border-radius:3px}
 
 /* Chem dropdown */
-.chem-dropdown{border:1.5px solid var(--accent);border-radius:9px;overflow:hidden;background:var(--card)}
-.chem-list{max-height:180px;overflow-y:auto}
-.chem-item{padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.chem-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:flex-end;justify-content:center}
+.chem-modal-overlay.open{display:flex}
+.chem-modal{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+.chem-modal-hdr{padding:14px 15px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chem-modal-search{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:9px;color:var(--text);padding:9px 13px;font-size:13px;outline:none;font-family:inherit}
+.chem-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.chem-item{padding:10px 15px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
 .chem-item:active{background:var(--adim)}
+.chem-item.selected{background:rgba(61,219,114,.12);border-left:3px solid var(--accent)}
+.chem-item.selected .chem-name{color:var(--accent);font-weight:700}
 .plot-dropdown{border:1.5px solid var(--teal);border-radius:9px;overflow:hidden;background:var(--card)}
 .plot-list{max-height:200px;overflow-y:auto}
 .plot-item{padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px}
@@ -488,39 +494,43 @@ function renderStockAlerts() {
 let openChemIdx = -1; let openChemForm = '';
 function openChemDrop(idx, form) {
   openChemIdx = idx; openChemForm = form;
-  const val = form==='cr' ? crChems[idx].n : mxTanks[currentTankIdx].chems[idx].n;
-  const el = document.getElementById(form+'-chem-drop-'+idx+(form==='mx'?'-'+currentTankIdx:''));
-  if (!el) return;
-  el.innerHTML = buildChemDropHTML(val, idx, form);
-  el.style.display = 'block';
+  document.getElementById('chem-modal-search').value = '';
+  renderChemModalList('');
+  document.getElementById('chem-modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('chem-modal-search').focus(), 200);
 }
-function buildChemDropHTML(val, idx, form) {
-  let html = `<div class="chem-dropdown"><input type="text" placeholder="ស្វែងរក..." id="chem-search-${idx}" oninput="filterChem(${idx},'${form}')" style="border-radius:0;border-bottom:1px solid var(--border);width:100%;background:var(--card);border:none;padding:10px 13px;color:var(--text);font-size:12px;outline:none"><div class="chem-list" id="chem-list-${idx}-${form}">`;
-  CHEMS.forEach(c => {
+function renderChemModalList(q) {
+  const curVal = openChemForm==='cr'
+    ? (crChems[openChemIdx]?.n||'')
+    : (mxTanks[currentTankIdx]?.chems[openChemIdx]?.n||'');
+  const list = document.getElementById('chem-modal-list');
+  const filtered = q ? CHEMS.filter(c=>c.n.toLowerCase().includes(q)||c.t.toLowerCase().includes(q)) : CHEMS;
+  list.innerHTML = filtered.map(c => {
     const sc = c.s===0?'danger':c.s<50?'warn':'accent';
-    const sv = c.s===0?'OUT':c.s<50?`LOW:${c.s}`:c.s;
-    html += `<div class="chem-item" onclick="selectChem('${c.n}',${idx},'${form}')"><div><div style="font-size:12px;font-weight:700">${c.n}</div><div style="font-size:10px;color:var(--muted)">${c.t}</div></div><span class="chip" style="background:rgba(0,0,0,.2);color:var(--${sc})">${sv}</span></div>`;
-  });
-  html += `</div><div class="dropdown-close" onclick="closeChemDrop(${idx},'${form}')">✕ បិទ</div></div>`;
-  return html;
+    const sv = c.s===0?'OUT':c.s<50?'LOW:'+c.s:c.s+''+c.u;
+    const sel = curVal===c.n ? ' selected' : '';
+    return `<div class="chem-item${sel}" onclick="selectChem('${c.n.replace(/'/g,"\\'")}')">
+      <div><div class="chem-name" style="font-size:13px">${c.n}</div>
+      <div style="font-size:10px;color:var(--muted)">${c.t}</div></div>
+      <span class="chip" style="background:rgba(0,0,0,.25);color:var(--${sc})">${sv}</span>
+    </div>`;
+  }).join('');
 }
-function filterChem(idx, form) {
-  const q = document.getElementById('chem-search-'+idx).value.toLowerCase();
-  const list = document.getElementById('chem-list-'+idx+'-'+form);
-  if (!list) return;
-  list.querySelectorAll('.chem-item').forEach(item => {
-    item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
-  });
+function filterChemModal() {
+  renderChemModalList(document.getElementById('chem-modal-search').value.toLowerCase().trim());
 }
-function selectChem(name, idx, form) {
-  if (form==='cr') { crChems[idx].n = name; renderCRChems(); }
-  else { mxTanks[currentTankIdx].chems[idx].n = name; renderMXTanks(); }
+function selectChem(name) {
+  if (openChemForm==='cr') { crChems[openChemIdx].n = name; renderCRChems(); }
+  else { mxTanks[currentTankIdx].chems[openChemIdx].n = name; renderMXTanks(); }
+  closeChemModal();
 }
-function closeChemDrop(idx, form) {
-  const sfx = form==='mx' ? idx+'-'+currentTankIdx : idx;
-  const el = document.getElementById(form+'-chem-drop-'+sfx);
-  if (el) el.style.display='none';
+function closeChemModal(e) {
+  if (e && e.target !== document.getElementById('chem-modal-overlay')) return;
+  document.getElementById('chem-modal-overlay').classList.remove('open');
 }
+function buildChemDropHTML(val, idx, form) { return ''; }
+function filterChem() {}
+function closeChemDrop() {}
 
 // ── Plot Dropdown ─────────────────────────────────────────────────────────────
 let plotTargetId = null;
@@ -938,5 +948,19 @@ function showToast(msg){
   clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',2500);
 }
 </script>
+
+<!-- Chem Modal -->
+<div class="chem-modal-overlay" id="chem-modal-overlay" onclick="closeChemModal(event)">
+  <div class="chem-modal">
+    <div class="chem-modal-hdr">
+      <span style="font-size:13px;font-weight:700;color:var(--text)">ជ្រើសសារធាតុ (Select Chemical)</span>
+      <button onclick="closeChemModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:10px 15px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <input class="chem-modal-search" id="chem-modal-search" type="text" placeholder="ស្វែងរក (Search)..." oninput="filterChemModal()" autocomplete="off">
+    </div>
+    <div class="chem-list" id="chem-modal-list"></div>
+  </div>
+</div>
 </body>
 </html>
