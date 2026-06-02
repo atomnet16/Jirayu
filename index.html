@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chem Control">
+<meta name="theme-color" content="#0A1A0D">
+<title>🌱 Chem Control · Mega Farm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+:root{
+  --bg:#0A1A0D;--surface:#112216;--card:#182E1C;--border:#243D28;
+  --accent:#3DDB72;--adim:#133322;
+  --blue:#5BA4F5;--teal:#2ECC9A;--warn:#F5A623;--danger:#E85555;
+  --purple:#9B7EF5;--orange:#F57C3D;
+  --text:#DFF0E3;--muted:#6B9A74;--dim:#3D5E44;
+}
+body{background:var(--bg);color:var(--text);font-family:'Hanuman','Noto Sans Khmer',sans-serif;max-width:480px;margin:0 auto;min-height:100vh}
+input,select,button{font-family:inherit}
+input::placeholder{color:var(--dim)}
+input[type=date]::-webkit-calendar-picker-indicator,
+input[type=time]::-webkit-calendar-picker-indicator{filter:invert(0.6) sepia(1) hue-rotate(90deg)}
+select option{background:var(--card);color:var(--text)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+button:disabled{opacity:.5}
+
+/* Layout */
+#app{padding-bottom:90px}
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 15px;position:sticky;top:0;z-index:100}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:10px;letter-spacing:2px;color:var(--accent);font-weight:700;text-transform:uppercase}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.date-chip{font-size:10px;background:rgba(61,219,114,.15);color:var(--accent);padding:3px 9px;border-radius:20px;font-weight:700}
+
+/* Nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:7px 0 14px;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--dim);transition:color .2s}
+.nav-btn.active{color:var(--accent)}
+.nav-icon{font-size:20px}
+.nav-lbl{font-size:9px;font-weight:700}
+
+/* Sections */
+.page{padding:15px 15px 0;display:none}
+.page.show{display:block}
+.sec-lbl{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:9px;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:7px}
+.form-card{background:var(--card);border:1.5px solid var(--border);border-radius:13px;padding:13px 10px;cursor:pointer;display:flex;flex-direction:column;gap:5px;transition:border-color .2s}
+.form-card:active{border-color:var(--accent)}
+.form-icon{font-size:20px}
+.form-lbl{font-size:11px;font-weight:700;line-height:1.3}
+.form-en{font-size:8px;color:var(--muted)}
+
+/* Stat card */
+.stat{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 8px;text-align:center}
+.stat-val{font-size:22px;font-weight:800}
+.stat-lbl{font-size:9px;color:var(--muted);line-height:1.3;margin-top:2px}
+
+/* Form */
+.form-wrap{padding:13px 15px;display:none}
+.form-wrap.show{display:block}
+.fhdr{display:flex;align-items:center;gap:9px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.ftitle{font-size:13px;font-weight:800;flex:1;line-height:1.3}
+.grp{margin-bottom:12px}
+label.lbl{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;display:block;margin-bottom:5px}
+input[type=text],input[type=number],input[type=date],input[type=time]{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:9px;color:var(--text);padding:10px 13px;font-size:13px;outline:none}
+select{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:9px;color:var(--text);padding:10px 13px;font-size:12px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%233DDB72' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.back-btn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.badge{font-size:9px;padding:3px 8px;border-radius:20px;font-weight:700}
+.chip{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700}
+.submit-btn{width:100%;border:none;border-radius:10px;color:#0A1A0D;padding:13px;font-size:13px;font-weight:800;cursor:pointer;margin-top:14px}
+.add-btn{width:100%;background:transparent;border:1.5px dashed var(--border);border-radius:9px;padding:9px;font-size:11px;cursor:pointer;font-weight:700;margin-top:3px}
+.rm-btn{background:transparent;border:none;color:var(--danger);font-size:14px;cursor:pointer;padding:0 4px}
+.chem-row{background:rgba(46,204,154,.05);border:1px solid var(--border);border-radius:8px;padding:9px 10px;margin-bottom:6px}
+.tank-card{background:var(--card);border:1.5px solid rgba(46,204,154,.35);border-radius:10px;padding:10px 12px;margin-bottom:9px}
+.calc-box{border-radius:9px;padding:10px 13px;margin-bottom:11px}
+.calc-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
+.calc-val{font-weight:800;font-size:12px}
+
+/* Report sub-nav */
+.subnav{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:14px}
+.subnav-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 4px;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.subnav-btn.active{background:rgba(61,219,114,.15);border-color:var(--accent);color:var(--accent)}
+
+/* Alerts */
+.alert-out{background:rgba(232,85,85,.1);border:1px solid rgba(232,85,85,.3);border-radius:8px;padding:7px 11px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.alert-low{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:7px 11px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.report-nav{background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-top:13px}
+
+/* Success */
+.success-wrap{text-align:center;padding:26px 18px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.success-icon{font-size:48px}
+.success-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 15px;width:100%;text-align:left}
+.success-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0}
+.sync-box{display:flex;align-items:center;gap:7px;font-size:11px;border-radius:8px;padding:7px 12px;width:100%}
+
+/* Bar chart */
+.bar-bg{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:5px}
+.bar-fill{height:100%;background:var(--accent);border-radius:3px}
+
+/* Chem dropdown */
+.chem-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:flex-end;justify-content:center}
+.chem-modal-overlay.open{display:flex}
+.chem-modal{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+.chem-modal-hdr{padding:14px 15px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chem-modal-search{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:9px;color:var(--text);padding:9px 13px;font-size:13px;outline:none;font-family:inherit}
+.chem-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.chem-item{padding:10px 15px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.chem-item:active{background:var(--adim)}
+.chem-item.selected{background:rgba(61,219,114,.12);border-left:3px solid var(--accent)}
+.chem-item.selected .chem-name{color:var(--accent);font-weight:700}
+.plot-dropdown{border:1.5px solid var(--teal);border-radius:9px;overflow:hidden;background:var(--card)}
+.plot-list{max-height:200px;overflow-y:auto}
+.plot-item{padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px}
+.plot-item:active{background:var(--adim)}
+.dropdown-close{padding:7px;text-align:center;font-size:10px;color:var(--muted);cursor:pointer;background:var(--surface)}
+
+/* History filter */
+.filter-tabs{display:flex;gap:7px;margin-bottom:12px}
+.ftab{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 3px;font-size:10px;font-weight:700;cursor:pointer}
+.ftab.active{background:rgba(61,219,114,.15);border-color:var(--accent);color:var(--accent)}
+
+/* Export box */
+.export-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:12px}
+.export-textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:10px;font-family:monospace;margin-top:8px;resize:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-row">
+      <div>
+        <div class="logo">🌱 Chem Control · Mega Farm</div>
+        <div class="logo-sub">ប្រព័ន្ធគ្រប់គ្រងសារធាតុ (Pesticide Mgmt)</div>
+      </div>
+      <div class="date-chip" id="today-chip"></div>
+    </div>
+  </div>
+
+  <!-- PAGES -->
+  <div id="page-home" class="page show">
+    <div class="sec-lbl" id="today-lbl">ថ្ងៃនេះ (Today)</div>
+    <div class="g3" style="margin-bottom:14px">
+      <div class="stat"><div class="stat-val" id="cnt-cr" style="color:var(--accent)">0</div><div class="stat-lbl">ស្នើ CR</div></div>
+      <div class="stat"><div class="stat-val" id="cnt-mx" style="color:var(--teal)">0</div><div class="stat-lbl">លាយ MX</div></div>
+      <div class="stat"><div class="stat-val" id="cnt-sp" style="color:var(--blue)">0</div><div class="stat-lbl">បាញ់ SP</div></div>
+    </div>
+    <div class="sec-lbl">ទម្រង់ (Forms)</div>
+    <div class="g3" style="margin-bottom:14px">
+      <div class="form-card" onclick="showForm('cr')">
+        <div class="form-icon">📦</div>
+        <div class="form-lbl">ការស្នើសុំ</div>
+        <div class="form-en">Requisition</div>
+        <span class="chip badge" style="background:rgba(61,219,114,.2);color:var(--accent)">CR-01</span>
+      </div>
+      <div class="form-card" onclick="showForm('mx')">
+        <div class="form-icon">⚗️</div>
+        <div class="form-lbl">ការលាយ</div>
+        <div class="form-en">Mixing</div>
+        <span class="chip badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
+      </div>
+      <div class="form-card" onclick="showForm('sp')">
+        <div class="form-icon">🌿</div>
+        <div class="form-lbl">ការបាញ់</div>
+        <div class="form-en">Spraying</div>
+        <span class="chip badge" style="background:rgba(91,164,245,.2);color:var(--blue)">SP-01</span>
+      </div>
+    </div>
+    <div class="report-nav" onclick="showTab('report')">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Summary · By Plot · By Chem · Balance</div>
+      </div>
+      <span style="font-size:16px;color:var(--warn)">→</span>
+    </div>
+    <button onclick="refreshCloud()" style="width:100%;background:rgba(91,164,245,.15);border:1px solid rgba(91,164,245,.4);color:#5BA4F5;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:9px">
+      🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh from Cloud)
+    </button>
+    <div id="stock-alerts" style="margin-top:13px"></div>
+  </div>
+
+  <div id="page-report" class="page">
+    <div style="font-size:13px;font-weight:800;margin-bottom:12px">📋 របាយការណ៍ (Reports)</div>
+    <div class="subnav">
+      <button class="subnav-btn active" onclick="showReport('summary')" id="rbt-summary"><span>📊</span><span style="font-size:8px">Summary</span></button>
+      <button class="subnav-btn" onclick="showReport('plot')" id="rbt-plot"><span>📍</span><span style="font-size:8px">By Plot</span></button>
+      <button class="subnav-btn" onclick="showReport('chem')" id="rbt-chem"><span>🧪</span><span style="font-size:8px">By Chem</span></button>
+      <button class="subnav-btn" onclick="showReport('balance')" id="rbt-balance"><span>⚖️</span><span style="font-size:8px">Balance</span></button>
+    </div>
+    <div id="report-content"></div>
+  </div>
+
+  <div id="page-history" class="page">
+    <div class="sec-lbl" style="margin-bottom:10px">ប្រវត្តិ (History)</div>
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="filterHistory('all')">ទាំងអស់</button>
+      <button class="ftab" onclick="filterHistory('cr')">CR</button>
+      <button class="ftab" onclick="filterHistory('mx')">MX</button>
+      <button class="ftab" onclick="filterHistory('sp')">SP</button>
+    </div>
+    <div id="history-list"></div>
+    <div class="export-box">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">💾 ទិន្នន័យ (Data Management)</div>
+      <button class="submit-btn" style="background:var(--warn);margin-top:0" onclick="exportData()">📋 Export & Copy Data</button>
+      <div id="export-status" style="font-size:10px;color:var(--accent);margin-top:5px;display:none">✅ Copied! Paste in Claude chat</div>
+      <button class="submit-btn" style="background:var(--teal);margin-top:8px" onclick="downloadBackup()">💾 Download Backup (.json)</button>
+      <input type="file" id="import-file" accept=".json" onchange="importBackup(this)" style="display:none">
+      <button class="submit-btn" style="background:var(--blue);margin-top:8px" onclick="document.getElementById('import-file').click()">📂 Import Backup (.json)</button>
+      <div id="import-status" style="font-size:10px;color:var(--accent);margin-top:5px;display:none"></div>
+      <div style="margin-top:10px;font-size:10px;color:var(--muted)">📋 Or paste JSON:</div>
+      <textarea id="import-paste" placeholder='[{"id":"CR-..."}]' style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px;font-size:10px;font-family:monospace;margin-top:5px;resize:none;height:55px"></textarea>
+      <button class="submit-btn" style="background:var(--purple);margin-top:5px" onclick="importPaste()">⬆️ Import Pasted JSON</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('home')" id="nav-home"><span class="nav-icon">🏠</span><span class="nav-lbl">Home</span></button>
+  <button class="nav-btn" onclick="showTab('report')" id="nav-report"><span class="nav-icon">📋</span><span class="nav-lbl">Reports</span></button>
+  <button class="nav-btn" onclick="showTab('history')" id="nav-history"><span class="nav-icon">📜</span><span class="nav-lbl">History</span></button>
+</nav>
+
+<!-- FORMS (overlay) -->
+<div id="form-cr" class="form-wrap">
+  <div class="fhdr">
+    <button class="back-btn" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">📦 ការស្នើសុំ (Requisition)</div>
+    <span class="badge" style="background:rgba(61,219,114,.2);color:var(--accent)">CR-01</span>
+  </div>
+  <div class="grp"><label class="lbl">កាលបរិច្ឆេទ (Date)</label><input type="date" id="cr-date"></div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">អ្នកស្នើ (Requester)</label><input type="text" id="cr-req" placeholder="ឈ្មោះ (Name)"></div>
+    <div class="grp"><label class="lbl">អ្នកអនុម័ត (Approver)</label><input type="text" id="cr-apv" placeholder="ប្រធាន (Head)"></div>
+  </div>
+  <div class="sec-lbl">សារធាតុ (Chemical List)</div>
+  <div id="cr-chems"></div>
+  <button class="add-btn" style="color:var(--accent)" onclick="addCRChem()">+ បន្ថែម (Add Chemical)</button>
+  <div class="grp" style="margin-top:10px"><label class="lbl">កំណត់ចំណាំ (Note)</label><input type="text" id="cr-note" placeholder="ប្រសិនមាន..."></div>
+  <button class="submit-btn" style="background:var(--accent)" onclick="submitCR()">✓ បញ្ជាក់ (Confirm)</button>
+</div>
+
+<div id="form-mx" class="form-wrap">
+  <div class="fhdr">
+    <button class="back-btn" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">⚗️ ការលាយ (Mixing Record)</div>
+    <span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
+  </div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">Date</label><input type="date" id="mx-date"></div>
+    <div class="grp"><label class="lbl">ម៉ោង (Time)</label><input type="time" id="mx-time"></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">អ្នកលាយ (Mixer)</label><input type="text" id="mx-mixer" placeholder="ឈ្មោះ"></div>
+    <div class="grp"><label class="lbl">អ្នកត្រួត (Supervisor)</label><input type="text" id="mx-sup" placeholder="ប្រធាន"></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">ចំការ (Plot)</label><div id="mx-plot-sel" onclick="openPlotDrop('mx-plot-val','mx-plot-sel')"><input type="text" id="mx-plot-val" placeholder="ជ្រើស Plot..." readonly style="cursor:pointer"></div></div>
+    <div class="grp"><label class="lbl">ម៉ាស៊ីន (Sprayer)</label>
+      <select id="mx-sprayer"><option value="">ជ្រើស...</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
+    </div>
+  </div>
+  <div class="grp"><label class="lbl">ទឹក/ថង L (Water per Tank)</label><input type="number" id="mx-wpt" value="200"></div>
+  <div id="mx-tanks-wrap"></div>
+  <button class="add-btn" style="color:var(--orange);margin-bottom:10px" onclick="addMXTank()">+ ថងថ្មី (Add Tank)</button>
+  <div id="mx-total-box" style="display:none" class="calc-box" style="background:rgba(46,204,154,.1);border:1px solid rgba(46,204,154,.3)"></div>
+  <div class="grp"><label class="lbl">Note</label><input type="text" id="mx-note" placeholder="ប្រសិនមាន..."></div>
+  <button class="submit-btn" style="background:var(--teal)" onclick="submitMX()">✓ បញ្ជាក់ (Confirm Mix)</button>
+</div>
+
+<div id="form-sp" class="form-wrap">
+  <div class="fhdr">
+    <button class="back-btn" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">🌿 ការបាញ់ (Spraying Record)</div>
+    <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">SP-01</span>
+  </div>
+  <div class="grp"><label class="lbl">Date</label><input type="date" id="sp-date"></div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">ម៉ោងចាប់ (Start)</label><input type="time" id="sp-ts"></div>
+    <div class="grp"><label class="lbl">ម៉ោងបញ្ចប់ (End)</label><input type="time" id="sp-te"></div>
+  </div>
+  <div id="sp-dur-box" style="display:none" class="calc-box"></div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">អ្នកបាញ់ (Operator)</label><input type="text" id="sp-op" placeholder="ឈ្មោះ"></div>
+    <div class="grp"><label class="lbl">Supervisor</label><input type="text" id="sp-sup" placeholder="ប្រធាន"></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">ចំការ (Plot)</label><input type="text" id="sp-plot-val" placeholder="ជ្រើស..." onclick="openPlotDrop('sp-plot-val','sp-plot-sel')" readonly style="cursor:pointer"><div id="sp-plot-sel"></div></div>
+    <div class="grp"><label class="lbl">ផ្ទៃដី ha</label><input type="number" id="sp-area" placeholder="0"></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label class="lbl">អាកាស (Weather)</label>
+      <select id="sp-weather"><option value="">ជ្រើស...</option><option>ថ្ងៃចែង (Sunny)</option><option>មានពពក (Cloudy)</option><option>ស្រអាប់ (Overcast)</option><option>មានអ័ព្ទ (Foggy)</option><option>ខ្យល់ (Windy)</option></select>
+    </div>
+    <div class="grp"><label class="lbl">ខ្យល់ (Wind)</label>
+      <select id="sp-wind"><option value="">ជ្រើស...</option><option>ស្ងប់ &lt;5km/h</option><option>ស្រាល 5-15</option><option>ខ្លាំង &gt;15</option></select>
+    </div>
+  </div>
+  <div class="grp"><label class="lbl">🔗 ភ្ជាប់ MX (Link Mixing)</label>
+    <select id="sp-mx"><option value="">-- No link --</option></select>
+  </div>
+  <div id="sp-mx-preview" style="display:none" class="calc-box"></div>
+  <div class="calc-box" style="background:rgba(91,164,245,.1);border:1px solid rgba(91,164,245,.3)">
+    <div style="font-size:10px;color:var(--blue);font-weight:700;margin-bottom:7px">💧 ទឹក (Water Tracking)</div>
+    <div class="g2">
+      <div><label class="lbl">ទឹកមុន L (Before)</label><input type="number" id="sp-wb" placeholder="0" oninput="calcWater()"></div>
+      <div><label class="lbl">ទឹកក្រោយ L (After)</label><input type="number" id="sp-wa" placeholder="0" oninput="calcWater()"></div>
+    </div>
+    <div id="sp-water-result" style="margin-top:7px"></div>
+  </div>
+  <div id="sp-chem-result" style="display:none" class="calc-box"></div>
+  <div class="grp"><label class="lbl">Note / Issue</label><input type="text" id="sp-note" placeholder="ឧ. ម៉ាស៊ីនខូច..."></div>
+  <button class="submit-btn" style="background:var(--accent)" onclick="submitSP()">✓ បញ្ជាក់ (Confirm Spraying)</button>
+</div>
+
+<!-- Plot dropdown (shared) -->
+<div id="plot-drop" style="display:none;position:fixed;left:15px;right:15px;max-width:450px;z-index:200;top:50%;transform:translateY(-50%)">
+  <div class="plot-dropdown">
+    <input type="text" id="plot-search" placeholder="ស្វែងរក (Search)..." oninput="filterPlots()" style="border-radius:0;border-bottom:1px solid var(--border);width:100%;background:var(--card);border-top:none;border-left:none;border-right:none;padding:10px 13px;color:var(--text);font-size:12px;outline:none">
+    <div class="plot-list" id="plot-list"></div>
+    <div class="dropdown-close" onclick="closePlotDrop()">✕ បិទ (Close)</div>
+  </div>
+</div>
+<div id="plot-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199" onclick="closePlotDrop()"></div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+const CHEMS = [
+  {n:"Emamecthrin",u:"Kg",t:"Insecticide",s:510},
+  {n:"Belt",u:"Kg",t:"Insecticide",s:303},
+  {n:"Lufenuron",u:"L",t:"Insecticide",s:862},
+  {n:"Fipronil",u:"L",t:"Insecticide",s:0},
+  {n:"Altacor",u:"Kg",t:"Insecticide",s:0},
+  {n:"Profenofos",u:"L",t:"Insecticide",s:891},
+  {n:"Actara (Thiamethoxam)",u:"Kg",t:"Insecticide",s:7.5},
+  {n:"Eforia",u:"L",t:"Insecticide",s:1745.5},
+  {n:"Amrarar",u:"Kg",t:"Insecticide",s:0},
+  {n:"Spirotetramat",u:"L",t:"Insecticide",s:94.3},
+  {n:"Chlorfenapyr",u:"L",t:"Insecticide",s:2070},
+  {n:"Bifentrin (Talstar)",u:"L",t:"Insecticide",s:260},
+  {n:"Methomyl",u:"Kg",t:"Insecticide",s:13},
+  {n:"Glyphosate",u:"L",t:"Herbicide",s:0},
+  {n:"Dual Gold",u:"L",t:"Herbicide",s:3621},
+  {n:"2,4-D",u:"L",t:"Herbicide",s:750},
+  {n:"Clio Pro",u:"L",t:"Herbicide",s:133.5},
+  {n:"Atrazine",u:"Kg",t:"Herbicide",s:1980},
+  {n:"Nicosulfuron (Green)",u:"L",t:"Herbicide",s:208},
+  {n:"Nicosulfuron (Yellow)",u:"L",t:"Herbicide",s:37},
+  {n:"Sumisoya",u:"Kg",t:"Herbicide",s:53.7},
+  {n:"Glufosinate",u:"L",t:"Herbicide",s:3880},
+  {n:"Pendimethalin",u:"L",t:"Herbicide",s:2607},
+  {n:"Acetochlor",u:"L",t:"Herbicide",s:640},
+  {n:"Imazetapyr (Pursuit)",u:"L",t:"Herbicide",s:874.6},
+  {n:"Indaziflam (Becano)",u:"L",t:"Herbicide",s:19.3},
+  {n:"Metribuzin (Sencor)",u:"Kg",t:"Herbicide",s:162.25},
+  {n:"Quizalofop (Clifton)",u:"L",t:"Herbicide",s:714},
+  {n:"Fomesafen (Flex)",u:"L",t:"Herbicide",s:112.75},
+  {n:"Fomesafen (Farma)",u:"L",t:"Herbicide",s:1912},
+  {n:"Ametryn 80",u:"Kg",t:"Herbicide",s:145},
+  {n:"Fluazifop",u:"L",t:"Herbicide",s:2180},
+  {n:"Carbendazim",u:"L",t:"Fungicide",s:0.5},
+  {n:"Nativo",u:"Kg",t:"Fungicide",s:0.3},
+  {n:"Atemis",u:"L",t:"Fungicide",s:0.25},
+  {n:"Mammoth Zinc",u:"L",t:"Fertilizer",s:80},
+  {n:"Mammoth Ca+B",u:"L",t:"Fertilizer",s:140},
+  {n:"Surfactant",u:"L",t:"Fertilizer",s:1263.2},
+  {n:"K30",u:"L",t:"Fertilizer",s:3000},
+  {n:"MgSO4",u:"Kg",t:"Fertilizer",s:0},
+  {n:"Euro seed",u:"L",t:"Fertilizer",s:0},
+  {n:"Fergan",u:"L",t:"Fertilizer",s:0},
+  {n:"Vetget oil",u:"L",t:"Fertilizer",s:0},
+];
+const PLOTS = ["Pivot 1","Pivot 2","Pivot 3","Pivot 4","Pivot 5/1","Pivot 5/2","Pivot 6","Pivot 7","Pivot 8","Pivot 9","Pivot 10","Pivot 11","Avocado 1","Avocado 2E","Avocado 2E-1","Avocado 2E-2","Avocado 2W2","Avocado 2W","Avocado 3Curve","Avocado 3P11","Avocado 4","Coconut 2","Coconut 3","Cashew Nut A","Cashew Nut B","Cashew Nut C","Cashew Nut D","Cashew Nut SM","Jackfruit 1","Jackfruit 2","Jackfruit 3","Mango 2","Mango 2B1","Mango 2B2","Mango 2B3","Mango 2D","Mango 2M","Mango 2Curve","Mango 2WH","Mango 3","Mango 3Tri","Mango 4","Tamarind 2","Tamarind 2N","Tamarind 2V","Tamarind 3N1","Tamarind 3N2","Tamarind 3N3","Tamarind 3N4","Tamarind 3SE","Tamarind 3SW","Tamarind 4N","Tamarind 4NP2","Tamarind 4S","Tamarind 4SD","Tamarind 4SP1"];
+
+// ── State ───────────────────────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxcMaU66qYXau37q2V8weSukc0-lG6W5Sp4AMV0_yXr4Xc7LH30N8lzRGiCfgzdh-/exec';
+const USE_CLOUD = true; // Set false to use local only
+
+// ── Cloud sync (v2 - all 3 sheets) ─────────────────────────────────────────
+async function cloudAppend(sheetName, row) {
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'append', sheet: sheetName, row: row })
+    });
+    const json = await res.json();
+    return json.ok === true;
+  } catch {
+    // Fallback: no-cors (won't get response but data may go through)
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'append', sheet: sheetName, row: row })
+      });
+    } catch {}
+    return false;
+  }
+}
+
+async function cloudSyncAll() {
+  // Push all local records to cloud at once (appendMany - dedup on server)
+  const cr = records.filter(r => r.type === 'cr').map(r => [
+    r.id,'cr',r.date,r.requester,r.approver,
+    JSON.stringify(r.chemicals||[]),r.note,r.createdAt
+  ]);
+  const mx = records.filter(r => r.type === 'mx').map(r => [
+    r.id,'mx',r.date,r.time,r.mixer,r.supervisor,r.plot,r.sprayer,
+    r.waterPerTank,r.totalWater,JSON.stringify(r.tanks||[]),
+    JSON.stringify(r.allChems||{}),r.note,r.createdAt
+  ]);
+  const sp = records.filter(r => r.type === 'sp').map(r => [
+    r.id,'sp',r.date,r.tStart||'',r.tEnd||'',r.hrs||'',r.haH||'',
+    r.operator,r.supervisor,r.plot,r.area,r.weather,r.wind,
+    r.mxId||'',r.waterBefore||'',r.waterAfter||'',r.waterUsed||'',
+    JSON.stringify(r.chemDelivered||{}),JSON.stringify(r.ratioInfo||{}),
+    r.note,r.createdAt
+  ]);
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'appendMany',
+        sheets: { 'CR-01': cr, 'MX-01': mx, 'SP-01': sp }
+      })
+    });
+    const json = await res.json();
+    return json.ok === true;
+  } catch { return false; }
+}
+
+async function cloudGetAll() {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now());
+    const data = await res.json();
+    if (data.ok && data.data) return data.data;
+    return null;
+  } catch { return null; }
+}
+
+async function loadFromCloud() {
+  const data = await cloudGetAll();
+  if (!data) return false;
+  const cloud = [];
+  const parseJ = (v) => { try { return typeof v==='string'?(JSON.parse(v)||v):v; } catch { return v; } };
+  (data['CR-01']||[]).forEach(r => { if(r.id){ r.chemicals=parseJ(r.chemicals); r.type='cr'; cloud.push(r); } });
+  (data['MX-01']||[]).forEach(r => { if(r.id){ r.allChems=parseJ(r.allChems); r.tanks=parseJ(r.tanks); r.type='mx'; cloud.push(r); } });
+  (data['SP-01']||[]).forEach(r => { if(r.id){ r.chemDelivered=parseJ(r.chemDelivered); r.ratioInfo=parseJ(r.ratioInfo); r.type='sp'; cloud.push(r); } });
+  if (cloud.length > 0) {
+    // Merge: keep local records not in cloud, add cloud records
+    const cloudIds = new Set(cloud.map(r => r.id));
+    const localOnly = records.filter(r => !cloudIds.has(r.id));
+    records = [...cloud, ...localOnly];
+    save();
+    return true;
+  }
+  return false;
+}
+
+let records = (function() {
+  // Try every possible key from old versions
+  const keys = ['mf_records','chemRecords','chem_records','megafarm_records'];
+  for (const k of keys) {
+    try {
+      const d = localStorage.getItem(k);
+      if (d) {
+        const parsed = JSON.parse(d);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+  }
+  return [];
+})();
+let crChems = [{n:'',q:''}];
+let mxTanks = [{chems:[{n:'',q:''}]}];
+let currentPlotTarget = null;
+
+function save() {
+  const data = JSON.stringify(records);
+  ['mf_records','chemRecords','chem_records','megafarm_records'].forEach(k => {
+    try { localStorage.setItem(k, data); } catch {}
+  });
+}
+function uid(p) { return p+'-'+Math.random().toString(36).slice(2,7).toUpperCase(); }
+function todayISO() { return new Date().toISOString().split('T')[0]; }
+function nowHM() { return new Date().toTimeString().slice(0,5); }
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+window.onload = async function() {
+  const d = new Date();
+  document.getElementById('today-chip').textContent = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  document.getElementById('today-lbl').textContent = 'ថ្ងៃនេះ (Today) — ' + todayISO();
+  document.getElementById('cr-date').value = todayISO();
+  document.getElementById('mx-date').value = todayISO();
+  document.getElementById('mx-time').value = nowHM();
+  document.getElementById('sp-date').value = todayISO();
+  document.getElementById('sp-ts').value = nowHM();
+  renderCRChems(); renderMXTanks(); renderHomeStats();
+  renderStockAlerts(); renderHistory(); renderReport('summary');
+  // Sync with cloud on startup
+  if (USE_CLOUD) {
+    showToast('🔄 Syncing CR · MX · SP...');
+    await cloudSyncAll();  // push local first
+    const loaded = await loadFromCloud();  // then pull
+    if (loaded) {
+      renderHomeStats(); renderHistory(); renderReport('summary');
+      showToast('✅ Synced! ' + records.length + ' records');
+    } else {
+      showToast('📱 Using local data (offline mode)');
+    }
+  }
+};
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+function showTab(tab) {
+  ['home','report','history'].forEach(t => {
+    document.getElementById('page-'+t).classList.toggle('show', t===tab);
+    document.getElementById('nav-'+t).classList.toggle('active', t===tab);
+  });
+  renderHomeStats();
+  renderHistory();
+  renderReport(currentReportView || 'summary');
+}
+function showForm(f) {
+  document.getElementById('app').style.display = 'none';
+  document.querySelectorAll('.nav').forEach(n => n.style.display='none');
+  document.getElementById('form-'+f).classList.add('show');
+  if (f==='sp') populateMXSelect();
+  if (f==='mx') { mxTanks=[{chems:[{n:'',q:''}]}]; renderMXTanks(); }
+  if (f==='cr') { crChems=[{n:'',q:''}]; renderCRChems(); }
+}
+function hideForm() {
+  document.querySelectorAll('.form-wrap').forEach(fw => fw.classList.remove('show'));
+  document.getElementById('app').style.display = '';
+  document.querySelectorAll('nav').forEach(n => n.style.display='');
+  // Reset form fields
+  ['cr-req','cr-apv','cr-note','mx-mixer','mx-sup','mx-note',
+   'sp-op','sp-sup','sp-note','sp-wb','sp-wa','sp-area',
+   'mx-plot-val','sp-plot-val'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['sp-dur-box','sp-mx-preview','sp-chem-result','sp-water-result','mx-total-box'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  document.getElementById('sp-weather').selectedIndex = 0;
+  document.getElementById('sp-wind').selectedIndex = 0;
+  document.getElementById('sp-mx').selectedIndex = 0;
+  document.getElementById('mx-sprayer').selectedIndex = 0;
+  document.getElementById('cr-date').value = todayISO();
+  document.getElementById('mx-date').value = todayISO();
+  document.getElementById('mx-time').value = nowHM();
+  document.getElementById('sp-date').value = todayISO();
+  document.getElementById('sp-ts').value = nowHM();
+  document.getElementById('sp-te').value = '';
+  // Re-render all views
+  renderHomeStats();
+  renderHistory();
+  if (currentReportView) renderReport(currentReportView);
+}
+
+// ── Home stats ───────────────────────────────────────────────────────────────
+function renderHomeStats() {
+  const t = todayISO();
+  document.getElementById('cnt-cr').textContent = records.filter(r=>r.type==='cr'&&r.date===t).length;
+  document.getElementById('cnt-mx').textContent = records.filter(r=>r.type==='mx'&&r.date===t).length;
+  document.getElementById('cnt-sp').textContent = records.filter(r=>r.type==='sp'&&r.date===t).length;
+}
+function renderStockAlerts() {
+  const el = document.getElementById('stock-alerts');
+  let html = '<div class="sec-lbl">⚠️ Stock Alert</div>';
+  CHEMS.filter(c=>c.s===0).slice(0,4).forEach(c => {
+    html += `<div class="alert-out"><span style="font-size:11px;font-weight:700">${c.n}</span><span class="chip" style="background:rgba(232,85,85,.2);color:var(--danger)">OUT</span></div>`;
+  });
+  CHEMS.filter(c=>c.s>0&&c.s<50).slice(0,3).forEach(c => {
+    html += `<div class="alert-low"><span style="font-size:11px;font-weight:700">${c.n}</span><span class="chip" style="background:rgba(245,166,35,.2);color:var(--warn)">LOW: ${c.s}</span></div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── Chem Selector (CR) ───────────────────────────────────────────────────────
+let openChemIdx = -1; let openChemForm = '';
+function openChemDrop(idx, form) {
+  openChemIdx = idx; openChemForm = form;
+  document.getElementById('chem-modal-search').value = '';
+  renderChemModalList('');
+  document.getElementById('chem-modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('chem-modal-search').focus(), 200);
+}
+function renderChemModalList(q) {
+  const curVal = openChemForm==='cr'
+    ? (crChems[openChemIdx]?.n||'')
+    : (mxTanks[currentTankIdx]?.chems[openChemIdx]?.n||'');
+  const list = document.getElementById('chem-modal-list');
+  const filtered = q ? CHEMS.filter(c=>c.n.toLowerCase().includes(q)||c.t.toLowerCase().includes(q)) : CHEMS;
+  list.innerHTML = filtered.map(c => {
+    const sc = c.s===0?'danger':c.s<50?'warn':'accent';
+    const sv = c.s===0?'OUT':c.s<50?'LOW:'+c.s:c.s+''+c.u;
+    const sel = curVal===c.n ? ' selected' : '';
+    return `<div class="chem-item${sel}" onclick="selectChem('${c.n.replace(/'/g,"\\'")}')">
+      <div><div class="chem-name" style="font-size:13px">${c.n}</div>
+      <div style="font-size:10px;color:var(--muted)">${c.t}</div></div>
+      <span class="chip" style="background:rgba(0,0,0,.25);color:var(--${sc})">${sv}</span>
+    </div>`;
+  }).join('');
+}
+function filterChemModal() {
+  renderChemModalList(document.getElementById('chem-modal-search').value.toLowerCase().trim());
+}
+function selectChem(name) {
+  if (openChemForm==='cr') { crChems[openChemIdx].n = name; renderCRChems(); }
+  else { mxTanks[currentTankIdx].chems[openChemIdx].n = name; renderMXTanks(); }
+  closeChemModal();
+}
+function closeChemModal(e) {
+  if (e && e.target !== document.getElementById('chem-modal-overlay')) return;
+  document.getElementById('chem-modal-overlay').classList.remove('open');
+}
+function buildChemDropHTML(val, idx, form) { return ''; }
+function filterChem() {}
+function closeChemDrop() {}
+
+// ── Plot Dropdown ─────────────────────────────────────────────────────────────
+let plotTargetId = null;
+function openPlotDrop(targetId, wrapperId) {
+  plotTargetId = targetId;
+  document.getElementById('plot-search').value = '';
+  renderPlotList('');
+  document.getElementById('plot-drop').style.display = 'block';
+  document.getElementById('plot-overlay').style.display = 'block';
+  setTimeout(() => document.getElementById('plot-search').focus(), 100);
+}
+function renderPlotList(q) {
+  const list = document.getElementById('plot-list');
+  const all = [...PLOTS, ...extraPlots];
+  const filtered = q ? all.filter(p=>p.toLowerCase().includes(q.toLowerCase())) : all;
+  let html = '';
+  if (q && !all.find(p=>p.toLowerCase()===q.toLowerCase())) {
+    html += `<div class="plot-item" style="color:var(--teal);font-weight:700" onclick="selectPlot('${q}',true)">+ Add "${q}"</div>`;
+  }
+  filtered.forEach(p => {
+    const active = document.getElementById(plotTargetId)?.value === p;
+    html += `<div class="plot-item" style="${active?'color:var(--teal);font-weight:700':''}" onclick="selectPlot('${p}')">${p}</div>`;
+  });
+  list.innerHTML = html;
+}
+function filterPlots() { renderPlotList(document.getElementById('plot-search').value); }
+function selectPlot(p, isNew) {
+  if (isNew) extraPlots.push(p);
+  if (plotTargetId) document.getElementById(plotTargetId).value = p;
+  closePlotDrop();
+}
+function closePlotDrop() {
+  document.getElementById('plot-drop').style.display = 'none';
+  document.getElementById('plot-overlay').style.display = 'none';
+}
+let extraPlots = [];
+
+// ── CR-01 ────────────────────────────────────────────────────────────────────
+function renderCRChems() {
+  let html = '';
+  crChems.forEach((c,i) => {
+    const unit = CHEMS.find(x=>x.n===c.n)?.u || '—';
+    html += `<div class="chem-row">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:10px;color:var(--muted)">#${i+1}</span><button class="rm-btn" onclick="remCRChem(${i})">✕</button></div>
+      <div id="cr-chem-drop-${i}" onclick="openChemDrop(${i},'cr')">
+        <input type="text" value="${c.n||''}" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:6px;color:${c.n?'var(--text)':'var(--dim)'}">
+      </div>
+      <div class="g2">
+        <div><label class="lbl">បរិមាណ (Qty)</label><input type="number" step="0.01" placeholder="0.00" value="${c.q||''}" oninput="crChems[${i}].q=this.value"></div>
+        <div><label class="lbl">ឯកតា (Unit)</label><input type="text" value="${unit}" readonly style="color:var(--muted)"></div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('cr-chems').innerHTML = html;
+}
+function addCRChem() { crChems.push({n:'',q:''}); renderCRChems(); }
+function remCRChem(i) { crChems.splice(i,1); if(!crChems.length) crChems=[{n:'',q:''}]; renderCRChems(); }
+function submitCR() {
+  const rec = {
+    id: uid('CR'), type:'cr', date: document.getElementById('cr-date').value,
+    requester: document.getElementById('cr-req').value,
+    approver: document.getElementById('cr-apv').value,
+    chemicals: crChems.filter(c=>c.n),
+    note: document.getElementById('cr-note').value,
+    createdAt: new Date().toISOString()
+  };
+  records.push(rec); save(); hideForm();
+  showToast('✅ CR-01 បានរក្សាទុក! (' + rec.id + ')');
+  if (USE_CLOUD) {
+    cloudAppend('CR-01', [rec.id,'cr',rec.date,rec.requester,rec.approver,
+      JSON.stringify(rec.chemicals||[]),rec.note,rec.createdAt]);
+  }
+}
+
+// ── MX-01 ────────────────────────────────────────────────────────────────────
+let currentTankIdx = 0;
+function renderMXTanks() {
+  const wpt = parseFloat(document.getElementById('mx-wpt')?.value||200);
+  const totalW = mxTanks.length * wpt;
+  let html = '';
+  mxTanks.forEach((tank,ti) => {
+    html += `<div class="tank-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:var(--teal)">🪣 ថង #${ti+1} — ${wpt.toFixed(0)} L</span>
+        ${mxTanks.length>1?`<button class="rm-btn" onclick="remMXTank(${ti})">✕</button>`:''}
+      </div>`;
+    tank.chems.forEach((c,ci) => {
+      const unit = CHEMS.find(x=>x.n===c.n)?.u || '—';
+      html += `<div class="chem-row" style="margin-bottom:5px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">Chemical #${ci+1}</span><button class="rm-btn" onclick="remMXChem(${ti},${ci})">✕</button></div>
+        <div id="mx-chem-drop-${ci}-${ti}" onclick="currentTankIdx=${ti};openChemDrop(${ci},'mx')">
+          <input type="text" value="${c.n||''}" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:${c.n?'var(--text)':'var(--dim)'}">
+        </div>
+        <div class="g2">
+          <div><label class="lbl">Qty (ml/g)</label><input type="number" step="0.1" placeholder="0" value="${c.q||''}" oninput="mxTanks[${ti}].chems[${ci}].q=this.value;calcMXTotal()"></div>
+          <div><label class="lbl">Unit</label><input type="text" value="${unit}" readonly style="color:var(--muted)"></div>
+        </div>
+      </div>`;
+    });
+    html += `<button class="add-btn" style="color:var(--teal)" onclick="addMXChem(${ti})">+ Add to Tank ${ti+1}</button></div>`;
+  });
+  document.getElementById('mx-tanks-wrap').innerHTML = html;
+  calcMXTotal();
+}
+function addMXTank() { mxTanks.push({chems:[{n:'',q:''}]}); renderMXTanks(); }
+function remMXTank(ti) { mxTanks.splice(ti,1); renderMXTanks(); }
+function addMXChem(ti) { mxTanks[ti].chems.push({n:'',q:''}); renderMXTanks(); }
+function remMXChem(ti,ci) { mxTanks[ti].chems.splice(ci,1); if(!mxTanks[ti].chems.length) mxTanks[ti].chems=[{n:'',q:''}]; renderMXTanks(); }
+function calcMXTotal() {
+  const allC = {};
+  mxTanks.forEach(t => t.chems.forEach(c => { if(c.n&&c.q) allC[c.n]=(allC[c.n]||0)+parseFloat(c.q); }));
+  const box = document.getElementById('mx-total-box');
+  if (Object.keys(allC).length) {
+    box.style.display='block';
+    box.style.background='rgba(46,204,154,.1)';
+    box.style.border='1px solid rgba(46,204,154,.3)';
+    let html = `<div style="font-size:10px;color:var(--teal);font-weight:700;margin-bottom:5px">សរុប All Tanks</div>`;
+    Object.entries(allC).forEach(([k,v]) => { html += `<div class="calc-row"><span>${k}</span><span class="calc-val" style="color:var(--teal)">${v.toFixed(2)}</span></div>`; });
+    box.innerHTML = html;
+  } else { box.style.display='none'; }
+}
+function submitMX() {
+  const wpt = parseFloat(document.getElementById('mx-wpt').value||200);
+  const allC = {};
+  mxTanks.forEach(t => t.chems.forEach(c => { if(c.n&&c.q) allC[c.n]=(allC[c.n]||0)+parseFloat(c.q); }));
+  const rec = {
+    id: uid('MX'), type:'mx',
+    date: document.getElementById('mx-date').value,
+    time: document.getElementById('mx-time').value,
+    mixer: document.getElementById('mx-mixer').value,
+    supervisor: document.getElementById('mx-sup').value,
+    plot: document.getElementById('mx-plot-val').value,
+    sprayer: document.getElementById('mx-sprayer').value,
+    waterPerTank: wpt, totalWater: mxTanks.length*wpt,
+    tanks: JSON.parse(JSON.stringify(mxTanks)),
+    allChems: allC, note: document.getElementById('mx-note').value,
+    createdAt: new Date().toISOString()
+  };
+  records.push(rec); save(); hideForm();
+  showToast('✅ MX-01 បានរក្សាទុក! (' + rec.id + ')');
+  if (USE_CLOUD) {
+    const row = [rec.id,'mx',rec.date,rec.time,rec.mixer,rec.supervisor,
+      rec.plot,rec.sprayer,rec.waterPerTank,rec.totalWater,
+      JSON.stringify(rec.tanks),JSON.stringify(rec.allChems),rec.note,rec.createdAt];
+    cloudAppend('MX-01', row);
+  }
+}
+
+// ── SP-01 ────────────────────────────────────────────────────────────────────
+function populateMXSelect() {
+  const sel = document.getElementById('sp-mx');
+  const mx = records.filter(r=>r.type==='mx');
+  sel.innerHTML = '<option value="">-- No link --</option>';
+  mx.slice().reverse().forEach(m => {
+    sel.innerHTML += `<option value="${m.id}">${m.id} · ${m.plot||'?'} · ${m.date} · ${(m.totalWater||0).toFixed(0)}L</option>`;
+  });
+  sel.onchange = previewMX;
+}
+function previewMX() {
+  const mxId = document.getElementById('sp-mx').value;
+  const mx = records.find(r=>r.id===mxId);
+  const box = document.getElementById('sp-mx-preview');
+  if (mx && Object.keys(mx.allChems||{}).length) {
+    box.style.display='block';
+    box.style.background='rgba(155,126,245,.1)';
+    box.style.border='1px solid rgba(155,126,245,.3)';
+    let html = `<div style="font-size:10px;color:var(--purple);font-weight:700;margin-bottom:5px">🔗 ${mx.id} · ${mx.plot} · ${(mx.totalWater||0).toFixed(0)}L</div>`;
+    Object.entries(mx.allChems).forEach(([k,v]) => { html += `<div class="calc-row"><span>${k}</span><span class="calc-val" style="color:var(--purple)">${v.toFixed(2)}</span></div>`; });
+    box.innerHTML = html;
+  } else { box.style.display='none'; }
+  calcWater();
+}
+function calcWater() {
+  const wb = parseFloat(document.getElementById('sp-wb').value)||0;
+  const wa = parseFloat(document.getElementById('sp-wa').value)||0;
+  const wu = wb-wa;
+  const res = document.getElementById('sp-water-result');
+  if (wu>0) {
+    res.innerHTML = `<div class="calc-row"><span>ប្រើ (Used)</span><span class="calc-val" style="color:var(--blue)">${wu.toFixed(0)} L</span></div>${wa>0?`<div class="calc-row"><span>នៅសល់ → ចំការបន្ទាប់</span><span class="calc-val" style="color:var(--orange)">${wa.toFixed(0)} L</span></div>`:''}`;
+    calcChemDelivered(wu);
+  } else { res.innerHTML=''; }
+  // Duration
+  const ts=document.getElementById('sp-ts').value, te=document.getElementById('sp-te').value;
+  if(ts&&te){const[sh,sm]=ts.split(':').map(Number),[eh,em]=te.split(':').map(Number);const m=(eh*60+em)-(sh*60+sm);if(m>0){const h=(m/60).toFixed(1);const db=document.getElementById('sp-dur-box');db.style.display='block';db.style.background='rgba(61,219,114,.1)';db.style.border='1px solid rgba(61,219,114,.3)';db.innerHTML=`<div class="calc-row"><span>⏱ Duration</span><span class="calc-val" style="color:var(--accent)">${h} h</span></div>`;}}
+}
+function calcChemDelivered(wu) {
+  const mxId = document.getElementById('sp-mx').value;
+  const mx = records.find(r=>r.id===mxId);
+  const box = document.getElementById('sp-chem-result');
+  if (!mx || !wu) { box.style.display='none'; return; }
+  const tot = mx.totalWater||(mx.tanks?.length*parseFloat(mx.waterPerTank||200));
+  const ratio = wu/tot;
+  const chemD = {};
+  Object.entries(mx.allChems||{}).forEach(([n,q]) => { chemD[n]={qty:(q*ratio).toFixed(3),unit:CHEMS.find(x=>x.n===n)?.u||''}; });
+  if (!Object.keys(chemD).length) { box.style.display='none'; return; }
+  box.style.display='block';
+  box.style.background='rgba(61,219,114,.1)';
+  box.style.border='1px solid rgba(61,219,114,.3)';
+  let html = `<div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:5px">🌿 ចំណែក (${(ratio*100).toFixed(1)}% · ${wu.toFixed(0)}/${tot}L)</div>`;
+  Object.entries(chemD).forEach(([k,v]) => { html += `<div class="calc-row"><span>${k}</span><span class="calc-val" style="color:var(--accent)">${v.qty} ${v.unit}</span></div>`; });
+  box.innerHTML = html;
+  box._chemD = chemD; box._ratio = ratio; box._tot = tot;
+}
+function submitSP() {
+  const wb=parseFloat(document.getElementById('sp-wb').value)||0;
+  const wa=parseFloat(document.getElementById('sp-wa').value)||0;
+  const wu=wb-wa;
+  const mxId=document.getElementById('sp-mx').value;
+  const mx=records.find(r=>r.id===mxId);
+  const box=document.getElementById('sp-chem-result');
+  const chemD=box._chemD||{};
+  const ts=document.getElementById('sp-ts').value,te=document.getElementById('sp-te').value;
+  let hrs=null;
+  if(ts&&te){const[sh,sm]=ts.split(':').map(Number),[eh,em]=te.split(':').map(Number);const m=(eh*60+em)-(sh*60+sm);if(m>0)hrs=(m/60).toFixed(1);}
+  const area=parseFloat(document.getElementById('sp-area').value)||0;
+  const rec={
+    id:uid('SP'),type:'sp',date:document.getElementById('sp-date').value,
+    tStart:ts,tEnd:te,hrs,haH:hrs&&area?(area/parseFloat(hrs)).toFixed(1):null,
+    operator:document.getElementById('sp-op').value,
+    supervisor:document.getElementById('sp-sup').value,
+    plot:document.getElementById('sp-plot-val').value,
+    area:document.getElementById('sp-area').value,
+    weather:document.getElementById('sp-weather').value,
+    wind:document.getElementById('sp-wind').value,
+    mxId,waterBefore:wb,waterAfter:wa,waterUsed:wu,
+    chemDelivered:chemD,
+    note:document.getElementById('sp-note').value,
+    createdAt:new Date().toISOString()
+  };
+  records.push(rec); save(); hideForm();
+  showToast('✅ SP-01 បានរក្សាទុក! (' + rec.id + ')');
+  if (USE_CLOUD) {
+    const row = [rec.id,'sp',rec.date,rec.tStart,rec.tEnd,rec.hrs||'',rec.haH||'',
+      rec.operator,rec.supervisor,rec.plot,rec.area,rec.weather,rec.wind,
+      rec.mxId,rec.waterBefore||'',rec.waterAfter||'',rec.waterUsed||'',
+      JSON.stringify(rec.chemDelivered),JSON.stringify(rec.ratioInfo||{}),
+      rec.note,rec.createdAt];
+    cloudAppend('SP-01', row);
+  }
+}
+
+// ── Reports ──────────────────────────────────────────────────────────────────
+let currentReportView = 'summary';
+function showReport(v) {
+  currentReportView = v;
+  ['summary','plot','chem','balance'].forEach(id => {
+    document.getElementById('rbt-'+id).classList.toggle('active', id===v);
+  });
+  renderReport(v);
+}
+function renderReport(v) {
+  const el = document.getElementById('report-content');
+  const cr=records.filter(r=>r.type==='cr');
+  const mx=records.filter(r=>r.type==='mx');
+  const sp=records.filter(r=>r.type==='sp');
+  const t=todayISO();
+  const totalArea=sp.reduce((a,r)=>a+(parseFloat(r.area)||0),0);
+  const totalWater=sp.reduce((a,r)=>a+(r.waterUsed||0),0);
+  const plotData={};
+  sp.forEach(r=>{if(!r.plot)return;if(!plotData[r.plot])plotData[r.plot]={area:0,water:0,chems:{},count:0};plotData[r.plot].area+=parseFloat(r.area)||0;plotData[r.plot].water+=r.waterUsed||0;plotData[r.plot].count++;Object.entries(r.chemDelivered||{}).forEach(([k,v])=>{plotData[r.plot].chems[k]=(plotData[r.plot].chems[k]||0)+parseFloat(v.qty||0);});});
+  const chemData={};
+  sp.forEach(r=>Object.entries(r.chemDelivered||{}).forEach(([k,v])=>{if(!chemData[k])chemData[k]={total:0,unit:v.unit};chemData[k].total+=parseFloat(v.qty||0);}));
+
+  if (v==='summary') {
+    el.innerHTML = `
+      <div class="sec-lbl">ថ្ងៃនេះ (Today) — ${t}</div>
+      <div class="g3" style="margin-bottom:13px">
+        <div class="stat"><div class="stat-val" style="color:var(--accent)">${cr.filter(r=>r.date===t).length}</div><div class="stat-lbl">ស្នើ CR</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--teal)">${mx.filter(r=>r.date===t).length}</div><div class="stat-lbl">លាយ MX</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--blue)">${sp.filter(r=>r.date===t).length}</div><div class="stat-lbl">បាញ់ SP</div></div>
+      </div>
+      <div class="sec-lbl">All Time</div>
+      <div class="g2" style="margin-bottom:13px">
+        <div class="stat"><div class="stat-val" style="color:var(--accent)">${Object.keys(plotData).length}</div><div class="stat-lbl">ចំការ Plots</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--teal);font-size:16px">${totalArea.toFixed(1)} ha</div><div class="stat-lbl">ផ្ទៃដី Area</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--blue);font-size:16px">${totalWater.toFixed(0)} L</div><div class="stat-lbl">ទឹក Water</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--purple)">${sp.length}</div><div class="stat-lbl">SP Records</div></div>
+      </div>
+      ${sp.length?`<div class="sec-lbl">ថ្មីៗ Recent SP</div>${[...sp].reverse().slice(0,3).map(r=>`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:700;color:var(--accent)">${r.id}</span><span style="font-size:10px;color:var(--teal)">${r.plot||'—'}</span></div><div style="font-size:10px;color:var(--muted)">${r.date} · ${r.area||'?'}ha · ${(r.waterUsed||0).toFixed(0)}L</div></div>`).join('')}`:''}
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:12px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">📋 Export → ផ្ញើ Claude → "เขียนลง Sheets"</div>
+        <button class="submit-btn" style="background:var(--warn);margin-top:0" onclick="exportData()">📋 Export & Copy Data</button>
+        <div id="exp-ok" style="font-size:10px;color:var(--accent);margin-top:6px;display:none">✅ Copied! Paste in Claude chat</div>
+      </div>
+      <div style="height:20px"></div>`;
+  }
+  else if (v==='plot') {
+    let html=`<div class="sec-lbl">📍 By Plot — ${Object.keys(plotData).length} plots</div>`;
+    if(!Object.keys(plotData).length) html+=`<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No spraying records yet</div>`;
+    Object.entries(plotData).sort((a,b)=>b[1].area-a[1].area).forEach(([plot,d])=>{
+      html+=`<div class="card" style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-size:12px;font-weight:800;color:var(--accent)">📍 ${plot}</div><div style="display:flex;gap:5px"><span class="chip" style="background:rgba(46,204,154,.2);color:var(--teal)">${d.area.toFixed(1)} ha</span><span class="chip" style="background:rgba(91,164,245,.2);color:var(--blue)">${d.count}x</span></div></div><div class="calc-row"><span style="color:var(--muted)">💧 Water</span><span style="font-weight:700">${d.water.toFixed(0)} L</span></div>`;
+      Object.entries(d.chems).forEach(([k,vv])=>{const cu=CHEMS.find(x=>x.n===k)?.u||'';html+=`<div class="calc-row"><span style="color:var(--muted)">→ ${k}</span><span style="font-weight:700;color:var(--accent)">${vv.toFixed(3)} ${cu}</span></div>`;});
+      html+=`</div>`;
+    });
+    el.innerHTML=html+'<div style="height:20px"></div>';
+  }
+  else if (v==='chem') {
+    let html=`<div class="sec-lbl">🧪 By Chemical</div>`;
+    const sorted=Object.entries(chemData).sort((a,b)=>b[1].total-a[1].total);
+    const maxV=sorted[0]?.[1].total||1;
+    if(!sorted.length) html+=`<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No data yet</div>`;
+    sorted.forEach(([name,d])=>{
+      html+=`<div class="card" style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><div><div style="font-size:11px;font-weight:700">${name}</div><div style="font-size:9px;color:var(--muted)">${CHEMS.find(x=>x.n===name)?.t||''}</div></div><span style="font-size:13px;font-weight:800;color:var(--accent)">${d.total.toFixed(3)} ${d.unit}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(d.total/maxV*100).toFixed(0)}%"></div></div></div>`;
+    });
+    el.innerHTML=html+'<div style="height:20px"></div>';
+  }
+  else if (v==='balance') {
+    const crQty=cr.reduce((a,r)=>{(r.chemicals||[]).forEach(c=>{a+=parseFloat(c.q)||0;});return a;},0);
+    const spQty=Object.values(chemData).reduce((a,v)=>a+v.total,0);
+    const vari=crQty-spQty;
+    const ok=Math.abs(vari)<1;
+    let html=`<div class="sec-lbl">⚖️ Reconcile CR vs SP</div>
+      <div style="background:${ok?'var(--adim)':'rgba(61,21,21,.8)'};border:1px solid ${ok?'var(--accent)':'var(--danger)'};border-radius:11px;padding:13px 15px;margin-bottom:13px">
+        <div style="font-size:12px;color:${ok?'var(--accent)':'var(--danger)'};font-weight:800;margin-bottom:8px">${ok?'✅ Balance — ស្មើ':'⚠️ Variance Detected'}</div>
+        <div class="calc-row"><span style="color:var(--muted)">CR Requisitioned</span><span style="font-weight:700">${crQty.toFixed(2)}</span></div>
+        <div class="calc-row"><span style="color:var(--muted)">SP Delivered</span><span style="font-weight:700">${spQty.toFixed(2)}</span></div>
+        <div class="calc-row" style="border-top:1px solid var(--border);padding-top:5px;margin-top:4px"><span style="color:var(--muted)">Variance</span><span style="font-weight:800;color:${ok?'var(--accent)':'var(--danger)'}">${vari>0?'+':''}${vari.toFixed(2)}</span></div>
+      </div>`;
+    if(cr.length){html+=`<div class="sec-lbl">CR Records (${cr.length})</div>`;cr.forEach(r=>{html+=`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:700">${r.id}</span><span style="font-size:10px;color:var(--muted)">${r.date}</span></div><div style="font-size:10px;color:var(--muted)">👤 ${r.requester||'—'} · ${r.chemicals?.length||0} items</div></div>`;});}
+    if(mx.length){html+=`<div class="sec-lbl" style="margin-top:10px">MX Records (${mx.length})</div>`;mx.forEach(r=>{html+=`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:700">${r.id}</span><span style="font-size:10px;color:var(--teal)">${r.plot||'—'}</span></div><div style="font-size:10px;color:var(--muted)">${r.date} · ${r.tanks?.length||0} ថង · ${(r.totalWater||0).toFixed(0)}L</div></div>`;});}
+    el.innerHTML=html+'<div style="height:20px"></div>';
+  }
+}
+
+// ── History ──────────────────────────────────────────────────────────────────
+let histFilter='all';
+function filterHistory(f){histFilter=f;document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');renderHistory();}
+function renderHistory(){
+  const el=document.getElementById('history-list');
+  const list=histFilter==='all'?records:records.filter(r=>r.type===histFilter);
+  if(!list.length){el.innerHTML=`<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:12px">No records yet</div>`;return;}
+  const cm={cr:{l:'CR',c:'accent'},mx:{l:'MX',c:'teal'},sp:{l:'SP',c:'blue'}};
+  el.innerHTML=[...list].reverse().map(r=>{
+    const fm=cm[r.type]||{l:r.type,c:'muted'};
+    return `<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;font-weight:700">${r.id}</span><span class="chip" style="background:rgba(0,0,0,.3);color:var(--${fm.c})">${fm.l}</span></div><div style="font-size:10px;color:var(--muted);line-height:1.6">${r.plot?'📍 '+r.plot:''}${r.area?' · '+r.area+'ha':''} · ${r.date}${(r.operator||r.mixer||r.requester)?' · 👤 '+(r.operator||r.mixer||r.requester):''}${r.type==='mx'&&r.tanks?' · '+r.tanks.length+'ថង':''}${r.mxId?' · 🔗'+r.mxId:''}</div></div>`;
+  }).join('');
+}
+
+// ── Export ───────────────────────────────────────────────────────────────────
+function exportData(){
+  const cr=records.filter(r=>r.type==='cr');
+  const mx=records.filter(r=>r.type==='mx');
+  const sp=records.filter(r=>r.type==='sp');
+  const lines=['=== CR-01 Requisition ==='];
+  cr.forEach(r=>lines.push([r.id,r.date,r.requester,r.approver,(r.chemicals||[]).map(c=>c.n+':'+c.q).join('|'),r.note].join('\t')));
+  lines.push('\n=== MX-01 Mixing ===');
+  mx.forEach(r=>lines.push([r.id,r.date,r.time,r.mixer,r.plot,r.sprayer,r.tanks?.length+'tanks',(r.totalWater||0).toFixed(0)+'L',Object.entries(r.allChems||{}).map(([k,v])=>k+':'+v.toFixed(2)).join('|')].join('\t')));
+  lines.push('\n=== SP-01 Spraying ===');
+  sp.forEach(r=>lines.push([r.id,r.date,r.plot,r.area+'ha',(r.waterUsed||0).toFixed(0)+'L',r.operator,Object.entries(r.chemDelivered||{}).map(([k,v])=>k+':'+v.qty+v.unit).join('|')].join('\t')));
+  const txt=lines.join('\n');
+  navigator.clipboard.writeText(txt).then(()=>{
+    ['export-status','exp-ok'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='block';setTimeout(()=>el.style.display='none',4000);}});
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    ['export-status','exp-ok'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='block';setTimeout(()=>el.style.display='none',4000);}});
+  });
+}
+
+// ── Backup & Import ──────────────────────────────────────────────────────────
+function downloadBackup() {
+  const data = JSON.stringify(records, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'MegaFarm_backup_' + todayISO() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 Downloaded backup!');
+}
+
+function importBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error('Invalid format');
+      // Merge: add records that don't exist yet
+      let added = 0;
+      imported.forEach(r => {
+        if (!records.find(x => x.id === r.id)) {
+          records.push(r);
+          added++;
+        }
+      });
+      save(); renderHomeStats(); renderHistory(); renderReport(currentReportView||'summary');
+      const el = document.getElementById('import-status');
+      el.textContent = '✅ Imported ' + added + ' new records (' + imported.length + ' total in file)';
+      el.style.display = 'block';
+      showToast('✅ Imported ' + added + ' records!');
+    } catch(err) {
+      showToast('❌ Import failed: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function importPaste() {
+  const txt = document.getElementById('import-paste').value.trim();
+  if (!txt) { showToast('❌ No data pasted'); return; }
+  try {
+    let imported = JSON.parse(txt);
+    // Handle both array and object with records key
+    if (!Array.isArray(imported)) {
+      if (imported.records) imported = imported.records;
+      else throw new Error('Expected array');
+    }
+    let added = 0;
+    imported.forEach(r => {
+      if (!records.find(x => x.id === r.id)) {
+        records.push(r);
+        added++;
+      }
+    });
+    save(); renderHomeStats(); renderHistory(); renderReport(currentReportView||'summary');
+    document.getElementById('import-paste').value = '';
+    const el = document.getElementById('import-status');
+    el.textContent = '✅ Imported ' + added + ' new records!';
+    el.style.display = 'block';
+    showToast('✅ Imported ' + added + ' records!');
+  } catch(err) {
+    showToast('❌ Invalid JSON: ' + err.message);
+  }
+}
+
+// ── Cloud Refresh ────────────────────────────────────────────────────────────
+async function refreshCloud() {
+  showToast('🔄 កំពុង Sync... (Syncing all sheets)');
+  // First push local data up
+  await cloudSyncAll();
+  // Then pull latest from cloud
+  const loaded = await loadFromCloud();
+  renderHomeStats(); renderHistory(); renderReport(currentReportView||'summary');
+  if (loaded) {
+    showToast('✅ Synced! ' + records.length + ' records · CR+MX+SP');
+  } else {
+    showToast('⚠️ Push done — pull failed, check connection');
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1a3d26;color:#3DDB72;border:1px solid #3DDB72;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;z-index:999;transition:opacity .3s';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',2500);
+}
+</script>
+
+<!-- Chem Modal -->
+<div class="chem-modal-overlay" id="chem-modal-overlay" onclick="closeChemModal(event)">
+  <div class="chem-modal">
+    <div class="chem-modal-hdr">
+      <span style="font-size:13px;font-weight:700;color:var(--text)">ជ្រើសសារធាតុ (Select Chemical)</span>
+      <button onclick="closeChemModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:10px 15px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <input class="chem-modal-search" id="chem-modal-search" type="text" placeholder="ស្វែងរក (Search)..." oninput="filterChemModal()" autocomplete="off">
+    </div>
+    <div class="chem-list" id="chem-modal-list"></div>
+  </div>
+</div>
+</body>
+</html>
