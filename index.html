@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Mileage Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f0fdf9;--surface:#fff;--surf2:#f0fdf9;--border:#d1fae5;--bord2:#a7f3d0;
+    --text:#064e3b;--muted:#0F6E56;--muted2:#6ee7b7;--primary:#0F6E56;
+    --plight:#d1fae5;--pdark:#064e3b;--green:#10b981;--amber:#f59e0b;--red:#ef4444;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans Thai',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+  input,select,textarea,button{font-family:var(--sans);outline:none}
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bord2);border-radius:2px}
+
+  /* Header */
+  #header{background:var(--primary);border-bottom:1px solid rgba(0,0,0,.1);padding:14px 16px 0;position:sticky;top:0;z-index:100}
+  .header-top{display:flex;justify-content:space-between;align-items:center;margin:0 auto 12px;max-width:480px}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .logo-title{font-size:15px;font-weight:700;color:#fff}
+  .logo-sub{font-size:9px;color:rgba(255,255,255,.6);font-family:var(--mono);letter-spacing:1.5px}
+  .clock-wrap{text-align:right}
+  .clock-time{font-family:var(--mono);font-size:18px;font-weight:600;color:#fff;letter-spacing:1px;line-height:1}
+  .clock-date{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
+  .blink{animation:blink 1s step-start infinite;color:#6ee7b7}
+  @keyframes blink{0%,49%,100%{opacity:1}50%,99%{opacity:.15}}
+
+  /* Language toggle */
+  .lang-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.5px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background .2s}
+  .lang-btn:active{background:rgba(255,255,255,.3)}
+
+  /* Sync badge */
+  .sync-badge{display:flex;align-items:center;gap:5px}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3)}
+  .sync-dot.ok{background:#6ee7b7}
+  .sync-dot.error{background:#fca5a5}
+  .pending-badge{font-size:10px;background:rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:2px 6px;font-weight:600}
+
+  /* Tabs */
+  .tabs{display:flex;max-width:480px;margin:0 auto;position:relative;z-index:10}
+  .tab-btn{flex:1;border:none;background:none;cursor:pointer;padding:12px 0;font-size:12px;font-weight:400;color:rgba(255,255,255,.5);border-bottom:2px solid transparent;transition:all .2s;font-family:var(--sans);touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,255,255,.1);user-select:none;position:relative;z-index:10}
+  .tab-btn.active{color:#fff;font-weight:600;border-bottom-color:#fff}
+  .tab-btn:active{opacity:.7}
+
+  /* Content */
+  .content{max-width:480px;margin:0 auto;padding:14px}
+  .tab-panel{display:none;flex-direction:column;gap:10px}
+  .tab-panel.active{display:flex}
+
+  /* Cards */
+  .card{background:var(--surface);border-radius:14px;padding:14px;border:1px solid var(--border);animation:fadeUp .25s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  .card-title{font-size:11px;font-weight:600;color:var(--primary);margin-bottom:10px;letter-spacing:.3px}
+
+  /* Form */
+  .field-label{font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .input-wrap{position:relative}
+  .input-unit{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--bord2);font-family:var(--mono);pointer-events:none}
+  input[type=number]{width:100%;background:var(--surf2);color:var(--pdark);border:1.5px solid var(--border);border-radius:9px;padding:10px 34px 10px 12px;font-size:15px;font-family:var(--mono);font-weight:600;transition:border-color .2s}
+  input[type=number]:focus{border-color:var(--primary)}
+  select{width:100%;background:var(--surf2);color:var(--pdark);border:1.5px solid var(--border);border-radius:10px;padding:11px 36px 11px 14px;font-size:14px;font-family:var(--mono);font-weight:600;appearance:none;cursor:pointer;transition:border-color .2s;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230F6E56' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center}
+  select:focus{border-color:var(--primary)}
+  textarea{width:100%;background:var(--surf2);color:var(--pdark);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:11px;font-family:var(--mono);resize:vertical;line-height:1.6;transition:border-color .2s}
+  textarea:focus{border-color:var(--primary)}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .dist-row{margin-top:10px;background:#d1fae5;border-radius:9px;padding:9px 13px;display:flex;justify-content:space-between;align-items:center;border:1px solid #a7f3d0}
+  .dist-label{font-size:12px;color:var(--primary)}
+  .dist-value{font-family:var(--mono);font-weight:700;color:var(--pdark);font-size:15px}
+  .dist-unit{font-size:11px;color:var(--primary)}
+
+  .ts-row{background:#d1fae5;border-radius:10px;padding:10px 14px;border:1px solid #a7f3d0;display:flex;justify-content:space-between;align-items:center}
+  .ts-lbl{font-size:11px;color:var(--primary);display:flex;align-items:center;gap:6px}
+  .ts-val{font-size:12px;font-family:var(--mono);font-weight:600;color:var(--pdark)}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+  .sync-hint{background:#ecfdf5;border-radius:10px;padding:8px 14px;border:1px solid #a7f3d0;display:none;justify-content:space-between;align-items:center}
+
+  /* Buttons */
+  .btn-primary{width:100%;border:none;cursor:pointer;background:var(--primary);color:#fff;border-radius:12px;padding:14px 0;font-size:14px;font-weight:700;letter-spacing:.3px;transition:opacity .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .btn-primary:active{opacity:.8}
+  .btn-teal{background:#ecfdf5;color:var(--pdark);border:1px solid #a7f3d0;border-radius:9px;padding:11px 0;font-size:12px;cursor:pointer;font-weight:600;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .btn-green{background:#ecfdf5;color:var(--pdark);border:1px solid #a7f3d0;border-radius:9px;padding:11px 0;font-size:12px;cursor:pointer;font-weight:600;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .btn-sync{background:#ecfdf5;color:var(--pdark);border:1px solid #a7f3d0;border-radius:10px;padding:11px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;font-weight:600;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .btn-sync.disabled{background:var(--surface);color:#9ca3af;border-color:var(--border);cursor:not-allowed}
+  .btn-danger{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:8px;padding:10px 16px;font-size:12px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+  .filter-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .filter-row select{flex:1;font-size:12px;padding:9px 32px 9px 12px}
+
+  .record-card{background:var(--surface);border-radius:14px;padding:13px;border:1px solid var(--border);animation:fadeUp .25s ease}
+  .record-card.latest{border-color:#10b981}
+  .record-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+  .record-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .tag{font-size:9px;border-radius:5px;padding:2px 6px;font-weight:600;font-family:var(--mono)}
+  .tag-latest{background:#d1fae5;color:#065f46}
+  .tag-pending{background:#fef3c7;color:#92400e}
+  .tag-synced{background:#d1fae5;color:#065f46}
+  .record-date{font-size:10px;color:#9ca3af;font-family:var(--mono)}
+  .record-hms{font-size:11px;color:var(--primary);font-family:var(--mono);font-weight:600;text-align:right}
+  .plate-tag{background:var(--plight);border:1px solid var(--bord2);border-radius:8px;padding:4px 10px;font-family:var(--mono);font-weight:700;font-size:13px;color:var(--pdark);letter-spacing:.5px}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .mini-stat{background:var(--surf2);border-radius:8px;padding:7px 10px}
+  .mini-label{font-size:10px;color:#6b7280;margin-bottom:2px}
+  .mini-value{font-family:var(--mono);font-weight:700;font-size:14px}
+  .mini-unit{font-size:10px;font-weight:400;color:#9ca3af}
+  .trip-row{margin-top:7px;background:#d1fae5;border-radius:7px;padding:6px 10px;display:flex;justify-content:space-between}
+  .trip-label{font-size:11px;color:var(--primary)}
+  .trip-value{font-family:var(--mono);font-weight:700;color:var(--pdark);font-size:13px}
+  .del-btn{background:none;border:none;cursor:pointer;font-size:15px;color:#fca5a5;padding:8px;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+  .sum-card{background:var(--surface);border-radius:14px;padding:13px;border:1px solid var(--border)}
+  .sum-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .stat-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+  .stat-box{background:var(--surf2);border-radius:9px;padding:9px}
+  .stat-box .lbl{font-size:10px;color:#6b7280;margin-bottom:3px}
+  .stat-box .val{font-family:var(--mono);font-weight:700;font-size:14px}
+  .stat-box .unt{font-size:10px;color:#9ca3af;margin-top:1px}
+
+  .step-row{display:flex;gap:10px;margin-bottom:9px;align-items:flex-start}
+  .step-num{width:22px;height:22px;border-radius:50%;background:var(--plight);border:1px solid var(--bord2);color:var(--primary);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step-txt{font-size:12px;color:#374151;line-height:1.6}
+  .status-row{display:flex;align-items:center;gap:8px}
+  .status-dot{width:9px;height:9px;border-radius:50%;background:#d1d5db}
+  .status-dot.ok{background:var(--green)}
+  .status-dot.error{background:var(--red)}
+  .status-dot.warn{background:var(--amber)}
+
+  #toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;white-space:nowrap;max-width:90vw;display:none;animation:slideDown .25s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  #toast.success{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}
+  #toast.error{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
+
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:998;align-items:center;justify-content:center;padding:24px}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;border-radius:16px;padding:22px;border:1px solid var(--border);max-width:320px;width:100%}
+  .modal h3{font-size:14px;margin-bottom:6px;color:var(--pdark)}
+  .modal p{font-size:12px;color:#6b7280;margin-bottom:18px}
+  .modal-btns{display:flex;gap:10px}
+  .modal-btns button{flex:1;border:none;padding:12px;border-radius:10px;cursor:pointer;font-family:var(--sans);font-size:13px;touch-action:manipulation}
+  .btn-cancel{background:#f3f4f6;color:#374151}
+  .btn-delete{background:#fee2e2;color:#991b1b;font-weight:600}
+
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+  .empty{text-align:center;padding:50px 0;color:#9ca3af}
+  .empty .icon{font-size:32px;margin-bottom:10px;opacity:.3}
+  .empty .txt{font-size:13px}
+  .last-sync-txt{font-size:10px;color:#9ca3af;font-family:var(--mono);margin-bottom:8px;text-align:right;display:none}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">🚗</div>
+      <div>
+        <div class="logo-title" id="logoTitle">ไมล์รถยนต์</div>
+        <div class="logo-sub">MILEAGE TRACKER</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+      <div class="sync-badge">
+        <span id="pendingBadge" class="pending-badge" style="display:none"></span>
+        <div id="syncDot" class="sync-dot"></div>
+      </div>
+      <div class="clock-wrap">
+        <div class="clock-time" id="clockTime">00<span class="blink">:</span>00<span class="blink">:</span>00</div>
+        <div class="clock-date" id="clockDate">--/--/----</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)" id="tabBtn0"></button>
+    <button class="tab-btn"        onclick="switchTab(1)" id="tabBtn1"></button>
+    <button class="tab-btn"        onclick="switchTab(2)" id="tabBtn2"></button>
+    <button class="tab-btn"        onclick="switchTab(3)" id="tabBtn3"></button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- TAB 0 -->
+  <div id="tab0" class="tab-panel active">
+    <div class="card">
+      <div class="card-title" id="lbl_plate"></div>
+      <select id="selPlate">
+        <option value="" id="lbl_selectPlate"></option>
+        <option>2AC-9758</option><option>2AP-7433</option><option>2AP-5911</option>
+        <option>2AP-7622</option><option>3D-5161</option><option>2AE-4783</option>
+        <option>2H-2330</option><option>2AP-5733</option><option>2AP-8522</option>
+        <option>2AP-6499</option><option>2AP-7933</option><option>2AP-8621</option>
+        <option>2AP-6955</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="lbl_km"></div>
+      <div class="grid-2">
+        <div>
+          <div class="field-label" id="lbl_kmStart"></div>
+          <div class="input-wrap">
+            <input type="number" id="kmStart" placeholder="—" readonly tabindex="-1" style="background:#e8f5f0;color:#0F6E56;cursor:not-allowed;border-color:#a7f3d0;pointer-events:none;">
+            <span class="input-unit">km</span>
+          </div>
+          <div id="kmStartHint" style="display:none;font-size:10px;color:var(--primary);margin-top:4px;font-family:var(--mono);background:var(--plight);border-radius:5px;padding:3px 8px;"></div>
+        </div>
+        <div>
+          <div class="field-label" id="lbl_kmEnd"></div>
+          <div class="input-wrap">
+            <input type="number" id="kmEnd" placeholder="0">
+            <span class="input-unit">km</span>
+          </div>
+          <div id="kmEndHint" style="display:none;font-size:10px;color:var(--primary);margin-top:4px;font-family:var(--mono);background:var(--plight);border-radius:5px;padding:3px 8px;"></div>
+        </div>
+      </div>
+      <div id="distRow" class="dist-row" style="display:none">
+        <span class="dist-label" id="lbl_dist"></span>
+        <span><span class="dist-value" id="distVal">0</span> <span class="dist-unit">km</span></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="lbl_fuel"></div>
+      <div class="grid-2">
+        <div>
+          <div class="field-label" id="lbl_fuelLiters"></div>
+          <div class="input-wrap">
+            <input type="number" id="fuelLiters" placeholder="0">
+            <span class="input-unit">L</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label" id="lbl_fuelKm"></div>
+          <div class="input-wrap">
+            <input type="number" id="fuelKm" placeholder="0">
+            <span class="input-unit">km</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ts-row">
+      <span class="ts-lbl"><span class="live-dot"></span><span id="lbl_tsLbl"></span></span>
+      <span id="tsPreview" class="ts-val"></span>
+    </div>
+
+    <div id="syncHint" class="sync-hint">
+      <span style="font-size:11px;color:var(--primary);">☁️ Google Sheets</span>
+      <span id="syncHintTxt" style="font-size:11px;color:var(--primary);"></span>
+    </div>
+
+    <button class="btn-primary" id="btnSave" onclick="handleSave()"></button>
+  </div>
+
+  <!-- TAB 1 -->
+  <div id="tab1" class="tab-panel">
+    <div class="filter-row">
+      <select id="filterPlate" onchange="renderHistory()"></select>
+      <button id="btnSync" class="btn-sync disabled" onclick="handleManualSync()">
+        <span id="syncIcon">☁</span> <span id="lbl_syncBtn"></span>
+        <span id="syncPendingBadge" style="display:none;background:var(--amber);color:#fff;border-radius:4px;padding:0 5px;font-size:10px;font-weight:700;"></span>
+      </button>
+    </div>
+    <div id="lastSyncTxt" class="last-sync-txt"></div>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div id="tab2" class="tab-panel">
+    <div id="summaryList"></div>
+  </div>
+
+  <!-- TAB 3 -->
+  <div id="tab3" class="tab-panel">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px;" id="lbl_setupTitle"></div>
+      <div class="step-row"><div class="step-num">1</div><div class="step-txt" id="lbl_step1"></div></div>
+      <div class="step-row"><div class="step-num">2</div><div class="step-txt" id="lbl_step2"></div></div>
+      <div class="step-row"><div class="step-num">3</div><div class="step-txt" id="lbl_step3"></div></div>
+      <div class="step-row"><div class="step-num">4</div><div class="step-txt" id="lbl_step4"></div></div>
+      <div class="step-row"><div class="step-num">5</div><div class="step-txt" id="lbl_step5"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔗 Web App URL</div>
+      <textarea id="urlInput" rows="3" placeholder="https://script.google.com/macros/s/..."></textarea>
+      <div class="grid-2" style="margin-top:10px;">
+        <button class="btn-teal" id="btnTest" onclick="handleTestUrl()"><span id="testIcon">🔌</span> <span id="lbl_test"></span></button>
+        <button class="btn-green" id="btnSaveUrl" onclick="handleSaveUrl()">💾 <span id="lbl_saveUrl"></span></button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;" id="lbl_connStatus"></div>
+      <div class="status-row">
+        <div id="statusDot" class="status-dot"></div>
+        <span id="statusTxt" style="font-size:12px;font-family:var(--mono);color:#9ca3af;"></span>
+      </div>
+      <div id="lastSyncStatus" style="font-size:10px;color:#9ca3af;font-family:var(--mono);display:none;margin-top:6px;"></div>
+      <div id="statsRow" style="font-size:10px;color:#9ca3af;margin-top:6px;"></div>
+    </div>
+    <div class="card" style="background:#fef2f2;border-color:#fecaca;">
+      <div style="font-size:11px;color:#991b1b;margin-bottom:10px;font-weight:600;">⚠️ Danger Zone</div>
+      <button class="btn-danger" id="btnClear" onclick="clearAllData()"></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div id="deleteModal" class="modal-bg">
+  <div class="modal">
+    <h3 id="lbl_modalTitle"></h3>
+    <p id="lbl_modalDesc"></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnCancel" onclick="closeDeleteModal()"></button>
+      <button class="btn-delete" id="btnDelete" onclick="confirmDelete()"></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const STORAGE_KEY    = 'mileage_records_v1';
+const WEBAPP_URL_KEY = 'mileage_webapp_url';
+const LANG_KEY       = 'mileage_lang';
+
+let records      = loadRecords();
+let pendingIds   = loadPending();
+let webAppUrl    = localStorage.getItem(WEBAPP_URL_KEY)||'';
+let syncStatus   = null;
+let lastSync     = null;
+let deleteTarget = null;
+let currentTab   = 0;
+let lang         = localStorage.getItem(LANG_KEY)||'th';
+
+function loadRecords(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[];}catch{return[];} }
+function loadPending(){ try{return JSON.parse(localStorage.getItem('mileage_pending'))||[];}catch{return[];} }
+function saveRecords(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(records)); }
+function savePending(){ localStorage.setItem('mileage_pending',JSON.stringify(pendingIds)); }
+
+// ══ i18n ══════════════════════════════════════════
+const T = {
+  th:{
+    appTitle:'ไมล์รถยนต์',
+    tabs:['บันทึก','ประวัติ','สรุป','ตั้งค่า'],
+    plate:'🚘 เลขทะเบียนรถ', selectPlate:'-- เลือกทะเบียน --',
+    km:'📍 เลขกิโลเมตร', kmStart:'กม. เริ่มต้น', kmEnd:'กม. สิ้นสุด',
+    dist:'📐 ระยะทางรวม',
+    fuel:'⛽ การเติมน้ำมัน', fuelLiters:'ลิตรที่เติม', fuelKm:'กม. ที่เติม',
+    tsLbl:'วันที่ / เวลาบันทึก',
+    syncReady:'พร้อม sync', syncOn:'Auto-sync เปิด ✓', syncFail:'Sync ไม่ได้ ⚠',
+    btnSave:'บันทึกข้อมูล', syncBtn:'Sync',
+    setupTitle:'📋 วิธีตั้งค่า Google Sheets',
+    step1:'เปิด Google Sheets ใหม่ → ตั้งชื่อว่า <b>Mileage Tracker</b>',
+    step2:'Extensions → Apps Script → ลบ code เดิม → วาง code จากไฟล์ <b>MileageWebApp.gs</b>',
+    step3:'Save → Deploy → <b>New Deployment</b>',
+    step4:'Type: Web App | Execute as: Me | Who has access: Anyone',
+    step5:'กด Deploy → Copy <b>Web App URL</b> → วางด้านล่าง',
+    test:'ทดสอบ', saveUrl:'บันทึก URL',
+    connStatus:'สถานะการเชื่อมต่อ',
+    notSet:'ยังไม่ได้ตั้งค่า URL', connOk:'เชื่อมต่อสำเร็จ', connFail:'เชื่อมต่อไม่ได้', connWait:'ตั้งค่าแล้ว — รอทดสอบ',
+    statsRow:(r,p)=>`รายการ ${r} | รอ sync ${p}`,
+    clearBtn:'🗑 ล้างข้อมูลทั้งหมดในเครื่อง', clearConfirm:'ลบข้อมูลทั้งหมดในเครื่อง?',
+    modalTitle:'ลบรายการนี้?', modalDesc:'จะลบทั้งในเครื่องและ Google Sheets',
+    cancel:'ยกเลิก', delete:'ลบ',
+    saveOk:'บันทึกสำเร็จ ✓', noPlate:'กรุณาเลือกทะเบียนรถ', noData:'กรุณากรอกข้อมูลอย่างน้อย 1 ช่อง',
+    syncOk:(a,u)=>`Sync สำเร็จ ✓ เพิ่ม ${a} อัปเดต ${u}`, syncErr:(e)=>`Sync ไม่สำเร็จ: ${e}`,
+    noUrl:'กรุณาตั้งค่า Web App URL ก่อน', badUrl:'URL ไม่ถูกต้อง', urlSaved:'บันทึก URL แล้ว ✓',
+    connOkMsg:'เชื่อมต่อสำเร็จ ✓', connErrMsg:'เชื่อมต่อไม่ได้ ตรวจสอบ URL และ Deploy settings',
+    clearedMsg:'ล้างข้อมูลแล้ว', deletedMsg:'ลบรายการแล้ว',
+    allFilter:(n)=>`ทั้งหมด (${n})`,
+    lastSyncLbl:(d,t)=>`sync ล่าสุด ${d} ${t}`,
+    lastSyncStatusLbl:(d,t)=>`Sync ล่าสุด: ${d} ${t}`,
+    latest:'ล่าสุด', pending:'pending', synced:'☁ synced',
+    kmStartLbl:'กม. เริ่มต้น', kmEndLbl:'กม. สิ้นสุด',
+    fuelLbl:'เติมน้ำมัน', fuelKmLbl:'กม. ที่เติม',
+    tripTotal:'ระยะทางรวม', trips:'เที่ยว',
+    sumKm:'รวม กม.', sumFuel:'น้ำมัน', sumRate:'อัตรา',
+    noHistory:'ยังไม่มีข้อมูลที่บันทึก', noSummary:'ยังไม่มีข้อมูลสำหรับสรุป',
+    langNext:'EN'
+  },
+  en:{
+    appTitle:'Mileage Tracker',
+    tabs:['Record','History','Summary','Settings'],
+    plate:'🚘 License Plate', selectPlate:'-- Select Plate --',
+    km:'📍 Odometer', kmStart:'Start KM', kmEnd:'End KM',
+    dist:'📐 Distance',
+    fuel:'⛽ Fuel', fuelLiters:'Liters', fuelKm:'Fuel at KM',
+    tsLbl:'Date / Time Recorded',
+    syncReady:'Ready to sync', syncOn:'Auto-sync ON ✓', syncFail:'Sync failed ⚠',
+    btnSave:'Save Record', syncBtn:'Sync',
+    setupTitle:'📋 Google Sheets Setup',
+    step1:'Create a new Google Sheet → Name it <b>Mileage Tracker</b>',
+    step2:'Extensions → Apps Script → Delete existing code → Paste code from <b>MileageWebApp.gs</b>',
+    step3:'Save → Deploy → <b>New Deployment</b>',
+    step4:'Type: Web App | Execute as: Me | Who has access: Anyone',
+    step5:'Click Deploy → Copy <b>Web App URL</b> → Paste below',
+    test:'Test', saveUrl:'Save URL',
+    connStatus:'Connection Status',
+    notSet:'URL not configured', connOk:'Connected successfully', connFail:'Connection failed', connWait:'URL saved — pending test',
+    statsRow:(r,p)=>`Records: ${r} | Pending sync: ${p}`,
+    clearBtn:'🗑 Clear all local data', clearConfirm:'Delete all local data?',
+    modalTitle:'Delete this record?', modalDesc:'This will delete from device and Google Sheets.',
+    cancel:'Cancel', delete:'Delete',
+    saveOk:'Saved ✓', noPlate:'Please select a license plate', noData:'Please fill in at least 1 field',
+    syncOk:(a,u)=>`Sync complete ✓ Added ${a} Updated ${u}`, syncErr:(e)=>`Sync failed: ${e}`,
+    noUrl:'Please configure Web App URL first', badUrl:'Invalid URL', urlSaved:'URL saved ✓',
+    connOkMsg:'Connected successfully ✓', connErrMsg:'Connection failed. Check URL and Deploy settings.',
+    clearedMsg:'Data cleared', deletedMsg:'Record deleted',
+    allFilter:(n)=>`All (${n})`,
+    lastSyncLbl:(d,t)=>`Last sync ${d} ${t}`,
+    lastSyncStatusLbl:(d,t)=>`Last sync: ${d} ${t}`,
+    latest:'Latest', pending:'pending', synced:'☁ synced',
+    kmStartLbl:'Start KM', kmEndLbl:'End KM',
+    fuelLbl:'Fuel Added', fuelKmLbl:'Fuel at KM',
+    tripTotal:'Total Distance', trips:'trips',
+    sumKm:'Total km', sumFuel:'Fuel', sumRate:'Rate',
+    noHistory:'No records yet', noSummary:'No data for summary',
+    langNext:'TH'
+  }
+};
+
+function t(){ return T[lang]; }
+
+function applyLang(){
+  const tx = t();
+  document.getElementById('logoTitle').textContent = tx.appTitle;
+  document.getElementById('langBtn').textContent   = tx.langNext;
+  ['0','1','2','3'].forEach((i)=>{ document.getElementById('tabBtn'+i).textContent = tx.tabs[i]; });
+  document.getElementById('lbl_plate').textContent       = tx.plate;
+  document.getElementById('lbl_selectPlate').textContent = tx.selectPlate;
+  document.getElementById('lbl_km').textContent          = tx.km;
+  document.getElementById('lbl_kmStart').textContent     = tx.kmStart;
+  document.getElementById('lbl_kmEnd').textContent       = tx.kmEnd;
+  document.getElementById('lbl_dist').textContent        = tx.dist;
+  document.getElementById('lbl_fuel').textContent        = tx.fuel;
+  document.getElementById('lbl_fuelLiters').textContent  = tx.fuelLiters;
+  document.getElementById('lbl_fuelKm').textContent      = tx.fuelKm;
+  document.getElementById('lbl_tsLbl').textContent       = tx.tsLbl;
+  document.getElementById('btnSave').textContent         = tx.btnSave;
+  document.getElementById('lbl_syncBtn').textContent     = tx.syncBtn;
+  document.getElementById('lbl_setupTitle').innerHTML    = tx.setupTitle;
+  document.getElementById('lbl_step1').innerHTML         = tx.step1;
+  document.getElementById('lbl_step2').innerHTML         = tx.step2;
+  document.getElementById('lbl_step3').innerHTML         = tx.step3;
+  document.getElementById('lbl_step4').innerHTML         = tx.step4;
+  document.getElementById('lbl_step5').innerHTML         = tx.step5;
+  document.getElementById('lbl_test').textContent        = tx.test;
+  document.getElementById('lbl_saveUrl').textContent     = tx.saveUrl;
+  document.getElementById('lbl_connStatus').textContent  = tx.connStatus;
+  document.getElementById('lbl_modalTitle').textContent  = tx.modalTitle;
+  document.getElementById('lbl_modalDesc').textContent   = tx.modalDesc;
+  document.getElementById('btnCancel').textContent       = tx.cancel;
+  document.getElementById('btnDelete').textContent       = tx.delete;
+  document.getElementById('btnClear').textContent        = tx.clearBtn;
+
+  // sync hint
+  const sh = document.getElementById('syncHintTxt');
+  sh.textContent = syncStatus==='ok'?tx.syncOn:syncStatus==='error'?tx.syncFail:tx.syncReady;
+
+  // status
+  updateStatusUI();
+  // re-render current tab
+  if(currentTab===1) renderHistory();
+  // update auto-fill hint text for current language
+  const hint=document.getElementById('kmEndHint');
+  if(hint&&hint.style.display!=='none'){ autoFillKmStart(); }
+  if(currentTab===2) renderSummary();
+}
+
+function toggleLang(){
+  lang = lang==='th'?'en':'th';
+  localStorage.setItem(LANG_KEY, lang);
+  applyLang();
+}
+
+// ── Clock ──────────────────────────────────────────
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtDT(ts){
+  const d=new Date(ts);
+  return{
+    date:`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`,
+    time:`${pad(d.getHours())}:${pad(d.getMinutes())}`,
+    sec:pad(d.getSeconds())
+  };
+}
+function tickClock(){
+  const{date,time,sec}=fmtDT(Date.now());
+  document.getElementById('clockDate').textContent=date;
+  document.getElementById('clockTime').innerHTML=
+    time.replace(':','<span class="blink">:</span>')+'<span class="blink">:</span>'+sec;
+  const prev=document.getElementById('tsPreview');
+  if(prev) prev.textContent=`${date}  ${time}:${sec}`;
+}
+setInterval(tickClock,1000);
+tickClock();
+
+// ── Tabs ───────────────────────────────────────────
+function switchTab(i){
+  currentTab=i;
+  document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',i===j));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',i===j));
+  if(i===1) renderHistory();
+  if(i===2) renderSummary();
+  if(i===3) renderSettings();
+}
+
+// ── Auto-fill kmEnd from previous record ───────────
+document.getElementById("selPlate").addEventListener("change", autoFillKmStart);
+
+function autoFillKmStart(){
+  const plate = document.getElementById("selPlate").value;
+  if(!plate) return;
+  const prev = records
+    .filter(r => r.plate===plate && r.kmEnd!=null)
+    .sort((a,b) => b.ts - a.ts)[0];
+  const inp  = document.getElementById("kmStart");
+  const hint = document.getElementById("kmStartHint");
+
+  if(prev){
+    // มีประวัติ — ล็อคและใส่ค่าอัตโนมัติ ผู้ใช้ไม่ต้องทำอะไร
+    inp.value = prev.kmEnd;
+    inp.setAttribute("readonly","");
+    inp.setAttribute("tabindex","-1");
+    inp.style.cssText = "background:#e8f5f0;color:#0F6E56;cursor:not-allowed;border-color:#a7f3d0;pointer-events:none;width:100%;";
+    const{date,time}=fmtDT(prev.ts);
+    hint.textContent = (lang==="th")
+      ? "↑ กม.จบจาก "+date+" "+time
+      : "↑ End KM from "+date+" "+time;
+    hint.style.display = "block";
+  } else {
+    // ยังไม่มีประวัติ — เปิดให้กรอกครั้งแรก
+    inp.value = "";
+    inp.removeAttribute("readonly");
+    inp.removeAttribute("tabindex");
+    inp.style.cssText = "width:100%;";
+    hint.textContent = (lang==="th")
+      ? "กรอกครั้งแรก"
+      : "First entry — enter manually";
+    hint.style.background = "#fef3c7";
+    hint.style.color = "#92400e";
+    hint.style.display = "block";
+  }
+  updateDist();
+}
+
+// ── Distance ───────────────────────────────────────
+['kmStart','kmEnd'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',updateDist);
+});
+function updateDist(){
+  const s=parseFloat(document.getElementById('kmStart').value);
+  const e=parseFloat(document.getElementById('kmEnd').value);
+  const row=document.getElementById('distRow');
+  if(!isNaN(s)&&!isNaN(e)&&e>s){
+    document.getElementById('distVal').textContent=(e-s).toLocaleString();
+    row.style.display='flex';
+  } else row.style.display='none';
+}
+
+// ── Save ───────────────────────────────────────────
+function handleSave(){
+  const tx=t();
+  const plate=document.getElementById('selPlate').value;
+  if(!plate){ showToast(tx.noPlate,'error'); return; }
+  const kmS=document.getElementById('kmStart').value;
+  const kmE=document.getElementById('kmEnd').value;
+  const fL =document.getElementById('fuelLiters').value;
+  const fK =document.getElementById('fuelKm').value;
+  if(!kmE&&!fL){ showToast(tx.noData,'error'); return; }
+  const rec={
+    id:Date.now(), plate,
+    kmStart:kmS?+kmS:null, kmEnd:kmE?+kmE:null,
+    fuelLiters:fL?+fL:null, fuelKm:fK?+fK:null,
+    ts:Date.now(), synced:false
+  };
+  records.unshift(rec);
+  pendingIds.push(rec.id);
+  saveRecords(); savePending();
+  document.getElementById('kmStart').value='';
+  document.getElementById('kmStartHint').style.display='none';
+  document.getElementById('kmStartHint').style.background='var(--plight)';
+  document.getElementById('kmStartHint').style.color='var(--primary)';
+  document.getElementById('kmEnd').value='';
+  document.getElementById('fuelLiters').value='';
+  document.getElementById('fuelKm').value='';
+  document.getElementById('distRow').style.display='none';
+  document.getElementById('kmEndHint').style.display='none';
+  // Re-fill kmStart for next entry from the kmEnd just saved
+  const selPlate=document.getElementById('selPlate').value;
+  if(selPlate){ setTimeout(()=>autoFillKmStart(),100); }
+  updateBadges();
+  showToast(tx.saveOk,'success');
+  if(webAppUrl) autoSync([rec]);
+}
+
+// ── Sync ───────────────────────────────────────────
+async function callWebApp(payload){
+  const res=await fetch(webAppUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+  return res.json();
+}
+async function autoSync(newRecs){
+  try{
+    const res=await callWebApp({action:'sync',records:newRecs});
+    if(res.success){ markSynced(newRecs.map(r=>r.id)); lastSync=Date.now(); syncStatus='ok'; updateBadges(); }
+  }catch{ syncStatus='error'; updateBadges(); }
+}
+async function handleManualSync(){
+  const tx=t();
+  if(!webAppUrl){ showToast(tx.noUrl,'error'); return; }
+  const icon=document.getElementById('syncIcon');
+  icon.textContent='⟳'; icon.classList.add('spin');
+  try{
+    const res=await callWebApp({action:'sync',records});
+    if(res.success){
+      records=records.map(r=>({...r,synced:true}));
+      pendingIds=[]; saveRecords(); savePending();
+      lastSync=Date.now(); syncStatus='ok'; updateBadges();
+      showToast(tx.syncOk(res.added,res.updated),'success');
+      if(currentTab===1) renderHistory();
+    } else throw new Error(res.error);
+  }catch(e){ syncStatus='error'; updateBadges(); showToast(tx.syncErr(e.message),'error'); }
+  icon.textContent='☁'; icon.classList.remove('spin');
+}
+function markSynced(ids){
+  const s=new Set(ids.map(String));
+  records=records.map(r=>s.has(String(r.id))?{...r,synced:true}:r);
+  pendingIds=pendingIds.filter(id=>!s.has(String(id)));
+  saveRecords(); savePending();
+  if(currentTab===1) renderHistory();
+}
+
+// ── Delete ─────────────────────────────────────────
+function openDeleteModal(id){ deleteTarget=id; document.getElementById('deleteModal').classList.add('open'); }
+function closeDeleteModal(){ deleteTarget=null; document.getElementById('deleteModal').classList.remove('open'); }
+async function confirmDelete(){
+  const tx=t();
+  const id=deleteTarget;
+  records=records.filter(r=>r.id!==id);
+  pendingIds=pendingIds.filter(x=>x!==id);
+  saveRecords(); savePending();
+  closeDeleteModal(); updateBadges(); renderHistory();
+  showToast(tx.deletedMsg,'success');
+  if(webAppUrl){ try{ await callWebApp({action:'delete',id}); }catch{} }
+}
+
+// ── History ────────────────────────────────────────
+const ALL_PLATES=["2AC-9758","2AP-7433","2AP-5911","2AP-7622","3D-5161","2AE-4783","2H-2330","2AP-5733","2AP-8522","2AP-6499","2AP-7933","2AP-8621","2AP-6955"];
+
+function renderHistory(){
+  const tx=t();
+  const fp=document.getElementById('filterPlate').value||'all';
+  const sel=document.getElementById('filterPlate');
+  const cur=sel.value;
+  sel.innerHTML=`<option value="all">${tx.allFilter(records.length)}</option>`;
+  [...new Set(records.map(r=>r.plate))].forEach(p=>{
+    const c=records.filter(r=>r.plate===p).length;
+    sel.innerHTML+=`<option value="${p}">${p} (${c})</option>`;
+  });
+  sel.value=cur||'all';
+  const data=fp==='all'?records:records.filter(r=>r.plate===fp);
+  const list=document.getElementById('historyList');
+  if(!data.length){ list.innerHTML=`<div class="empty"><div class="icon">📋</div><div class="txt">${tx.noHistory}</div></div>`; return; }
+  list.innerHTML=data.map((r,i)=>{
+    const{date,time,sec}=fmtDT(r.ts);
+    const dist=r.kmStart!=null&&r.kmEnd!=null?r.kmEnd-r.kmStart:null;
+    const syncTag=r.synced?`<span class="tag tag-synced">${tx.synced}</span>`:`<span class="tag tag-pending">${tx.pending}</span>`;
+    const latestTag=(i===0&&fp==='all')?`<span class="tag tag-latest">${tx.latest}</span>`:'';
+    const stats=[
+      r.kmStart!=null?`<div class="mini-stat"><div class="mini-label">${tx.kmStartLbl}</div><div class="mini-value" style="color:#065f46">${r.kmStart.toLocaleString()} <span class="mini-unit">km</span></div></div>`:'',
+      r.kmEnd!=null?`<div class="mini-stat"><div class="mini-label">${tx.kmEndLbl}</div><div class="mini-value" style="color:#065f46">${r.kmEnd.toLocaleString()} <span class="mini-unit">km</span></div></div>`:'',
+      r.fuelLiters!=null?`<div class="mini-stat"><div class="mini-label">${tx.fuelLbl}</div><div class="mini-value" style="color:#92400e">${r.fuelLiters} <span class="mini-unit">L</span></div></div>`:'',
+      r.fuelKm!=null?`<div class="mini-stat"><div class="mini-label">${tx.fuelKmLbl}</div><div class="mini-value" style="color:#92400e">${r.fuelKm.toLocaleString()} <span class="mini-unit">km</span></div></div>`:''
+    ].filter(Boolean).join('');
+    const distHtml=dist!=null&&dist>0?`<div class="trip-row"><span class="trip-label">${tx.tripTotal}</span><span class="trip-value">${dist.toLocaleString()} km</span></div>`:'';
+    return`<div class="record-card${i===0&&fp==='all'?' latest':''}">
+      <div class="record-top">
+        <div class="record-tags"><span class="plate-tag">${r.plate}</span>${latestTag}${syncTag}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div><div class="record-date">${date}</div><div class="record-hms">${time}:${sec}</div></div>
+          <button class="del-btn" onclick="openDeleteModal(${r.id})">🗑</button>
+        </div>
+      </div>
+      <div class="stat-grid">${stats}</div>${distHtml}
+    </div>`;
+  }).join('');
+}
+
+// ── Summary ────────────────────────────────────────
+function renderSummary(){
+  const tx=t();
+  const list=document.getElementById('summaryList');
+  const rows=ALL_PLATES.map(p=>{
+    const recs=records.filter(r=>r.plate===p);
+    const trips=recs.filter(r=>r.kmStart!=null&&r.kmEnd!=null);
+    const totalKm=trips.reduce((s,r)=>s+(r.kmEnd-r.kmStart),0);
+    const totalFuel=recs.reduce((s,r)=>s+(r.fuelLiters||0),0);
+    if(!trips.length&&!totalFuel) return '';
+    const avg=totalFuel>0?(totalKm/totalFuel).toFixed(1):'-';
+    return`<div class="sum-card" style="margin-bottom:8px;">
+      <div class="sum-top"><span class="plate-tag">${p}</span><span style="font-size:11px;color:#9ca3af;">${trips.length} ${tx.trips}</span></div>
+      <div class="stat-3">
+        <div class="stat-box"><div class="lbl">${tx.sumKm}</div><div class="val" style="color:#065f46">${totalKm>0?totalKm.toLocaleString():'-'}</div><div class="unt">km</div></div>
+        <div class="stat-box"><div class="lbl">${tx.sumFuel}</div><div class="val" style="color:#92400e">${totalFuel.toFixed(1)}</div><div class="unt">L</div></div>
+        <div class="stat-box"><div class="lbl">${tx.sumRate}</div><div class="val" style="color:#065f46">${avg}</div><div class="unt">km/L</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  list.innerHTML=rows||`<div class="empty"><div class="icon">📋</div><div class="txt">${tx.noSummary}</div></div>`;
+}
+
+// ── Settings ───────────────────────────────────────
+function renderSettings(){
+  document.getElementById('urlInput').value=webAppUrl;
+  updateStatusUI();
+}
+function handleSaveUrl(){
+  const tx=t();
+  const url=document.getElementById('urlInput').value.trim();
+  if(!url.startsWith('https://script.google.com')){ showToast(tx.badUrl,'error'); return; }
+  webAppUrl=url; localStorage.setItem(WEBAPP_URL_KEY,url);
+  updateBadges(); updateStatusUI();
+  showToast(tx.urlSaved,'success');
+}
+async function handleTestUrl(){
+  const tx=t();
+  const url=document.getElementById('urlInput').value.trim();
+  if(!url) return;
+  const icon=document.getElementById('testIcon');
+  icon.textContent='⟳'; icon.classList.add('spin');
+  try{
+    const res=await fetch(url);
+    const json=await res.json();
+    if(json.status==='ok'){ syncStatus='ok'; showToast(tx.connOkMsg,'success'); }
+    else throw new Error();
+  }catch{ syncStatus='error'; showToast(tx.connErrMsg,'error'); }
+  icon.textContent='🔌'; icon.classList.remove('spin');
+  updateStatusUI();
+}
+function updateStatusUI(){
+  const tx=t();
+  const dot=document.getElementById('statusDot');
+  const stxt=document.getElementById('statusTxt');
+  dot.className='status-dot'+(webAppUrl?(syncStatus==='ok'?' ok':syncStatus==='error'?' error':' warn'):'');
+  stxt.textContent=!webAppUrl?tx.notSet:syncStatus==='ok'?tx.connOk:syncStatus==='error'?tx.connFail:tx.connWait;
+  stxt.style.color=webAppUrl?'var(--pdark)':'#9ca3af';
+  document.getElementById('statsRow').textContent=tx.statsRow(records.length,pendingIds.length);
+  if(lastSync){
+    const ls=document.getElementById('lastSyncStatus');
+    const{date,time}=fmtDT(lastSync);
+    ls.textContent=tx.lastSyncStatusLbl(date,time);
+    ls.style.display='block';
+  }
+}
+function clearAllData(){
+  const tx=t();
+  if(!confirm(tx.clearConfirm)) return;
+  records=[]; pendingIds=[]; saveRecords(); savePending();
+  updateBadges(); showToast(tx.clearedMsg,'success');
+}
+
+// ── Badges ─────────────────────────────────────────
+function updateBadges(){
+  const tx=t();
+  const pb=document.getElementById('pendingBadge');
+  pendingIds.length>0?(pb.textContent=pendingIds.length,pb.style.display='inline'):pb.style.display='none';
+  const dot=document.getElementById('syncDot');
+  dot.className='sync-dot'+(webAppUrl?(syncStatus==='ok'?' ok':syncStatus==='error'?' error':''):'');
+  const btnSync=document.getElementById('btnSync');
+  const spb=document.getElementById('syncPendingBadge');
+  webAppUrl?btnSync.classList.remove('disabled'):btnSync.classList.add('disabled');
+  pendingIds.length>0?(spb.textContent=pendingIds.length,spb.style.display='inline'):spb.style.display='none';
+  const hint=document.getElementById('syncHint');
+  const htxt=document.getElementById('syncHintTxt');
+  if(webAppUrl){
+    hint.style.display='flex';
+    htxt.textContent=syncStatus==='ok'?tx.syncOn:syncStatus==='error'?tx.syncFail:tx.syncReady;
+    htxt.style.color=syncStatus==='ok'?'#065f46':syncStatus==='error'?'#991b1b':'var(--primary)';
+  } else hint.style.display='none';
+  if(lastSync){
+    const ls=document.getElementById('lastSyncTxt');
+    const{date,time}=fmtDT(lastSync);
+    ls.textContent=tx.lastSyncLbl(date,time);
+    ls.style.display='block';
+  }
+}
+
+// ── Toast ──────────────────────────────────────────
+let toastTimer=null;
+function showToast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+type; el.style.display='block';
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.style.display='none',3500);
+}
+
+// ── Init ───────────────────────────────────────────
+applyLang();
+updateBadges();
+renderHistory();
+</script>
+</body>
+</html>
