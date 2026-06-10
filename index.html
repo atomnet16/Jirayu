@@ -915,7 +915,7 @@ function renderDailySpReport() {
     if (!Object.keys(cd).length && mxRec) {
       var ac4 = sanitizeAllChems(mxRec.allChems||{});
       var tot4 = mxEffectiveWater(mxRec);
-      var wu4 = parseFloat(r.waterUsed)||0;
+      var wu4 = spEffectiveWaterUsed(r);
       if (tot4>0 && wu4>0) {
         var rat4 = wu4/tot4;
         Object.keys(ac4).forEach(function(n){
@@ -1617,6 +1617,14 @@ function cloudSync() {
           if(!r.tanks && loc.tanks) r.tanks=loc.tanks;
         }
       }
+      // SP: ถ้า cloud ไม่มีข้อมูลน้ำ/ยา (sheet เก่าไม่มีคอลัมน์) → ใช้ค่าจาก local
+      if(r.type==='sp' && loc){
+        if(!(parseFloat(r.waterUsed)>0)   && parseFloat(loc.waterUsed)>0)   r.waterUsed=parseFloat(loc.waterUsed);
+        if(!(parseFloat(r.waterBefore)>0) && parseFloat(loc.waterBefore)>0) r.waterBefore=parseFloat(loc.waterBefore);
+        if(!(parseFloat(r.waterAfter)>0)  && parseFloat(loc.waterAfter)>0)  r.waterAfter=parseFloat(loc.waterAfter);
+        if(!Object.keys(r.chemDelivered||{}).length && loc.chemDelivered && Object.keys(loc.chemDelivered).length) r.chemDelivered=loc.chemDelivered;
+        if(!r.mxId && loc.mxId) r.mxId=loc.mxId;
+      }
     });
     records=cloud.concat(localOnly);
     saveLocal();
@@ -1884,6 +1892,13 @@ function calcWater(){
   else {el.innerHTML='';}
   calcChemDel(wu);
 }
+function spEffectiveWaterUsed(r){
+  // waterUsed ตรง ๆ ก่อน — ถ้าไม่มีให้คำนวณจาก Before − After
+  var wu=parseFloat(r.waterUsed)||0;
+  if(wu>0) return wu;
+  var wb=parseFloat(r.waterBefore)||0, wa=parseFloat(r.waterAfter)||0;
+  return (wb-wa)>0 ? (wb-wa) : 0;
+}
 function mxEffectiveWater(mx){
   // Return totalWater from record; fallback: waterPerTank × number of tanks
   var tw=parseFloat(mx.totalWater)||0;
@@ -1917,6 +1932,10 @@ function submitSP(){
   var wb=parseFloat(document.getElementById('sp-wb').value)||0;
   var wa=parseFloat(document.getElementById('sp-wa').value)||0;
   var wu=wb-wa;
+  if(wu<=0){
+    if(!window.confirm('⚠️ ไม่มีข้อมูลน้ำที่ใช้ (Before − After = '+wu.toFixed(0)+' L)\nกรอก ទឹកមុន/ទឹកក្រោយ ให้ถูกต้องก่อน หรือกด OK เพื่อบันทึกต่อ')) return;
+    wu=0;
+  }
   var ts=document.getElementById('sp-ts').value,te=document.getElementById('sp-te').value;
   var hrs=null;if(ts&&te){var sm=ts.split(':').map(Number),em=te.split(':').map(Number);var m=(em[0]*60+em[1])-(sm[0]*60+sm[1]);if(m>0)hrs=(m/60).toFixed(1);}
   var area=parseFloat(document.getElementById('sp-area').value)||0;
@@ -2151,7 +2170,7 @@ function buildChemDetail(r) {
           // หลาย MX — รวม allChems ทั้งหมด (merge) แล้วใช้ totalWater รวม
           var merged = {}; var totW = 0;
           cands.forEach(function(m){ totW += mxEffectiveWater(m); var ac2=sanitizeAllChems(m.allChems||{}); Object.keys(ac2).forEach(function(n){ merged[n]=(merged[n]||0)+parseFloat(ac2[n]); }); });
-          var wu2=parseFloat(r.waterUsed)||0;
+          var wu2=spEffectiveWaterUsed(r);
           if (totW>0&&wu2>0) {
             var rat2=wu2/totW;
             Object.keys(merged).forEach(function(n){ var u3=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u; cd[n]={qty:(merged[n]*rat2).toFixed(3),unit:u3}; });
@@ -2163,7 +2182,7 @@ function buildChemDetail(r) {
       if (mxRec) {
         var ac3 = sanitizeAllChems(mxRec.allChems||{});
         var tot3 = mxEffectiveWater(mxRec);
-        var wu3 = parseFloat(r.waterUsed)||0;
+        var wu3 = spEffectiveWaterUsed(r);
         var rat3 = (tot3>0&&wu3>0) ? wu3/tot3 : 0;
         if (rat3>0) {
           // Normal proportional calculation
@@ -2185,7 +2204,8 @@ function buildChemDetail(r) {
       var v = cd[n]; var q = typeof v==='object' ? v.qty : v; var u2 = typeof v==='object' ? v.unit : '';
       rows.push('<div class="crow"><span style="color:var(--muted)">'+n+'</span><span class="cval" style="color:var(--blue)">'+parseFloat(q||0).toFixed(3)+' '+u2+'</span></div>');
     });
-    if (r.waterUsed)  rows.push('<div class="crow"><span style="color:var(--muted)">💧 น้ำที่ใช้</span><span class="cval" style="color:var(--blue)">'+r.waterUsed+' L</span></div>');
+    var wuShow=spEffectiveWaterUsed(r);
+    if (wuShow>0)  rows.push('<div class="crow"><span style="color:var(--muted)">💧 น้ำที่ใช้</span><span class="cval" style="color:var(--blue)">'+wuShow.toFixed(0)+' L</span></div>');
     if (r.area)       rows.push('<div class="crow"><span style="color:var(--muted)">📐 พื้นที่</span><span class="cval">'+r.area+' ha</span></div>');
     if (r.hrs)        rows.push('<div class="crow"><span style="color:var(--muted)">⏱ เวลา</span><span class="cval">'+r.tStart+' – '+r.tEnd+' ('+r.hrs+'h)</span></div>');
     if (r.weather)    rows.push('<div class="crow"><span style="color:var(--muted)">🌤 อากาศ</span><span class="cval">'+r.weather+'</span></div>');
