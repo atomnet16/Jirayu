@@ -454,30 +454,31 @@ var USE_CLOUD  = true;
 // ═══════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════
+// s: = คลังคงเหลือ ณ 2026-06-14 (snapshot จาก Initial − CR + RT ถึงวันนี้)
 var CHEMS = [
-  {n:'Emamecthrin',u:'Kg',t:'Insecticide',s:405.5},
-  {n:'Belt',u:'Kg',t:'Insecticide',s:303},
-  {n:'Lufenuron',u:'L',t:'Insecticide',s:920},
+  {n:'Emamecthrin',u:'Kg',t:'Insecticide',s:216.5},
+  {n:'Belt',u:'Kg',t:'Insecticide',s:280.7},
+  {n:'Lufenuron',u:'L',t:'Insecticide',s:944},
   {n:'Fipronil',u:'L',t:'Insecticide',s:0},
   {n:'Altacor',u:'Kg',t:'Insecticide',s:0},
-  {n:'Profenofos',u:'L',t:'Insecticide',s:860},
+  {n:'Profenofos',u:'L',t:'Insecticide',s:783.5},
   {n:'Actara (Thiamethoxam)',u:'Kg',t:'Insecticide',s:7.5},
   {n:'Eforia',u:'L',t:'Insecticide',s:1745.5},
   {n:'Amrarar',u:'Kg',t:'Insecticide',s:0},
   {n:'Spirotetramat',u:'L',t:'Insecticide',s:94.3},
-  {n:'Chlorfenapyr',u:'L',t:'Insecticide',s:1846},
-  {n:'Bifentrin (Talstar)',u:'L',t:'Insecticide',s:260},
+  {n:'Chlorfenapyr',u:'L',t:'Insecticide',s:1774},
+  {n:'Bifentrin (Talstar)',u:'L',t:'Insecticide',s:258},
   {n:'Methomyl',u:'Kg',t:'Insecticide',s:13},
   {n:'Glyphosate',u:'L',t:'Herbicide',s:0},
-  {n:'Dual Gold',u:'L',t:'Herbicide',s:3621},
+  {n:'Dual Gold',u:'L',t:'Herbicide',s:3639.5},
   {n:'2,4-D',u:'L',t:'Herbicide',s:750},
-  {n:'Clio Pro',u:'L',t:'Herbicide',s:133.5},
-  {n:'Atrazine',u:'Kg',t:'Herbicide',s:1990.8},
-  {n:'Nicosulfuron (Green)',u:'L',t:'Herbicide',s:208},
+  {n:'Clio Pro',u:'L',t:'Herbicide',s:124.4},
+  {n:'Atrazine',u:'Kg',t:'Herbicide',s:1797.9},
+  {n:'Nicosulfuron (Green)',u:'L',t:'Herbicide',s:113.65},
   {n:'Nicosulfuron (Yellow)',u:'L',t:'Herbicide',s:37},
   {n:'Sumisoya',u:'Kg',t:'Herbicide',s:53.7},
-  {n:'Glufosinate',u:'L',t:'Herbicide',s:3848},
-  {n:'Pendimethalin',u:'L',t:'Herbicide',s:3855},
+  {n:'Glufosinate',u:'L',t:'Herbicide',s:3873},
+  {n:'Pendimethalin',u:'L',t:'Herbicide',s:3879},
   {n:'Acetochlor',u:'L',t:'Herbicide',s:640},
   {n:'Imazetapyr (Pursuit)',u:'L',t:'Herbicide',s:874.6},
   {n:'Indaziflam (Becano)',u:'L',t:'Herbicide',s:19.3},
@@ -489,11 +490,11 @@ var CHEMS = [
   {n:'Fluazifop',u:'L',t:'Herbicide',s:2160},
   {n:'Carbendazim',u:'L',t:'Fungicide',s:0.5},
   {n:'Nativo',u:'Kg',t:'Fungicide',s:0.3},
-  {n:'Atemis',u:'L',t:'Fungicide',s:1068},
-  {n:'Mammoth Zinc',u:'L',t:'Fertilizer',s:40},
+  {n:'Atemis',u:'L',t:'Fungicide',s:1021},
+  {n:'Mammoth Zinc',u:'L',t:'Fertilizer',s:35},
   {n:'Mammoth Ca+B',u:'L',t:'Fertilizer',s:100},
-  {n:'Surfactant',u:'L',t:'Fertilizer',s:1195},
-  {n:'K30',u:'L',t:'Fertilizer',s:2610},
+  {n:'Surfactant',u:'L',t:'Fertilizer',s:1123.15},
+  {n:'K30',u:'L',t:'Fertilizer',s:2461.8},
   {n:'CoMo',u:'L',t:'Fertilizer',s:200},
   {n:'Levos',u:'Kg',t:'Herbicide',s:1145},
   {n:'MgSO4',u:'Kg',t:'Fertilizer',s:0},
@@ -517,7 +518,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.26'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.26b'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -1110,7 +1111,7 @@ function renderAlerts() {
 // ═══════════════════════════════════════════════════════════
 // WAREHOUSE STOCK  (คลัง)  —  Initial − All CR-01 issued
 // ═══════════════════════════════════════════════════════════
-var WAREHOUSE_START = '2026-06-05'; // Stock ณ วันที่นี้
+var WAREHOUSE_START = '2026-06-14'; // Stock ณ วันที่นี้ (snapshot 2026-06-14)
 function calcWarehouseStock() {
   var stock = {};
   CHEMS.forEach(function(c) {
