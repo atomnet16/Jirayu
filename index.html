@@ -1737,16 +1737,16 @@ function fillMXSelect(){
   if(noneEl) noneEl.style.display='none';
   container.innerHTML = mxList.map(function(m){
     var d = normalizeDate(m.date);
-    var dayBadge = d===today ? '<span style="background:#3DDB72;color:#0a1f0f;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">TODAY</span>'
-                 : d===yesterday ? '<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">เมื่อวาน</span>' : '';
+    var dayBadge = d===today ? '<span style="background:#2C4E38;color:#EBE8E0;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">TODAY</span>'
+                 : d===yesterday ? '<span style="background:#C47A2A;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">เมื่อวาน</span>' : '';
     var ac = sanitizeAllChems(m.allChems||{});
     var chemHtml = Object.keys(ac).length
       ? Object.keys(ac).map(function(k){
           var u=(CHEMS.find(function(x){return x.n===k;})||{u:''}).u;
-          return '<span style="background:rgba(61,219,114,.12);color:var(--teal);font-size:9px;padding:1px 6px;border-radius:8px;margin:1px">'+k+' '+parseFloat(ac[k]).toFixed(2)+' '+u+'</span>';
+          return '<span style="background:rgba(44,78,56,.12);color:var(--acc);font-size:9px;padding:1px 6px;border-radius:8px;margin:1px">'+k+' '+parseFloat(ac[k]).toFixed(2)+' '+u+'</span>';
         }).join('')
       : '<span style="color:var(--muted);font-size:9px">ไม่มีข้อมูลยา</span>';
-    return '<div id="mxcard-'+m.id+'" onclick="selectMXCard(\''+m.id+'\')" style="border:2px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--card);transition:all .2s">'
+    return '<div id="mxcard-'+m.id+'" onclick="selectMXCard(\''+m.id+'\')" style="border:2px solid var(--bdr);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--card);transition:all .2s">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
         + '<span style="font-size:11px;font-weight:700;color:var(--teal)">⚗️ '+(m.plot||'?')+'</span>'
         + '<span style="font-size:10px;color:var(--muted)">'+d+dayBadge+'</span>'
@@ -1762,14 +1762,14 @@ function fillMXSelect(){
 function selectMXCard(id){
   // Deselect all
   document.querySelectorAll('[id^="mxcard-"]').forEach(function(el){
-    el.style.border='2px solid rgba(255,255,255,.1)';
+    el.style.border='2px solid var(--bdr)';
     el.style.background='var(--card)';
   });
   // Select this one
   var card = document.getElementById('mxcard-'+id);
   if(card){
-    card.style.border='2px solid var(--teal)';
-    card.style.background='rgba(61,219,114,.07)';
+    card.style.border='2px solid var(--acc)';
+    card.style.background='rgba(44,78,56,.08)';
   }
   document.getElementById('sp-mx').value = id;
   previewMX();
@@ -1780,7 +1780,7 @@ function previewMX(){
   var box=document.getElementById('sp-mx-prev');
   if(mx){
     var ac=sanitizeAllChems(mx.allChems||{});
-    box.style.display='block';box.style.background='rgba(61,219,114,.06)';box.style.border='2px solid var(--teal)';
+    box.style.display='block';box.style.background='rgba(44,78,56,.06)';box.style.border='2px solid var(--acc)';
     var mxW=mxEffectiveWater(mx);
     var h='<div style="font-size:10px;color:var(--teal);font-weight:700;margin-bottom:5px">✅ ថងយាដែលជ្រើស: '+mx.id+' · '+(mx.plot||'?')+'</div>';
     h+='<div class="crow"><span>💧 ទឹកសរុប (Total Water)</span><span class="cval" style="color:var(--blue)">'
