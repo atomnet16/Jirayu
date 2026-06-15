@@ -511,6 +511,17 @@ var PLOTS = ['Pivot 1','Pivot 2','Pivot 3','Pivot 4','Pivot 5/1','Pivot 5/2','Pi
 // STATE
 // ═══════════════════════════════════════════════════════════
 var records = loadLocal();
+// STOCK_INIT: ปริมาณตั้งต้นจาก Google Sheet [{chemical,unit,snapQty,snapDate}]
+// ว่าง = fallback ใช้ CHEMS[].s + WAREHOUSE_START (hardcode) เหมือนเดิม
+var stockInit = (function(){ try { return JSON.parse(localStorage.getItem('mf_stock_init')||'[]'); } catch(e){ return []; } })();
+function stockInitMap(){
+  var m={};
+  (stockInit||[]).forEach(function(s){
+    var n=(s.chemical||s.Chemical||'').trim();
+    if(n) m[n]={qty:parseFloat(s.snapQty!=null?s.snapQty:s.SnapQty)||0, date:normalizeDate(s.snapDate||s.SnapDate||'')||''};
+  });
+  return m;
+}
 var crChems = [{n:'',q:''}];
 var stChems = [{n:'',q:''}];
 var rtChems = [{n:'',q:''}];
@@ -1114,29 +1125,42 @@ function renderAlerts() {
 // ═══════════════════════════════════════════════════════════
 var WAREHOUSE_START = '2026-06-14'; // Stock ณ วันที่นี้ (snapshot 2026-06-14)
 function calcWarehouseStock() {
+  // ปริมาณตั้งต้น + วันที่ snapshot: ถ้ามี STOCK_INIT จาก Sheet → ใช้ค่านั้น (ราย-สารเคมี)
+  // ถ้าไม่มี → fallback ใช้ CHEMS[].s + WAREHOUSE_START เหมือนเดิม
+  var sim = stockInitMap();
   var stock = {};
   CHEMS.forEach(function(c) {
-    stock[c.n] = { initial: parseFloat(c.s) || 0, issued: 0, unit: c.u };
+    var si = sim[c.n];
+    stock[c.n] = {
+      initial: (si && !isNaN(si.qty)) ? si.qty : (parseFloat(c.s) || 0),
+      issued: 0, unit: c.u,
+      snapDate: (si && si.date) ? si.date : WAREHOUSE_START
+    };
   });
-  records.filter(function(r) { return r.type === 'cr' && normalizeDate(r.date) >= WAREHOUSE_START; }).forEach(function(r) {
+  // CR-01 เบิก — นับเฉพาะรายการ "ตั้งแต่ snapDate ของสารนั้น" เป็นต้นไป
+  records.filter(function(r){ return r.type === 'cr'; }).forEach(function(r) {
+    var d = normalizeDate(r.date);
     (r.chemicals || []).forEach(function(c) {
       if (!c.n || !stock[c.n]) return;
+      if (d < stock[c.n].snapDate) return;
       stock[c.n].issued += parseFloat(c.q) || 0;
     });
   });
-  // Add stock-in receipts (ST-01)
-  records.filter(function(r) { return r.type === 'st' && normalizeDate(r.date) >= WAREHOUSE_START; }).forEach(function(r) {
+  // ST-01 รับเข้าคลัง
+  records.filter(function(r){ return r.type === 'st'; }).forEach(function(r) {
+    var d = normalizeDate(r.date);
     (r.chemicals || []).forEach(function(c) {
       if (!c.n || !stock[c.n]) return;
+      if (d < stock[c.n].snapDate) return;
       stock[c.n].received = (stock[c.n].received || 0) + (parseFloat(c.q) || 0);
     });
   });
   // RT-01: คืนเข้าคลัง — เก็บแยก field (ไม่รวมกับ received ของ ST เพื่อไม่ทำให้ ต้นทุน+รับ บวม)
-  records.filter(function(r){
-    return r.type==='rt' && normalizeDate(r.date) >= WAREHOUSE_START;
-  }).forEach(function(r){
+  records.filter(function(r){ return r.type === 'rt'; }).forEach(function(r){
+    var d = normalizeDate(r.date);
     (r.chemicals||[]).forEach(function(c){
       if (!c.n || !stock[c.n]) return;
+      if (d < stock[c.n].snapDate) return;
       stock[c.n].returned = (stock[c.n].returned||0) + (parseFloat(c.q)||0);
     });
   });
@@ -1426,6 +1450,11 @@ function cloudSync() {
   cloudRead(function(resp) {
     if (!resp) { setSyncUI(false); return; }
     var data = resp.data || {};
+    // STOCK_INIT: ปริมาณตั้งต้นจาก Sheet → เก็บ local, ใช้แทน CHEMS[].s ทันที (ไม่กระทบ UI)
+    if (resp.stockInit && resp.stockInit.length) {
+      stockInit = resp.stockInit;
+      try { localStorage.setItem('mf_stock_init', JSON.stringify(stockInit)); } catch(e){}
+    }
     // Sync cloud deletedIds → merge into local deletedIds so this device also forgets them
     var cloudDeleted = resp.deletedIds || [];
     cloudDeleted.forEach(function(id){
