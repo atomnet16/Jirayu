@@ -5,19 +5,31 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Chem Control">
-<meta name="theme-color" content="#2C4E38">
+<meta name="theme-color" content="#080f18">
 <title>🌱 Chem Control · Mega Farm</title>
 <link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 :root{
-  --bg:#EBE5D8;--surf:#F6F2E8;--card:#F0EDE4;--bdr:#C6C0B2;
-  --acc:#2C4E38;--dim:#D4EDDA;--adim:#E2DDD0;
-  --teal:#7A5E38;--blue:#596858;--warn:#C47A2A;--danger:#B84040;
-  --purple:#6B5B35;--orange:#A05A28;
-  --text:#181C18;--muted:#596858;--faint:#C6C0B2;
+  --bg:#080f18;--surf:rgba(6,24,50,0.55);--card:rgba(6,24,50,0.55);--bdr:rgba(0,210,235,0.18);
+  --acc:#00e5ff;--dim:rgba(0,229,255,0.12);--adim:rgba(0,229,255,0.08);
+  --teal:#2ECC9A;--blue:#5BA4F5;--warn:#F5A623;--danger:#E85555;
+  --purple:#9B7EF5;--orange:#F57C3D;
+  --text:#E8F6FB;--muted:#6f93ab;--faint:#2c4a63;
+  --glass-blur:14px;
+}
+[data-theme="limestone"]{
+  --bg:#F4F1EA;--surf:#FFFFFF;--card:#FFFFFF;--bdr:#E2DCCB;
+  --acc:#2E7D5B;--dim:#EDEAE0;--adim:#EDEAE0;
+  --teal:#2ECC9A;--blue:#3B82C4;--warn:#C97A1E;--danger:#C0463C;
+  --purple:#7C66C9;--orange:#C9742E;
+  --text:#2B2A26;--muted:#8A8470;--faint:#D8D2C2;
+  --glass-blur:0px;
 }
 body{background:var(--bg);color:var(--text);font-family:'Hanuman','Noto Sans Khmer',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:90px}
+[data-theme="limestone"] body,:root[data-theme="limestone"]{background:var(--bg)}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 20% 20%,rgba(0,100,180,0.18) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(0,200,150,0.12) 0%,transparent 60%),#080f18;pointer-events:none}
+[data-theme="limestone"] body::before{display:none}
 input,select,button,textarea{font-family:inherit}
 input::placeholder,textarea::placeholder{color:var(--faint)}
 select option{background:var(--card)}
@@ -25,27 +37,32 @@ input[type=date]::-webkit-calendar-picker-indicator,
 input[type=time]::-webkit-calendar-picker-indicator{filter:invert(.3)}
 
 /* NAV */
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surf);border-top:1.5px solid var(--bdr);display:flex;padding:6px 0 14px;z-index:100;box-shadow:0 -2px 12px rgba(28,48,30,.08)}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surf);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-top:1.5px solid var(--bdr);display:flex;padding:6px 0 14px;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,.3)}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--faint);font-size:9px;font-weight:700;font-family:inherit}
 .nb.on{color:var(--acc)}
 .nb span:first-child{font-size:22px}
 
 /* HEADER */
-.hdr{background:var(--acc);border-bottom:1px solid rgba(0,0,0,.15);padding:10px 15px;position:sticky;top:0;z-index:50}
+.hdr{background:rgba(6,24,50,0.75);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-bottom:1px solid var(--bdr);padding:10px 15px;position:sticky;top:0;z-index:50}
+[data-theme="limestone"] .hdr{background:var(--acc);backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:1px solid rgba(0,0,0,.15)}
 .hdr-r{display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:10px;letter-spacing:2px;color:#EBE8E0;font-weight:700}
-.logo-s{font-size:9px;color:rgba(235,232,224,.7)}
+.logo{font-size:10px;letter-spacing:2px;color:var(--acc);font-weight:700}
+.logo-s{font-size:9px;color:var(--muted)}
 .chips{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.chip-d{font-size:10px;background:rgba(235,232,224,.2);color:#EBE8E0;padding:2px 8px;border-radius:20px;font-weight:700}
-.chip-s{font-size:9px;color:rgba(235,232,224,.8)}
+.chip-d{font-size:10px;background:rgba(0,229,255,.12);color:var(--acc);padding:2px 8px;border-radius:20px;font-weight:700;border:1px solid var(--bdr)}
+.chip-s{font-size:9px;color:var(--muted)}
+[data-theme="limestone"] .logo{color:#EBE8E0}
+[data-theme="limestone"] .logo-s{color:rgba(235,232,224,.7)}
+[data-theme="limestone"] .chip-d{background:rgba(235,232,224,.2);color:#EBE8E0;border:none}
+[data-theme="limestone"] .chip-s{color:rgba(235,232,224,.8)}
 
 /* PAGES */
 .pg{display:none;padding:14px 14px 0}
 .pg.on{display:block}
 
 /* CARDS */
-.card{background:var(--card);border:1px solid var(--bdr);border-radius:11px;padding:11px 13px;margin-bottom:7px}
-.fcard{background:var(--surf);border:1.5px solid var(--bdr);border-radius:12px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .2s}
+.card{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:11px;padding:11px 13px;margin-bottom:7px}
+.fcard{background:var(--surf);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1.5px solid var(--bdr);border-radius:12px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .2s}
 .fcard:active{border-color:var(--acc)}
 
 /* STATS */
@@ -79,7 +96,8 @@ select{width:100%;background:var(--surf);border:1.5px solid var(--bdr);border-ra
 /* REPORT */
 .subnav{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:13px}
 .snb{background:var(--surf);border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:7px 3px;font-size:9px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
-.snb.on{background:rgba(44,78,56,.1);border-color:var(--acc);color:var(--acc)}
+.snb.on{background:rgba(0,229,255,.1);border-color:var(--acc);color:var(--acc)}
+[data-theme="limestone"] .snb.on{background:rgba(44,78,56,.1)}
 .sec{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:700}
 .bar-bg{height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;margin-top:5px}
 .bar-f{height:100%;background:var(--acc);border-radius:3px}
@@ -121,7 +139,8 @@ select{width:100%;background:var(--surf);border:1.5px solid var(--bdr);border-ra
 .etxt{width:100%;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;color:var(--text);padding:9px;font-size:10px;font-family:monospace;margin-top:6px;resize:none;height:55px}
 
 /* TOAST */
-#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--acc);color:#F6F2E8;border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,229,255,0.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(0,229,255,0.4);color:var(--acc);border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+[data-theme="limestone"] #toast{background:var(--acc);border:none;color:#F6F2E8}
 </style>
 </head>
 <body>
@@ -261,11 +280,42 @@ select{width:100%;background:var(--surf);border:1.5px solid var(--bdr);border-ra
   </div>
 </div>
 
+<!-- SETTINGS PAGE -->
+<div class="pg" id="pg-settings">
+  <div class="sec">⚙️ SETTINGS</div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">🎨 Theme</div>
+    <div class="g2">
+      <button class="snb" id="theme-dark" onclick="setTheme('dark')" style="padding:10px 5px;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <span style="font-size:16px">🌑</span><span style="font-size:10px">Dark Glass</span>
+      </button>
+      <button class="snb" id="theme-limestone" onclick="setTheme('limestone')" style="padding:10px 5px;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <span style="font-size:16px">🪨</span><span style="font-size:10px">Limestone</span>
+      </button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">📡 Sync Status</div>
+    <div class="crow"><span style="color:var(--muted)">Last Sync</span><span class="cval" id="set-last-sync">—</span></div>
+    <div class="crow"><span style="color:var(--muted)">Script URL</span><span class="cval" id="set-script-status">checking...</span></div>
+    <div class="crow"><span style="color:var(--muted)">Records (Local)</span><span class="cval" id="set-rec-count">0</span></div>
+  </div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">ℹ️ About</div>
+    <div class="crow"><span style="color:var(--muted)">App</span><span class="cval">Chem Control · Mega Farm</span></div>
+    <div class="crow"><span style="color:var(--muted)">Version</span><span class="cval">v12</span></div>
+  </div>
+  <button onclick="doRefresh()" style="width:100%;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.3);color:var(--acc);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+    🔄 Force Sync Now
+  </button>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
   <button class="nb on" onclick="showTab('home')" id="nb-home"><span>🏠</span>Home</button>
   <button class="nb" onclick="showTab('report')" id="nb-report"><span>📋</span>Reports</button>
   <button class="nb" onclick="showTab('hist')" id="nb-hist"><span>📜</span>History</button>
+  <button class="nb" onclick="showTab('settings')" id="nb-settings"><span>⚙️</span>Settings</button>
 </nav>
 
 <!-- EDIT BANNER (shown when editing an existing record) -->
@@ -618,9 +668,47 @@ function sanitizeAllChems(ac) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════
+function setTheme(name) {
+  if (name === 'limestone') {
+    document.documentElement.setAttribute('data-theme','limestone');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  localStorage.setItem('mf_theme', name);
+  updateThemeButtons(name);
+}
+function updateThemeButtons(name) {
+  var d = document.getElementById('theme-dark');
+  var l = document.getElementById('theme-limestone');
+  if (d) d.classList.toggle('on', name !== 'limestone');
+  if (l) l.classList.toggle('on', name === 'limestone');
+}
+function loadTheme() {
+  var saved = localStorage.getItem('mf_theme') || 'dark';
+  setTheme(saved);
+}
+function renderSettings() {
+  var lsEl = document.getElementById('set-last-sync');
+  if (lsEl) {
+    var el = document.getElementById('chip-sync');
+    lsEl.textContent = el ? el.textContent : '—';
+  }
+  var ssEl = document.getElementById('set-script-status');
+  if (ssEl) ssEl.innerHTML = USE_CLOUD
+    ? '<span style="color:var(--acc)">● Connected</span>'
+    : '<span style="color:var(--danger)">● Disabled</span>';
+  var rcEl = document.getElementById('set-rec-count');
+  if (rcEl) rcEl.textContent = records.length;
+  updateThemeButtons(localStorage.getItem('mf_theme') || 'dark');
+}
+
+// ═══════════════════════════════════════════════════════════
 // INIT — synchronous, never awaits anything
 // ═══════════════════════════════════════════════════════════
 window.onload = function() {
+  loadTheme();
   var t = todayISO();
   document.getElementById('chip-date').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' · ' + APP_VERSION;
   document.getElementById('lbl-today').textContent = 'ថ្ងៃនេះ (TODAY) — '+t;
@@ -646,24 +734,25 @@ window.onload = function() {
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════
 function showTab(tab) {
-  ['home','report','hist'].forEach(function(t) {
+  ['home','report','hist','settings'].forEach(function(t) {
     var pg = document.getElementById('pg-'+t);
     if (pg) { pg.style.display = ''; pg.classList.toggle('on', t===tab); }
     var nb = document.getElementById('nb-'+t);
     if (nb) nb.classList.toggle('on', t===tab);
   });
-  renderAll();
+  if (tab === 'settings') renderSettings();
+  else renderAll();
 }
 var _prevTab = 'home'; // track which tab was open before form
 function showForm(f) {
   // Remember active tab so hideForm can return to it
   _prevTab = 'home';
-  ['home','report','hist'].forEach(function(t){
+  ['home','report','hist','settings'].forEach(function(t){
     var nb=document.getElementById('nb-'+t);
     if(nb&&nb.classList.contains('on')) _prevTab=t;
   });
   // Hide ALL pages so form appears regardless of which tab is active
-  ['pg-home','pg-report','pg-hist'].forEach(function(id){
+  ['pg-home','pg-report','pg-hist','pg-settings'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
   document.querySelector('.nav').style.display = 'none';
