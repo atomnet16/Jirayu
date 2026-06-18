@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#1a6b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Field Inspection">
+<title>Field Inspection — Mega Farm</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f0f4f0;color:#222;min-height:100vh}
+  header{background:#1a6b3a;color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+  header h1{font-size:1.1rem;font-weight:600}
+  .container{max-width:520px;margin:0 auto;padding:16px}
+
+  /* Card */
+  .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .card h2{font-size:.85rem;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+  /* Form */
+  label{display:block;font-size:.85rem;color:#555;margin-bottom:4px;margin-top:10px}
+  label:first-child{margin-top:0}
+  input,textarea,select{width:100%;padding:9px 11px;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;background:#fafafa;transition:border .15s}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:#1a6b3a;background:#fff}
+  textarea{resize:vertical;min-height:60px}
+
+  /* GPS */
+  .gps-row{display:flex;gap:8px;align-items:flex-end}
+  .gps-row input{flex:1}
+  #gpsBtn{padding:9px 14px;background:#e8f5e9;border:1.5px solid #1a6b3a;border-radius:8px;color:#1a6b3a;font-size:.85rem;cursor:pointer;white-space:nowrap;font-weight:600}
+  #gpsBtn:active{background:#c8e6c9}
+  #gpsStatus{font-size:.78rem;color:#888;margin-top:4px;min-height:16px}
+
+  /* Camera */
+  .photo-zone{border:2px dashed #ccc;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border .15s;position:relative}
+  .photo-zone:hover,.photo-zone.dragover{border-color:#1a6b3a;background:#f1f8f2}
+  .photo-zone p{color:#999;font-size:.9rem}
+  .photo-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  #previewGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  #previewGrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid #eee}
+
+  /* Submit */
+  #submitBtn{width:100%;padding:14px;background:#1a6b3a;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .15s}
+  #submitBtn:hover{background:#155c30}
+  #submitBtn:disabled{background:#aaa;cursor:not-allowed}
+
+  /* Result */
+  #result{display:none}
+  .severity-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-weight:700;font-size:.9rem;margin-bottom:10px}
+  .sev-0,.sev-1{background:#e8f5e9;color:#1a6b3a}
+  .sev-2,.sev-3{background:#fff3e0;color:#e65100}
+  .sev-4,.sev-5{background:#ffebee;color:#c62828}
+  .diag-item{border-left:3px solid #1a6b3a;padding:8px 10px;margin:6px 0;background:#f9f9f9;border-radius:0 8px 8px 0}
+  .diag-item.disease{border-color:#e53935}
+  .diag-item.pest{border-color:#fb8c00}
+  .diag-item.weather{border-color:#039be5}
+  .diag-item.nutrient{border-color:#43a047}
+  .diag-item.chemical{border-color:#8e24aa}
+  .diag-title{font-weight:600;font-size:.9rem}
+  .diag-rec{font-size:.82rem;color:#555;margin-top:4px}
+  .weather-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+  .weather-cell{background:#f5f5f5;border-radius:8px;padding:8px}
+  .weather-cell .val{font-size:1.1rem;font-weight:700;color:#1a6b3a}
+  .weather-cell .lbl{font-size:.72rem;color:#888;margin-top:2px}
+  .sheet-link{display:block;text-align:center;margin-top:10px;color:#1a6b3a;font-size:.9rem;text-decoration:none;font-weight:600}
+  .sheet-link:hover{text-decoration:underline}
+  #loading{display:none;text-align:center;padding:30px 0}
+  .spinner{width:44px;height:44px;border:4px solid #ddd;border-top-color:#1a6b3a;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .error-box{background:#ffebee;border:1.5px solid #ef9a9a;border-radius:8px;padding:12px;color:#c62828;font-size:.88rem}
+</style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:1.5rem">🌾</span>
+  <h1>Field Inspection — Mega Farm</h1>
+</header>
+
+<div class="container">
+
+<!-- Form -->
+<div id="formSection">
+
+  <div class="card">
+    <h2>📋 ข้อมูลแปลง</h2>
+    <label>รหัสแปลง *</label>
+    <input id="plotId" type="text" placeholder="เช่น PLOT-A01" value="PLOT-A01">
+    <label>ชื่อแปลง</label>
+    <input id="plotName" type="text" placeholder="เช่น แปลงข้าวโพดเหนือ">
+    <label>ชื่อผู้ตรวจ *</label>
+    <input id="inspectorName" type="text" placeholder="ชื่อ-นามสกุล">
+    <label>หมายเหตุ</label>
+    <textarea id="notes" placeholder="อาการที่สังเกตเพิ่มเติม..."></textarea>
+  </div>
+
+  <div class="card">
+    <h2>📍 พิกัด GPS</h2>
+    <div class="gps-row">
+      <div style="flex:1">
+        <label>Latitude</label>
+        <input id="lat" type="number" step="any" placeholder="11.5564">
+      </div>
+      <div style="flex:1">
+        <label>Longitude</label>
+        <input id="lon" type="number" step="any" placeholder="104.9282">
+      </div>
+      <button id="gpsBtn" onclick="getGPS()">📡 GPS</button>
+    </div>
+    <div id="gpsStatus"></div>
+  </div>
+
+  <div class="card">
+    <h2>📷 รูปภาพพืช</h2>
+    <div class="photo-zone" id="photoZone">
+      <p>แตะเพื่อถ่ายรูปหรือเลือกไฟล์<br><small>รับ JPG/PNG สูงสุด 5 รูป</small></p>
+      <input id="photoInput" type="file" accept="image/*" multiple capture="environment"
+        onchange="handleFiles(this.files)">
+    </div>
+    <div id="previewGrid"></div>
+  </div>
+
+  <button id="submitBtn" onclick="submitInspection()">🔍 ส่งตรวจวิเคราะห์</button>
+
+</div>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:#555">AI กำลังวินิจฉัย...<br><small>อาจใช้เวลา 30–60 วินาที</small></p>
+</div>
+
+<!-- Result -->
+<div id="result" class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <h2 style="margin:0">📊 ผลวินิจฉัย</h2>
+    <button onclick="resetForm()" style="background:#f5f5f5;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.85rem">🔄 ตรวจใหม่</button>
+  </div>
+
+  <div id="sevBadge" class="severity-badge"></div>
+  <p id="summary" style="font-size:.9rem;color:#333;margin-bottom:14px"></p>
+
+  <h2 style="font-size:.85rem;color:#555;margin-bottom:8px">สภาพอากาศ</h2>
+  <div class="weather-row" id="weatherRow"></div>
+
+  <h2 style="font-size:.85rem;color:#555;margin:12px 0 6px">การวินิจฉัย</h2>
+  <div id="diagList"></div>
+
+  <a id="sheetLink" class="sheet-link" target="_blank">📊 ดูผลทั้งหมดใน Google Sheet →</a>
+</div>
+
+</div><!-- /container -->
+
+<script>
+const API_BASE = window.location.origin;
+let selectedFiles = [];
+
+// ── GPS ──────────────────────────────────────────────────────────────────────
+function getGPS() {
+  const btn = document.getElementById('gpsBtn');
+  const status = document.getElementById('gpsStatus');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  status.textContent = 'กำลังดึงพิกัด...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      document.getElementById('lat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('lon').value = pos.coords.longitude.toFixed(6);
+      status.textContent = `✅ แม่นยำ ±${Math.round(pos.coords.accuracy)} ม.`;
+      btn.textContent = '✅';
+      btn.disabled = false;
+    },
+    (err) => {
+      status.textContent = '❌ ดึง GPS ไม่ได้ — กรอกเองได้เลย';
+      btn.textContent = '📡 GPS';
+      btn.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 15000 }
+  );
+}
+
+// ── Photo ────────────────────────────────────────────────────────────────────
+function handleFiles(files) {
+  selectedFiles = Array.from(files).slice(0, 5);
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = '';
+  selectedFiles.forEach(f => {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(f);
+    grid.appendChild(img);
+  });
+  document.querySelector('.photo-zone p').textContent =
+    `เลือกแล้ว ${selectedFiles.length} รูป (แตะเพื่อเปลี่ยน)`;
+}
+
+// ── Submit ───────────────────────────────────────────────────────────────────
+async function submitInspection() {
+  const plotId       = document.getElementById('plotId').value.trim();
+  const inspectorName= document.getElementById('inspectorName').value.trim();
+  const lat          = document.getElementById('lat').value.trim();
+  const lon          = document.getElementById('lon').value.trim();
+
+  if (!plotId)        return alert('กรุณากรอกรหัสแปลง');
+  if (!inspectorName) return alert('กรุณากรอกชื่อผู้ตรวจ');
+  if (!lat || !lon)   return alert('กรุณาดึงพิกัด GPS ก่อน');
+  if (selectedFiles.length === 0) return alert('กรุณาเลือกรูปภาพอย่างน้อย 1 รูป');
+
+  const fd = new FormData();
+  fd.append('plotId',        plotId);
+  fd.append('plotName',      document.getElementById('plotName').value.trim());
+  fd.append('inspectorName', inspectorName);
+  fd.append('notes',         document.getElementById('notes').value.trim());
+  fd.append('latitude',      lat);
+  fd.append('longitude',     lon);
+  selectedFiles.forEach(f => fd.append('images', f));
+
+  document.getElementById('formSection').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/inspect`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'เกิดข้อผิดพลาด');
+    showResult(data);
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('formSection').style.display = 'block';
+    alert('❌ ' + err.message);
+  }
+}
+
+// ── Render Result ────────────────────────────────────────────────────────────
+const SEV_LABEL = ['ปกติ ✅','เล็กน้อย 🟡','เล็กน้อย–ปานกลาง 🟠','ปานกลาง 🔶','รุนแรง 🔴','รุนแรงมาก 🚨'];
+const CAT_TH    = {disease:'โรคพืช',pest:'แมลง',weather:'อากาศ',nutrient:'ธาตุอาหาร',chemical:'สารเคมี'};
+
+function showResult(data) {
+  document.getElementById('loading').style.display = 'none';
+  const r = data.result;
+  const w = data.weather;
+
+  // severity badge
+  const badge = document.getElementById('sevBadge');
+  badge.textContent = `ความรุนแรง ${r.overallSeverity}/5 — ${SEV_LABEL[r.overallSeverity]}`;
+  badge.className = `severity-badge sev-${r.overallSeverity}`;
+
+  document.getElementById('summary').textContent = r.summary;
+
+  // weather
+  document.getElementById('weatherRow').innerHTML = `
+    <div class="weather-cell"><div class="val">${w.temperature_c}°C</div><div class="lbl">อุณหภูมิ</div></div>
+    <div class="weather-cell"><div class="val">${w.humidity_pct}%</div><div class="lbl">ความชื้น</div></div>
+    <div class="weather-cell"><div class="val">${w.precipitation_mm}mm</div><div class="lbl">ฝน</div></div>
+  `;
+
+  // diagnoses
+  const list = document.getElementById('diagList');
+  list.innerHTML = r.diagnoses.map(d => `
+    <div class="diag-item ${d.category}">
+      <div class="diag-title">${CAT_TH[d.category] || d.category} — ${d.nameTh}</div>
+      <div class="diag-rec">💊 ${d.recommendation}</div>
+    </div>
+  `).join('') || '<p style="color:#888;font-size:.9rem">ไม่พบปัญหา</p>';
+
+  document.getElementById('sheetLink').href = data.sheetUrl;
+  document.getElementById('result').style.display = 'block';
+}
+
+function resetForm() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('formSection').style.display = 'block';
+  selectedFiles = [];
+  document.getElementById('previewGrid').innerHTML = '';
+  document.querySelector('.photo-zone p').textContent = 'แตะเพื่อถ่ายรูปหรือเลือกไฟล์\nรับ JPG/PNG สูงสุด 5 รูป';
+}
+</script>
+</body>
+</html>

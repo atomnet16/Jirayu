@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Hybrid Router</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gemini: '#4285F4',
+            claude: '#D97706'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar */
+    #chat-box::-webkit-scrollbar { width: 4px; }
+    #chat-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+    /* Typing animation */
+    .typing-dot { animation: bounce 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    /* Message slide-in */
+    .msg-enter { animation: slideIn 0.25s ease-out; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Code block */
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.8rem; margin: 0.5rem 0; }
+    code { font-family: 'Courier New', monospace; }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-4">
+
+  <!-- Header -->
+  <div class="w-full max-w-2xl mb-3">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl shadow-lg">⚡</div>
+      <div>
+        <h1 class="text-white font-bold text-lg leading-tight">LLM Hybrid Router</h1>
+        <p class="text-slate-400 text-xs">Auto-routes to Gemini Pro · Claude 3.5 Sonnet</p>
+      </div>
+      <div class="ml-auto flex gap-1.5">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-medium">
+          <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>Gemini
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-medium">
+          <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span>Claude
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat window -->
+  <div class="w-full max-w-2xl flex flex-col bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden" style="height: min(620px, 80vh)">
+
+    <!-- Messages -->
+    <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4">
+
+      <!-- Welcome message -->
+      <div class="flex justify-start msg-enter">
+        <div class="max-w-[85%]">
+          <div class="bg-slate-700/70 text-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow">
+            👋 สวัสดี! ฉันคือ <strong>Hybrid Router</strong> — ระบบจะวิเคราะห์คำถามของคุณแล้วส่งต่อให้ <span class="text-blue-400 font-semibold">Gemini Pro</span> หรือ <span class="text-amber-400 font-semibold">Claude 3.5 Sonnet</span> โดยอัตโนมัติ ✨
+          </div>
+          <div class="mt-1 ml-1 flex gap-1">
+            <span class="text-xs text-slate-500">System</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-slate-700/50"></div>
+
+    <!-- Input area -->
+    <div class="p-3 bg-slate-800/40">
+      <form id="chat-form" class="flex gap-2 items-end">
+        <textarea
+          id="message-input"
+          rows="1"
+          placeholder="พิมพ์ข้อความ... (Shift+Enter = ขึ้นบรรทัด)"
+          class="flex-1 bg-slate-700/60 border border-slate-600/50 text-slate-100 placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
+          style="max-height: 120px; overflow-y: auto;"
+        ></textarea>
+        <button
+          type="submit"
+          id="send-btn"
+          class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-150 flex-shrink-0"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+            <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+          </svg>
+        </button>
+      </form>
+      <p class="text-center text-slate-600 text-xs mt-2">AI อาจผิดพลาดได้ — โปรดตรวจสอบข้อมูลสำคัญ</p>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    // Neutral history format: [{sender: 'user'|'ai', text: '...'}]
+    let history = [];
+
+    // Auto-resize textarea
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    });
+
+    // Shift+Enter = newline, Enter = submit
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    function scrollBottom() {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatMessage(text) {
+      // Code blocks (```)
+      text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+        `<pre><code class="language-${lang}">${escapeHtml(code.trim())}</code></pre>`
+      );
+      // Inline code
+      text = text.replace(/`([^`]+)`/g, '<code class="bg-slate-700 px-1 rounded text-amber-300 text-xs">$1</code>');
+      // Bold
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      // Newlines
+      text = text.replace(/\n/g, '<br>');
+      return text;
+    }
+
+    function addMessage(sender, text, modelUsed = null) {
+      const isUser = sender === 'user';
+      const wrapper = document.createElement('div');
+      wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'} msg-enter`;
+
+      const isGemini = modelUsed && modelUsed.toLowerCase().includes('gemini');
+      const badgeColor = isGemini
+        ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+        : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      const badgeIcon = isGemini ? '✦' : '◆';
+
+      wrapper.innerHTML = `
+        <div class="max-w-[85%]">
+          <div class="${isUser
+            ? 'bg-gradient-to-br from-blue-600 to-purple-700 text-white rounded-2xl rounded-tr-sm'
+            : 'bg-slate-700/70 text-slate-100 rounded-2xl rounded-tl-sm'
+          } px-4 py-3 text-sm leading-relaxed shadow">
+            ${isUser ? escapeHtml(text) : formatMessage(text)}
+          </div>
+          ${modelUsed ? `
+          <div class="mt-1 ml-1 flex items-center gap-1.5">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border ${badgeColor} text-xs font-medium">
+              ${badgeIcon} ${modelUsed}
+            </span>
+          </div>` : ''}
+          ${!modelUsed && !isUser ? '' : ''}
+        </div>
+      `;
+
+      chatBox.appendChild(wrapper);
+      scrollBottom();
+    }
+
+    function addTypingIndicator() {
+      const div = document.createElement('div');
+      div.id = 'typing-indicator';
+      div.className = 'flex justify-start msg-enter';
+      div.innerHTML = `
+        <div class="bg-slate-700/70 rounded-2xl rounded-tl-sm px-4 py-3 shadow flex items-center gap-1.5">
+          <span class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></span>
+          <span class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></span>
+          <span class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></span>
+        </div>
+      `;
+      chatBox.appendChild(div);
+      scrollBottom();
+    }
+
+    function removeTypingIndicator() {
+      document.getElementById('typing-indicator')?.remove();
+    }
+
+    function addErrorMessage(msg) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-start msg-enter';
+      div.innerHTML = `
+        <div class="max-w-[85%] bg-red-900/40 border border-red-700/40 text-red-300 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow">
+          ⚠️ ${escapeHtml(msg)}
+        </div>
+      `;
+      chatBox.appendChild(div);
+      scrollBottom();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addMessage('user', message);
+      history.push({ sender: 'user', text: message });
+
+      // Reset input
+      input.value = '';
+      input.style.height = 'auto';
+      sendBtn.disabled = true;
+
+      // Show typing
+      addTypingIndicator();
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, history })
+        });
+
+        const data = await res.json();
+        removeTypingIndicator();
+
+        if (!res.ok) throw new Error(data.error || 'Unknown error');
+
+        addMessage('ai', data.reply, data.modelUsed);
+        history.push({ sender: 'ai', text: data.reply });
+
+      } catch (err) {
+        removeTypingIndicator();
+        addErrorMessage(err.message);
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    });
+
+    // Focus input on load
+    input.focus();
+  </script>
+</body>
+</html>
