@@ -3,6 +3,7 @@ const STATIC = [
   '/Jirayu/',
   '/Jirayu/index.html',
   '/Jirayu/manifest.json',
+  '/Jirayu/icon.png',
   '/Jirayu/icon.svg',
 ];
 
