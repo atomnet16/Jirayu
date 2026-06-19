@@ -1,0 +1,19 @@
+{
+  "name": "Chem Control · Mega Farm",
+  "short_name": "Chem Control",
+  "description": "ระบบจัดการสารเคมี Mega Farm Cambodia",
+  "start_url": "/Jirayu/",
+  "scope": "/Jirayu/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080f18",
+  "theme_color": "#080f18",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

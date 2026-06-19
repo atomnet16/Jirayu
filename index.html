@@ -6,7 +6,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Chem Control">
 <meta name="theme-color" content="#080f18">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>🌱 Chem Control · Mega Farm</title>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .catch(e => console.warn('SW:', e));
+  });
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
