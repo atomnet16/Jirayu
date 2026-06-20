@@ -10,13 +10,30 @@ var SS = SpreadsheetApp.getActiveSpreadsheet();
 var SCHEMA = {
   'CR-01': ['ID','Date','Requester','Approver','Chemicals','Note','CreatedAt','UpdatedAt'],
   'MX-01': ['ID','Date','Time','Mixer','Plot','Sprayer',
-             'WaterPerTank','TotalWater','Note','CreatedAt','UpdatedAt'],
+             'WaterPerTank','TotalWater','SprayType','Note','CreatedAt','UpdatedAt'],
   'SP-01': ['ID','Date','TStart','TEnd','Hrs','HaH','Operator',
              'Plot','Area','Weather','Wind','MxId',
              'WaterBefore','WaterAfter','WaterUsed','ChemDelivered','Note','CreatedAt','UpdatedAt'],
   'ST-01': ['ID','Date','Ref','Receiver','Approver','Chemicals','Note','CreatedAt','UpdatedAt'],
   'RT-01': ['ID','Date','Reason','ReturnedBy','Receiver','Chemicals','Note','CreatedAt','UpdatedAt']
 };
+
+// ── Spray type classification (priority: Burn down > Pre-emergence > Post-emergence > Insecticide) ──
+var SPRAY_TYPE_RULES_GAS = [
+  {label:'Burn down',     chems:['Glyphosate','Glufosinate','2,4-D','Fluazifop']},
+  {label:'Pre-emergence', chems:['Dual Gold','Pendimethalin','Acetochlor']},
+  {label:'Post-emergence',chems:['Clio Pro','Atrazine','Nicosulfuron (Green)','Fomesafen (Flex)','Fomesafen (Farma)']},
+  {label:'Insecticide',   chems:['Emamecthrin','Belt','Lufenuron','Fipronil','Altacor','Profenofos','Eforia','Amrarar','Spirotetramat','Chlorfenapyr','Bifentrin (Talstar)','Methomyl']}
+];
+function computeSprayType(allChems) {
+  if (!allChems || typeof allChems !== 'object') return '';
+  var chemNames = Object.keys(allChems).filter(function(k){ return parseFloat(allChems[k]) > 0; });
+  for (var i = 0; i < SPRAY_TYPE_RULES_GAS.length; i++) {
+    var rule = SPRAY_TYPE_RULES_GAS[i];
+    if (rule.chems.some(function(c){ return chemNames.indexOf(c) >= 0; })) return rule.label;
+  }
+  return '';
+}
 
 // ── Field value lookup ─────────────────────────────────────────────
 function getFieldValue(header, d) {
@@ -40,6 +57,7 @@ function getFieldValue(header, d) {
     'MxId':            d.mxId          || '',
     'WaterPerTank':    d.waterPerTank  || 0,
     'TotalWater':      d.totalWater    || 0,
+    'SprayType':       d.allChems ? computeSprayType(d.allChems) : (d.sprayType || ''),
     'WaterBefore':     d.waterBefore   || 0,
     'WaterAfter':      d.waterAfter    || 0,
     'WaterUsed':       d.waterUsed     || 0,
@@ -321,6 +339,142 @@ function seedStockInit() {
   sh.setColumnWidth(1,170); sh.setColumnWidth(4,100); sh.setColumnWidth(9,100);
   updateStockInitCalc();
   SpreadsheetApp.getActive().toast('✅ STOCK_INIT พร้อมใช้: '+rows.length+' สารเคมี');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  fixMXfromDataAN — แก้ chemical columns ใน MX-01 ให้ตรงกับ DATA AN
+//  วิธีใช้: เปิด GAS Editor → รัน fixMXfromDataAN()
+//  ผลลัพธ์: อัพเดท chemical columns ใน MX-01 ตาม date+plot จาก DATA AN
+// ═══════════════════════════════════════════════════════════════════
+
+// Map ชื่อ column DATA AN → ชื่อ CHEMS ในแอป
+var DATA_AN_ALIAS = {
+  'Emamecthrin (Kg)':            'Emamecthrin',
+  'Belt (Kg)':                   'Belt',
+  'Lufenuron (L)':               'Lufenuron',
+  'Fipronil (L)':                'Fipronil',
+  'Altacor (Kg)':                'Altacor',
+  'Profenofos (L)':              'Profenofos',
+  'Actara (Thiamethoxam) (Kg)':  'Actara (Thiamethoxam)',
+  'Methomyl (Kg)':               'Methomyl',
+  'Eforia (L)':                  'Eforia',
+  'Amrarar (Kg)':                'Amrarar',
+  'Chlorfenapyr (L)':            'Chlorfenapyr',
+  'Bifentrin (Talstar)':         'Bifentrin (Talstar)',
+  'Glyphosate (L)':              'Glyphosate',
+  'Dual Gold (L)':               'Dual Gold',
+  '2,4-D (L)':                   '2,4-D',
+  'Clio Pro (L)':                'Clio Pro',
+  'Fluazipob (L)':               'Fluazifop',        // typo ใน Sheet
+  'Atrazine (Kg)':               'Atrazine',
+  'Nicosulfuron (L)':            'Nicosulfuron (Green)',
+  'Sumisoya (Kg)':               'Sumisoya',
+  'Acetochlor (L)':              'Acetochlor',
+  'Glufosinate (L)':             'Glufosinate',
+  'Pendimethalin (L)':           'Pendimethalin',
+  'Ametryn (Kg)':                'Ametryn 80',       // ชื่อต่างกัน
+  'Becano (Indaziflam)':         'Indaziflam (Becano)',
+  'Nativo (Kg)':                 'Nativo',
+  'Atemis (L)':                  'Atemis',
+  'Mammoth Zinc (L)':            'Mammoth Zinc',
+  'Mammoth Ca+B (L)':            'Mammoth Ca+B',
+  'K30 (L)':                     'K30',
+  'Euro seed (L)':               'Euro seed',
+  'Virtus (Kg)':                 'Virtus',
+  'MgSO4 (KG)':                  'MgSO4',
+  'Fergan (L)':                  'Fergan',
+  'Vetget oil (L)':              'Vetget oil',
+  'Surfactant (L)':              'Surfactant',
+};
+
+function fixMXfromDataAN() {
+  var tz = Session.getScriptTimeZone();
+  var anSh  = SS.getSheetByName('DATA AN');
+  var mxSh  = SS.getSheetByName('MX-01');
+  if (!anSh) { SpreadsheetApp.getActive().toast('❌ ไม่พบ sheet DATA AN'); return; }
+  if (!mxSh) { SpreadsheetApp.getActive().toast('❌ ไม่พบ sheet MX-01');   return; }
+
+  // อ่าน DATA AN
+  var anData    = anSh.getDataRange().getValues();
+  var anHeaders = anData[0].map(function(h){ return String(h).trim(); });
+  var iDate  = anHeaders.indexOf('Date');
+  var iPlot  = anHeaders.indexOf('Plot');
+
+  // อ่าน MX-01
+  var mxData    = mxSh.getDataRange().getValues();
+  var mxHeaders = mxData[0].map(function(h){ return String(h).trim(); });
+
+  // ── ตรวจว่า MX-01 มี chemical columns พอ ── เพิ่มถ้าขาด
+  var needCols = Object.values(DATA_AN_ALIAS);
+  var toAdd = needCols.filter(function(n){ return mxHeaders.indexOf(n) < 0; });
+  if (toAdd.length > 0) {
+    var startCol = mxSh.getLastColumn() + 1;
+    mxSh.getRange(1, startCol, 1, toAdd.length).setValues([toAdd])
+      .setBackground('#1a3d26').setFontColor('#3DDB72').setFontWeight('bold');
+    // reload headers
+    mxData    = mxSh.getDataRange().getValues();
+    mxHeaders = mxData[0].map(function(h){ return String(h).trim(); });
+  }
+
+  var iMxDate = mxHeaders.indexOf('Date');
+  var iMxPlot = mxHeaders.indexOf('Plot');
+
+  // สร้าง key date+plot สำหรับ MX-01 แต่ละแถว
+  function normDate(v) {
+    if (v instanceof Date && !isNaN(v)) return Utilities.formatDate(v, tz, 'yyyy-MM-dd');
+    return String(v||'').substring(0,10);
+  }
+  function normPlot(v) { return String(v||'').trim().toLowerCase(); }
+
+  // Build index: "date|plot" → [rowIndex, ...]  (MX-01 แถว 1-based ใน sheet = index+1 ใน array +1 header)
+  var mxIndex = {};
+  for (var i = 1; i < mxData.length; i++) {
+    var key = normDate(mxData[i][iMxDate]) + '|' + normPlot(mxData[i][iMxPlot]);
+    if (!mxIndex[key]) mxIndex[key] = [];
+    mxIndex[key].push(i + 1); // row number in sheet (1-based, +1 for header)
+  }
+
+  var updated = 0, skipped = 0;
+
+  // วนแต่ละแถว DATA AN
+  for (var r = 1; r < anData.length; r++) {
+    var row = anData[r];
+    // ตรวจว่ามี chemical ค่าบ้างไหม
+    var hasData = false;
+    anHeaders.forEach(function(h, ci) {
+      if (DATA_AN_ALIAS[h] && parseFloat(row[ci]) > 0) hasData = true;
+    });
+    if (!hasData) { skipped++; continue; }
+
+    var anDate = normDate(row[iDate]);
+    var anPlot = normPlot(row[iPlot]);
+    if (!anDate || !anPlot) { skipped++; continue; }
+
+    var key = anDate + '|' + anPlot;
+    var mxRows = mxIndex[key];
+    if (!mxRows || mxRows.length === 0) { skipped++; continue; }
+
+    // เขียนทุก MX-01 row ที่ตรง date+plot
+    mxRows.forEach(function(mxRowNum) {
+      anHeaders.forEach(function(anCol, ci) {
+        var chemName = DATA_AN_ALIAS[anCol];
+        if (!chemName) return;
+        var val = parseFloat(row[ci]);
+        if (isNaN(val) || val <= 0) return;
+        var colIdx = mxHeaders.indexOf(chemName);
+        if (colIdx >= 0) {
+          mxSh.getRange(mxRowNum, colIdx + 1).setValue(val);
+        }
+      });
+    });
+    updated++;
+  }
+
+  SpreadsheetApp.getActive().toast(
+    '✅ อัพเดทแล้ว ' + updated + ' วัน | ข้ามไป ' + skipped + ' วัน (ไม่มีข้อมูล/ไม่พบใน MX-01)',
+    'fixMXfromDataAN', 8
+  );
+  Logger.log('Updated: ' + updated + ' | Skipped: ' + skipped);
 }
 
 // ═══════════════════════════════════════════════════════════════════

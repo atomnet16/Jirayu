@@ -255,6 +255,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     <button class="ft" onclick="setHF('sp',this)">SP</button>
     <button class="ft" onclick="setHF('st',this)">📥ST</button>
     <button class="ft" onclick="setHF('rt',this)">↩️RT</button>
+    <button class="ft" onclick="setHF('plot',this)">📍Plot</button>
   </div>
   <div id="hist-list"></div>
   <div class="ebox">
@@ -550,6 +551,49 @@ var CHEMS = [
   {n:'Vetget oil',u:'L',t:'Fertilizer',s:0},
   {n:'Virtus',u:'Kg',t:'Fertilizer',s:0}
 ];
+
+// Spray type classification — priority: Burn down > Pre-emergence > Post-emergence > Insecticide
+var SPRAY_TYPE_RULES = [
+  {label:'Burn down',     color:'#C0302A', bg:'rgba(192,48,42,0.15)',  chems:['Glyphosate','Glufosinate','2,4-D','Fluazifop']},
+  {label:'Pre-emergence', color:'#B06A00', bg:'rgba(176,106,0,0.15)',  chems:['Dual Gold','Pendimethalin','Acetochlor']},
+  {label:'Post-emergence',color:'#1A5CB5', bg:'rgba(26,92,181,0.15)', chems:['Clio Pro','Atrazine','Nicosulfuron (Green)','Fomesafen (Flex)','Fomesafen (Farma)']},
+  {label:'Insecticide',   color:'#5B3DBF', bg:'rgba(91,61,191,0.15)', chems:['Emamecthrin','Belt','Lufenuron','Fipronil','Altacor','Profenofos','Eforia','Amrarar','Spirotetramat','Chlorfenapyr','Bifentrin (Talstar)','Methomyl']}
+];
+// Resolve the actual chemicals for an SP record — prefer MX allChems (source of truth)
+// Order: 1) mxId link  2) match MX by date+plot (merge if many)  3) SP chemDelivered
+function resolveSpChems(r){
+  var out={};
+  function addFromMx(m){
+    var ac=sanitizeAllChems(m.allChems||{});
+    if(!Object.keys(ac).length&&m.tanks){
+      m.tanks.forEach(function(tk){(tk.chems||[]).forEach(function(c){
+        var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)ac[c.n]=(ac[c.n]||0)+q;
+      });});
+    }
+    Object.keys(ac).forEach(function(n){out[n]=(out[n]||0)+ac[n];});
+  }
+  var mxRec=r.mxId?records.find(function(m){return m.type==='mx'&&m.id===r.mxId;}):null;
+  if(mxRec){addFromMx(mxRec);}
+  else if(r.date&&r.plot){
+    var d=normalizeDate(r.date);
+    records.filter(function(m){return m.type==='mx'&&normalizeDate(m.date)===d&&m.plot===r.plot;}).forEach(addFromMx);
+  }
+  // final fallback: SP chemDelivered
+  if(!Object.keys(out).length){
+    Object.entries(r.chemDelivered||{}).forEach(function(ce){
+      var q=parseFloat(typeof ce[1]==='object'?ce[1].qty:ce[1])||0;
+      if(q>0)out[ce[0]]=(out[ce[0]]||0)+q;
+    });
+  }
+  return out;
+}
+function getSprayType(chemNames){
+  for(var i=0;i<SPRAY_TYPE_RULES.length;i++){
+    var r=SPRAY_TYPE_RULES[i];
+    if(r.chems.some(function(c){return chemNames.indexOf(c)>=0;})) return r;
+  }
+  return {label:'—',color:'var(--muted)',bg:'transparent'};
+}
 
 var PLOTS = ['Pivot 1','Pivot 2','Pivot 3','Pivot 4','Pivot 5/1','Pivot 5/2','Pivot 6','Pivot 7','Pivot 8','Pivot 9','Pivot 10','Pivot 11','Avocado 1','Avocado 2E','Avocado 2E-1','Avocado 2E-2','Avocado 2W2','Avocado 2W','Avocado 3Curve','Avocado 3P11','Avocado 4','Coconut 2','Coconut 3','Cashew Nut A','Cashew Nut B','Cashew Nut C','Cashew Nut D','Cashew Nut SM','Jackfruit 1','Jackfruit 2','Jackfruit 3','Mango 2','Mango 2B1','Mango 2B2','Mango 2B3','Mango 2D','Mango 2M','Mango 2Curve','Mango 2WH','Mango 3','Mango 3Tri','Mango 4','Tamarind 2','Tamarind 2N','Tamarind 2V','Tamarind 3N1','Tamarind 3N2','Tamarind 3N3','Tamarind 3N4','Tamarind 3SE','Tamarind 3SW','Tamarind 4N','Tamarind 4NP2','Tamarind 4S','Tamarind 4SD','Tamarind 4SP1'];
 
@@ -1555,7 +1599,7 @@ function cloudSync() {
       r.updatedAt=r.updatedAt||r.UpdatedAt||'';
       r.allChems=sanitizeAllChems(safeJ(r.allChems||r.AllChems)||buildChemMap(r,data));
       r.mixer=r.mixer||r.Mixer||'';
-      r.plot=r.plot||r.Plot||'';
+      r.plot=(r.plot||r.Plot||'').trim();
       r.sprayer=r.sprayer||r.Sprayer||'';
       r.time=r.time||r.Time||'';
       r.waterPerTank=parseFloat(r.waterPerTank||r.WaterPerTank||r['Water/Tank(L)']||0);
@@ -1572,7 +1616,7 @@ function cloudSync() {
       r.createdAt=r.createdAt||r.CreatedAt||'';
       r.chemDelivered=safeJ(r.chemDelivered||r.ChemDelivered)||{};
       r.operator=r.operator||r.Operator||'';
-      r.plot=r.plot||r.Plot||'';
+      r.plot=(r.plot||r.Plot||'').trim();
       r.area=r.area||r.Area||r['Area(ha)']||'';
       r.weather=r.weather||r.Weather||'';
       r.wind=r.wind||r.Wind||'';
@@ -1655,6 +1699,8 @@ function cloudSync() {
     records.forEach(function(r){ localMap[r.id]=r; });
     cloud.forEach(function(r){
       var loc = localMap[r.id];
+      // Save cloudAC BEFORE any local override so it isn't clobbered
+      var savedCloudAC = r.type==='mx' ? sanitizeAllChems(r.allChems||{}) : null;
       // If local copy was edited more recently than what cloud returned → keep local data
       // This prevents cloud overwriting a pending edit before Google Sheet has processed it
       if (loc && loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt)) {
@@ -1664,7 +1710,7 @@ function cloudSync() {
         r.cloudSynced = true; // still treat as synced so it stays in records
       }
       if(r.type==='mx'){
-        var cloudAC = sanitizeAllChems(r.allChems||{});
+        var cloudAC = Object.keys(savedCloudAC).length > 0 ? savedCloudAC : sanitizeAllChems(r.allChems||{});
         var localAC = loc ? sanitizeAllChems(loc.allChems||{}) : {};
         r.allChems = Object.keys(cloudAC).length > 0 ? cloudAC : localAC;
         // ถ้า cloud ไม่มีข้อมูลน้ำ (sheet เก่าไม่มีคอลัมน์ TotalWater) → ใช้ค่าจาก local
@@ -1691,9 +1737,34 @@ function cloudSync() {
   });
 }
 function buildChemMap(r, data) {
-  // Build allChems/chemDelivered from individual chem columns in sheet response
-  var map={};
-  CHEMS.forEach(function(c){ if(r[c.n]&&parseFloat(r[c.n])>0) map[c.n]=parseFloat(r[c.n]); });
+  // DATA AN columns have unit suffixes e.g. "Emamecthrin (Kg)" and some name differences
+  var ALIAS = {
+    'Indaziflam (Becano)': 'Becano (Indaziflam)',
+    'Fluazifop':           'Fluazipob',
+    'Ametryn 80':          'Ametryn',
+  };
+  // Normalize row keys: strip trailing (unit) suffix + collapse whitespace/newlines
+  var normRow = {};
+  Object.keys(r).forEach(function(k) {
+    var nk = k.replace(/\n/g,' ').replace(/\s*\([A-Za-z]+\)\s*$/, '').trim();
+    normRow[nk] = r[k];
+  });
+  var map = {};
+  CHEMS.forEach(function(c) {
+    var val;
+    // 1. Exact column name
+    val = parseFloat(r[c.n]); if (val > 0) { map[c.n] = val; return; }
+    // 2. Normalized (unit suffix stripped)
+    val = parseFloat(normRow[c.n]); if (val > 0) { map[c.n] = val; return; }
+    // 3. Name + unit suffix explicitly e.g. "Emamecthrin (Kg)"
+    val = parseFloat(r[c.n + ' (' + c.u + ')']); if (val > 0) { map[c.n] = val; return; }
+    // 4. Alias for known name differences
+    var alias = ALIAS[c.n];
+    if (alias) {
+      val = parseFloat(normRow[alias]); if (val > 0) { map[c.n] = val; return; }
+      val = parseFloat(r[alias + ' (' + c.u + ')']); if (val > 0) { map[c.n] = val; }
+    }
+  });
   return Object.keys(map).length?map:{};
 }
 function doRefresh() {
@@ -2132,14 +2203,72 @@ function renderRpt(v){
     if(sp.length){html+='<div class="sec">ថ្មីៗ Recent SP</div>';sp.slice().reverse().slice(0,3).forEach(function(r){html+='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:700;color:var(--acc)">'+r.id+'</span><span style="font-size:10px;color:var(--teal)">'+(r.plot||'—')+'</span></div><div style="font-size:10px;color:var(--muted)">'+normalizeDate(r.date)+' · '+(r.area||'?')+'ha · '+(r.waterUsed||0).toFixed(0)+'L</div></div>';});}
   }
   else if(v==='plot'){
-    html='<div class="sec">📍 By Plot — '+Object.keys(plotData).length+' plots</div>';
-    if(!Object.keys(plotData).length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No spraying records yet</div>';}
-    Object.entries(plotData).sort(function(a,b){return b[1].area-a[1].area;}).forEach(function(e){
-      var p=e[0],d=e[1];
-      html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+p+'</div><div style="display:flex;gap:5px"><span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">'+d.area.toFixed(1)+'ha</span><span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">'+d.count+'x</span></div></div>';
-      html+='<div class="crow"><span style="color:var(--muted)">💧 Water</span><span style="font-weight:700">'+d.water.toFixed(0)+' L</span></div>';
-      Object.entries(d.chems).forEach(function(ce){var u=(CHEMS.find(function(x){return x.n===ce[0];})||{u:''}).u;html+='<div class="crow"><span style="color:var(--muted)">→ '+ce[0]+'</span><span style="font-weight:700;color:var(--acc)">'+ce[1].toFixed(3)+' '+u+'</span></div>';});
+    // Build from MX records (source of truth for chemicals)
+    var mxByPlot={};
+    mx.forEach(function(r){
+      var pKey=(r.plot||'').trim();
+      if(!pKey)return;
+      if(!mxByPlot[pKey])mxByPlot[pKey]=[];
+      mxByPlot[pKey].push(r);
+    });
+    var plotKeys=Object.keys(mxByPlot).sort();
+    html='<div class="sec">📍 By Plot (MX) — '+plotKeys.length+' plots</div>';
+    if(!plotKeys.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No MX records yet</div>';}
+    plotKeys.forEach(function(p){
+      var recs=mxByPlot[p].slice().sort(function(a,b){
+        var da=a.date||'',db=b.date||'';
+        return da>db?-1:da<db?1:0;
+      });
+      // สรุปสารเคมีรวมทั้ง plot
+      var totChems={};
+      recs.forEach(function(r){
+        var ac=sanitizeAllChems(r.allChems||{});
+        if(!Object.keys(ac).length&&r.tanks){var rb={};r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)rb[c.n]=(rb[c.n]||0)+q;});});ac=rb;}
+        Object.keys(ac).forEach(function(cn){totChems[cn]=(totChems[cn]||0)+ac[cn];});
+      });
+      html+='<div class="card">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      html+='<div style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+p+'</div>';
+      html+='<span style="font-size:10px;color:var(--muted)">'+recs.length+' MX</span>';
       html+='</div>';
+      // สรุปรวม
+      var totChemKeys=Object.keys(totChems);
+      if(totChemKeys.length){
+        var totUid='rpt-tot-'+p.replace(/\W/g,'_');
+        var st=getSprayType(totChemKeys);
+        html+='<div style="cursor:pointer;margin-bottom:4px" onclick="var e=document.getElementById(\''+totUid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">';
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed rgba(26,107,54,0.2);padding-bottom:4px">';
+        html+='<span style="font-size:10px;font-weight:700;color:var(--acc)">📊 รวมสารเคมี</span>';
+        html+='<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:'+st.bg+';color:'+st.color+'">'+st.label+' ▾</span>';
+        html+='</div>';
+        html+='<div id="'+totUid+'" style="display:none;padding:6px 0">';
+        totChemKeys.forEach(function(cn){
+          var u=(CHEMS.find(function(x){return x.n===cn;})||{u:''}).u;
+          html+='<div class="crow"><span style="color:var(--muted)">'+cn+'</span><span class="cval" style="color:var(--acc)">'+totChems[cn].toFixed(2)+' '+u+'</span></div>';
+        });
+        html+='</div></div>';
+      }
+      // รายวัน
+      html+='<div style="border-top:1px solid rgba(26,107,54,0.12);padding-top:4px">';
+      recs.forEach(function(r,idx){
+        var ac=sanitizeAllChems(r.allChems||{});
+        if(!Object.keys(ac).length&&r.tanks){var rb={};r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)rb[c.n]=(rb[c.n]||0)+q;});});ac=rb;}
+        var uid='rpt-bp-'+p.replace(/\W/g,'_')+'-'+idx;
+        var chemNames=Object.keys(ac);
+        var st2=getSprayType(chemNames);
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(26,107,54,0.07);cursor:pointer" onclick="var el=document.getElementById(\''+uid+'\');el.style.display=el.style.display===\'none\'?\'block\':\'none\'">';
+        html+='<span style="font-size:11px;color:var(--muted)">'+normalizeDate(r.date)+(r.mixer?' · '+r.mixer:'')+'</span>';
+        html+='<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:'+st2.bg+';color:'+st2.color+'">'+st2.label+' ▾</span>';
+        html+='</div>';
+        html+='<div id="'+uid+'" style="display:none;background:rgba(26,107,54,0.05);border-radius:8px;padding:8px 10px;margin:4px 0 6px">';
+        chemNames.forEach(function(cn){
+          var u=(CHEMS.find(function(x){return x.n===cn;})||{u:''}).u;
+          html+='<div class="crow"><span style="color:var(--muted)">→ '+cn+'</span><span class="cval" style="color:var(--teal)">'+parseFloat(ac[cn]).toFixed(2)+' '+u+'</span></div>';
+        });
+        if(!chemNames.length)html+='<div style="font-size:9px;color:var(--warn)">⚠️ ไม่พบข้อมูลสารเคมี</div>';
+        html+='</div>';
+      });
+      html+='</div></div>';
     });
   }
   else if(v==='chem'){
@@ -2278,9 +2407,95 @@ function buildChemDetail(r) {
   return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)">'+rows.join('')+'</div>';
 }
 
+function renderHistByPlot(el){
+  var mxRecs=records.filter(function(r){return r.type==='mx'&&r.plot;});
+  var plotMap={};
+  mxRecs.forEach(function(r){
+    var pKey=(r.plot||'').trim();
+    if(!pKey)return;
+    if(!plotMap[pKey])plotMap[pKey]=[];
+    plotMap[pKey].push(r);
+  });
+  var plots=Object.keys(plotMap).sort();
+  if(!plots.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:35px 0;font-size:12px">No MX records with plot</div>';return;}
+  el.innerHTML=plots.map(function(p){
+    var recs=plotMap[p].slice().sort(function(a,b){
+      var da=a.date||'',db=b.date||'';
+      return da>db?-1:da<db?1:0;
+    });
+    // สรุปสารเคมีรวมทั้ง plot
+    var totChems={};
+    recs.forEach(function(r){
+      var ac=sanitizeAllChems(r.allChems||{});
+      if(Object.keys(ac).length===0&&r.tanks){
+        var rb={};
+        r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)rb[c.n]=(rb[c.n]||0)+q;});});
+        ac=rb;
+      }
+      Object.keys(ac).forEach(function(cn){totChems[cn]=(totChems[cn]||0)+ac[cn];});
+    });
+    var rows=recs.map(function(r,idx){
+      var ac=sanitizeAllChems(r.allChems||{});
+      if(Object.keys(ac).length===0&&r.tanks){
+        var rebuilt={};
+        r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)rebuilt[c.n]=(rebuilt[c.n]||0)+q;});});
+        ac=rebuilt;
+      }
+      var uid='hbp-'+p.replace(/\W/g,'_')+'-'+idx;
+      var chemKeys=Object.keys(ac);
+      var chemRows=chemKeys.map(function(cn){
+        var u=(CHEMS.find(function(x){return x.n===cn;})||{u:''}).u;
+        return '<div class="crow"><span style="color:var(--muted);font-size:10px">→ '+cn+'</span><span class="cval" style="color:var(--teal);font-size:10px">'+parseFloat(ac[cn]).toFixed(2)+' '+u+'</span></div>';
+      }).join('');
+      if(!chemKeys.length){
+        // แสดงข้อมูล raw ที่มีอยู่เพื่อ debug
+        var rawKeys=Object.keys(r).filter(function(k){return ['id','type','date','createdAt','updatedAt','cloudSynced','plot','tanks','allChems','mixer','sprayer','note','time','waterPerTank','totalWater'].indexOf(k)<0;});
+        var rawHasVal=rawKeys.filter(function(k){return r[k]&&parseFloat(r[k])>0;});
+        chemRows='<div style="font-size:9px;color:var(--warn);padding:4px 0">⚠️ ไม่พบ allChems/tanks'
+          +(rawHasVal.length?' — พบค่าใน column: '+rawHasVal.map(function(k){return k+'='+r[k];}).join(', '):'')
+          +'<br>ID: '+r.id+' | tanks:'+(r.tanks?r.tanks.length:'ไม่มี')+'</div>';
+      }
+      return '<div style="border-bottom:1px solid rgba(26,107,54,0.08)">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;cursor:pointer" onclick="var e=document.getElementById(\''+uid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">'
+          +'<div><span style="font-size:11px;font-weight:700;color:var(--teal)">⚗️ '+r.id+'</span>'
+            +(r.mixer?' <span style="font-size:10px;color:var(--muted)">· '+r.mixer+'</span>':'')
+          +'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px">'
+            +'<span style="font-size:10px;color:var(--muted)">'+normalizeDate(r.date)+'</span>'
+            +'<button onclick="event.stopPropagation();editRecord(\''+r.id+'\')" style="font-size:10px;background:var(--blue);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer">✏️</button>'
+            +'<button class="delbtn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')" style="font-size:10px">🔐</button>'
+            +'<span style="font-size:9px;color:var(--faint)">▾</span>'
+          +'</div>'
+        +'</div>'
+        +'<div id="'+uid+'" style="display:none;background:rgba(15,122,104,0.05);border-radius:8px;padding:8px 10px;margin-bottom:6px">'
+          +(r.sprayer?'<div style="font-size:9px;color:var(--muted);margin-bottom:4px">🚁 '+r.sprayer+(r.totalWater?' · '+(r.totalWater).toFixed(0)+'L':'')+'</div>':'')
+          +chemRows
+        +'</div>'
+        +'</div>';
+    }).join('');
+    var totRow=Object.keys(totChems).map(function(cn){
+      var u=(CHEMS.find(function(x){return x.n===cn;})||{u:''}).u;
+      return '<div class="crow"><span style="color:var(--muted);font-size:10px">'+cn+'</span><span class="cval" style="font-size:10px">'+totChems[cn].toFixed(2)+' '+u+'</span></div>';
+    }).join('');
+    var totUid='hbp-tot-'+p.replace(/\W/g,'_');
+    return '<div class="card">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+        +'<div style="font-size:13px;font-weight:800;color:var(--acc)">📍 '+p+'</div>'
+        +'<span style="font-size:10px;color:var(--muted)">'+recs.length+' MX</span>'
+      +'</div>'
+      +(totRow?'<div style="cursor:pointer;margin-bottom:6px" onclick="var e=document.getElementById(\''+totUid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">'
+        +'<div style="font-size:10px;font-weight:700;color:var(--acc);border-bottom:1px dashed rgba(26,107,54,0.2);padding-bottom:4px;margin-bottom:4px">📊 รวมสารเคมี ▾</div>'
+        +'<div id="'+totUid+'" style="display:none">'+totRow+'</div>'
+        +'</div>':'')
+      +'<div style="border-top:1px solid rgba(26,107,54,0.12);padding-top:4px">'+rows+'</div>'
+      +'</div>';
+  }).join('');
+}
+
 function renderHist(){
   var el=document.getElementById('hist-list');
   if(!el)return;
+  if(histFilter==='plot'){renderHistByPlot(el);return;}
   var list=histFilter==='all'?records:records.filter(function(r){return r.type===histFilter;});
   if(!list.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:35px 0;font-size:12px">No records yet</div>';return;}
   var cm={cr:{l:'CR',c:'acc'},mx:{l:'MX',c:'teal'},sp:{l:'SP',c:'blue'},st:{l:'ST',c:'purple'},rt:{l:'RT',c:'warn'}};
