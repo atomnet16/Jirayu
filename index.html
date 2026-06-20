@@ -1700,20 +1700,24 @@ function cloudSync() {
     records.forEach(function(r){ localMap[r.id]=r; });
     cloud.forEach(function(r){
       var loc = localMap[r.id];
-      // Save cloudAC BEFORE any local override so it isn't clobbered
       var savedCloudAC = r.type==='mx' ? sanitizeAllChems(r.allChems||{}) : null;
-      // If local copy was edited more recently than what cloud returned → keep local data
-      // This prevents cloud overwriting a pending edit before Google Sheet has processed it
-      if (loc && loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt)) {
-        // Preserve all local fields except cloudSynced flag
+      // ถ้า local ใหม่กว่า cloud (เช่น เพิ่งแก้ไขในแอป) → ใช้ข้อมูล local ทั้งหมด
+      var localIsNewer = loc && loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt);
+      if (localIsNewer) {
         var fields = Object.keys(loc);
         fields.forEach(function(k){ r[k] = loc[k]; });
-        r.cloudSynced = true; // still treat as synced so it stays in records
+        r.cloudSynced = true;
       }
       if(r.type==='mx'){
-        var cloudAC = Object.keys(savedCloudAC).length > 0 ? savedCloudAC : sanitizeAllChems(r.allChems||{});
         var localAC = loc ? sanitizeAllChems(loc.allChems||{}) : {};
-        r.allChems = Object.keys(cloudAC).length > 0 ? cloudAC : localAC;
+        var cloudAC = savedCloudAC;
+        // local ใหม่กว่า → เชื่อ local allChems (ค่าที่เพิ่งแก้)
+        // cloud ใหม่กว่าหรือเท่ากัน → เชื่อ cloud allChems
+        if (localIsNewer) {
+          r.allChems = Object.keys(localAC).length > 0 ? localAC : cloudAC;
+        } else {
+          r.allChems = Object.keys(cloudAC).length > 0 ? cloudAC : localAC;
+        }
         // ถ้า cloud ไม่มีข้อมูลน้ำ (sheet เก่าไม่มีคอลัมน์ TotalWater) → ใช้ค่าจาก local
         if(loc){
           if(!(parseFloat(r.totalWater)>0) && parseFloat(loc.totalWater)>0) r.totalWater=parseFloat(loc.totalWater);
