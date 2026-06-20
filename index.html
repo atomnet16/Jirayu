@@ -636,7 +636,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.20f'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.20g'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -1573,7 +1573,7 @@ function cloudSync() {
   }
   // 1. Push local records up (fire-and-forget)
   var cr = records.filter(function(r){return r.type==='cr';}).map(function(r){
-    return {id:r.id,date:normalizeDate(r.date)||r.date,requester:r.requester||'',approver:r.approver||'',chemicals:r.chemicals||[],note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||''};
+    return {id:r.id,date:normalizeDate(r.date)||r.date,requester:r.requester||'',approver:r.approver||'',chemicals:r.chemicals||[],note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
   });
   var mx = records.filter(function(r){return r.type==='mx';}).map(function(r){
     // Rebuild allChems from tanks if empty/corrupted
@@ -1583,16 +1583,16 @@ function cloudSync() {
         var q=parseFloat(c.q); if(c.n&&q>0&&q<2000) ac[c.n]=(ac[c.n]||0)+q;
       });});
     }
-    return {id:r.id,date:normalizeDate(r.date)||r.date,time:r.time||'',mixer:r.mixer||'',supervisor:r.supervisor||'',plot:r.plot||'',sprayer:r.sprayer||'',waterPerTank:r.waterPerTank||0,totalWater:mxEffectiveWater(r),allChems:ac,note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||''};
+    return {id:r.id,date:normalizeDate(r.date)||r.date,time:r.time||'',mixer:r.mixer||'',supervisor:r.supervisor||'',plot:r.plot||'',sprayer:r.sprayer||'',waterPerTank:r.waterPerTank||0,totalWater:mxEffectiveWater(r),allChems:ac,note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
   });
   var sp = records.filter(function(r){return r.type==='sp';}).map(function(r){
-    return {id:r.id,date:normalizeDate(r.date)||r.date,tStart:r.tStart||'',tEnd:r.tEnd||'',hrs:r.hrs||'',haH:r.haH||'',operator:r.operator||'',supervisor:r.supervisor||'',plot:r.plot||'',area:r.area||'',weather:r.weather||'',wind:r.wind||'',mxId:r.mxId||'',waterBefore:r.waterBefore||0,waterAfter:r.waterAfter||0,waterUsed:r.waterUsed||0,chemDelivered:r.chemDelivered||{},note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||''};
+    return {id:r.id,date:normalizeDate(r.date)||r.date,tStart:r.tStart||'',tEnd:r.tEnd||'',hrs:r.hrs||'',haH:r.haH||'',operator:r.operator||'',supervisor:r.supervisor||'',plot:r.plot||'',area:r.area||'',weather:r.weather||'',wind:r.wind||'',mxId:r.mxId||'',waterBefore:r.waterBefore||0,waterAfter:r.waterAfter||0,waterUsed:r.waterUsed||0,chemDelivered:r.chemDelivered||{},note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
   });
   var st_recs=records.filter(function(r){return r.type==='st';}).map(function(r){
-    return {id:r.id,date:r.date,ref:r.ref||'',receiver:r.receiver||'',approver:r.approver||'',chemicals:r.chemicals||[],note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||''};
+    return {id:r.id,date:r.date,ref:r.ref||'',receiver:r.receiver||'',approver:r.approver||'',chemicals:r.chemicals||[],note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
   });
   var rt_recs=records.filter(function(r){return r.type==='rt';}).map(function(r){
-    return {id:r.id,date:r.date,reason:r.reason||'',returnedBy:r.returnedBy||'',receiver:r.receiver||'',chemicals:r.chemicals||[],note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||''};
+    return {id:r.id,date:r.date,reason:r.reason||'',returnedBy:r.returnedBy||'',receiver:r.receiver||'',chemicals:r.chemicals||[],note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
   });
   cloudWrite({action:'appendMany',sheets:{'CR-01':cr,'MX-01':mx,'SP-01':sp,'ST-01':st_recs,'RT-01':rt_recs}});
   // 2. Read cloud data (includes deletedIds from all devices)

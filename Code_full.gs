@@ -270,6 +270,39 @@ function ensureUpdatedAtCol(sh) {
   }
 }
 
+// ── รันมือ 1 ครั้ง: เติม UpdatedAt ให้แถวเก่าที่ยังว่าง (= CreatedAt หรือ now) ──
+// แถวที่ UpdatedAt ว่าง = ช่องโหว่ bounce (ถูก push ทับได้) → เติมให้ครบเพื่อปิดช่องโหว่
+function backfillUpdatedAt() {
+  var sheets = ['CR-01','MX-01','SP-01','ST-01','RT-01'];
+  var tz = Session.getScriptTimeZone();
+  var totalFilled = 0;
+  sheets.forEach(function(name){
+    var sh = SS.getSheetByName(name);
+    if (!sh) return;
+    ensureUpdatedAtCol(sh);
+    var data = sh.getDataRange().getValues();
+    if (data.length < 2) return;
+    var headers = data[0].map(function(h){ return String(h).trim(); });
+    var iU = headers.indexOf('UpdatedAt'), iC = headers.indexOf('CreatedAt');
+    if (iU < 0) return;
+    var nowISO = new Date().toISOString();
+    var filled = 0;
+    for (var i = 1; i < data.length; i++) {
+      if (!String(data[i][0]||'').trim()) continue;          // ข้ามแถวว่าง (ไม่มี ID)
+      if (String(data[i][iU]||'').trim()) continue;          // มี UpdatedAt แล้ว
+      var cd = iC>=0 ? data[i][iC] : '';
+      var val = '';
+      if (cd instanceof Date && !isNaN(cd)) val = Utilities.formatDate(cd, tz, "yyyy-MM-dd'T'HH:mm:ss");
+      else val = String(cd||'').trim() || nowISO;
+      sh.getRange(i+1, iU+1).setValue(val);
+      filled++;
+    }
+    totalFilled += filled;
+  });
+  SpreadsheetApp.getActive().toast('✅ backfill UpdatedAt: เติม '+totalFilled+' แถว', 'backfillUpdatedAt', 8);
+  Logger.log('backfillUpdatedAt filled: '+totalFilled);
+}
+
 // ── Ensure water columns ──────────────────────────────────────────
 function ensureWaterCols(sh, sheetName) {
   var lastCol = sh.getLastColumn();
@@ -683,13 +716,23 @@ function doPost(e) {
             var rowIdx = existIdx+2;
             var existingUpdatedAt = (idxUpdatedAt>=0)?String(rows[existIdx+1][idxUpdatedAt]).trim():'';
             var incomingUpdatedAt = String(d.updatedAt||'').trim();
-            var shouldUpdate = (incomingUpdatedAt && incomingUpdatedAt>existingUpdatedAt);
+            // กัน bounce: ถ้าแถวบน sheet ยังไม่มี UpdatedAt (เก่า) → backfill timestamp แล้ว "ไม่" overwrite รอบนี้
+            // (sheet คือค่าที่ถูก write ล่าสุด, ไม่ปล่อยให้ push ค่าเก่ามาทับ — การแก้จริงใช้ action update เสมอ)
+            if (idxUpdatedAt>=0 && !existingUpdatedAt) {
+              var backfill = incomingUpdatedAt || String(d.createdAt||'').trim() || new Date().toISOString();
+              sh.getRange(rowIdx, idxUpdatedAt+1).setValue(backfill);
+              existingUpdatedAt = backfill;
+            }
+            // overwrite เฉพาะเมื่อ "ทั้งสองฝั่งมี timestamp" และ incoming ใหม่กว่าจริง
+            var shouldUpdate = (incomingUpdatedAt && existingUpdatedAt && incomingUpdatedAt>existingUpdatedAt);
+            // incoming ไม่เก่ากว่า sheet → อนุญาตให้เติม cell ว่างได้ (กันเครื่องเก่าเติมค่าที่ลบไปแล้วกลับมา)
+            var incomingNotOlder = (!existingUpdatedAt || !incomingUpdatedAt || incomingUpdatedAt>=existingUpdatedAt);
             if (shouldUpdate) {
               var row = buildRow(name,d,headers);
               if (row.length){ sh.getRange(rowIdx,1,1,row.length).setValues([row]); updated++; }
               if (isMX&&d.allChems&&Object.keys(d.allChems).length>0) appendChemicals(sh,rowIdx,d.allChems);
             }
-            if (name==='SP-01'&&!shouldUpdate) {
+            if (name==='SP-01'&&!shouldUpdate&&incomingNotOlder) {
               var spRowVals = sh.getRange(rowIdx,1,1,sh.getLastColumn()).getValues()[0];
               [['WaterBefore',d.waterBefore],['WaterAfter',d.waterAfter],['WaterUsed',d.waterUsed],['MxId',d.mxId]].forEach(function(sf){
                 var sCol=headers.indexOf(sf[0]); if(sCol<0) return;
@@ -703,7 +746,7 @@ function doPost(e) {
                 if(!curCD||curCD==='{}') sh.getRange(rowIdx,cdCol+1).setValue(JSON.stringify(d.chemDelivered));
               }
             }
-            if (isMX&&!shouldUpdate) {
+            if (isMX&&!shouldUpdate&&incomingNotOlder) {
               var rowVals=sh.getRange(rowIdx,1,1,sh.getLastColumn()).getValues()[0];
               [['TotalWater',d.totalWater],['WaterPerTank',d.waterPerTank]].forEach(function(wf){
                 var wCol=mxHeaders.indexOf(wf[0]);
@@ -711,7 +754,7 @@ function doPost(e) {
                 if(!(parseFloat(rowVals[wCol])>0)) sh.getRange(rowIdx,wCol+1).setValue(parseFloat(wf[1]));
               });
             }
-            if (isMX&&d.allChems&&Object.keys(d.allChems).length>0) {
+            if (isMX&&d.allChems&&Object.keys(d.allChems).length>0&&(shouldUpdate||incomingNotOlder)) {
               var targetRow=sh.getRange(rowIdx,1,1,sh.getLastColumn()).getValues()[0];
               Object.keys(d.allChems).forEach(function(chemName){
                 var colIdx=mxHeaders.indexOf(chemName); if(colIdx<0) return;
