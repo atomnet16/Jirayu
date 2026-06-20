@@ -187,6 +187,18 @@ function ensureSheet(name) {
   return sh;
 }
 
+// ── Ensure UpdatedAt column exists (สำคัญ: ใช้เทียบเวลากันข้อมูลเก่าเขียนทับ) ──
+// ถ้าไม่มีคอลัมน์นี้ appendMany จะ overwrite ทุก sync → ข้อมูลเด้งกลับ
+function ensureUpdatedAtCol(sh) {
+  var lastCol = sh.getLastColumn();
+  if (lastCol < 1) return;
+  var headers = sh.getRange(1,1,1,lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  if (headers.indexOf('UpdatedAt') < 0) {
+    sh.getRange(1, lastCol+1).setValue('UpdatedAt')
+      .setBackground('#1a3d26').setFontColor('#3DDB72').setFontWeight('bold');
+  }
+}
+
 // ── Ensure water columns ──────────────────────────────────────────
 function ensureWaterCols(sh, sheetName) {
   var lastCol = sh.getLastColumn();
@@ -535,6 +547,7 @@ function doPost(e) {
       if (!sheetName||!SCHEMA[sheetName]) return ok('unknown sheet');
       var sh = ensureSheet(sheetName);
       if (sheetName==='MX-01'||sheetName==='SP-01') ensureWaterCols(sh,sheetName);
+      ensureUpdatedAtCol(sh);
       var shHeaders = sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
       var row = buildRow(sheetName,payload,shHeaders);
       if (!row.length) return ok('empty row');
@@ -552,6 +565,7 @@ function doPost(e) {
       if (!sheetName||!id||!SCHEMA[sheetName]) return ok('unknown sheet or missing id');
       var sh = ensureSheet(sheetName);
       if (sheetName==='MX-01'||sheetName==='SP-01') ensureWaterCols(sh,sheetName);
+      ensureUpdatedAtCol(sh);
       var vals = sh.getDataRange().getValues();
       var shHeaders = vals[0].map(function(h){ return String(h).trim(); });
       var rowIdx = -1;
@@ -580,6 +594,7 @@ function doPost(e) {
         if (!SCHEMA[name]) return;
         var sh = ensureSheet(name);
         if (name==='MX-01'||name==='SP-01') ensureWaterCols(sh,name);
+        ensureUpdatedAtCol(sh);
         var rows = sh.getDataRange().getValues();
         var headers = rows[0].map(function(h){ return String(h).trim(); });
         var idxUpdatedAt = headers.indexOf('UpdatedAt');
