@@ -640,13 +640,32 @@ var editMode = false;
 var pendingEdits = loadPendingEdits();
 function loadPendingEdits(){ try{return JSON.parse(localStorage.getItem('mf_edits')||'[]');}catch(e){return[];} }
 function savePendingEdits(){ try{localStorage.setItem('mf_edits',JSON.stringify(pendingEdits));}catch(e){} }
-// Protection window: หลังแก้ไข record ให้เชื่อ local เสมอชั่วคราว (กัน cloud เก่าเด้งทับ)
-var EDIT_PROTECT_MS = 90000;
-var recentEdits = loadRecentEdits();
-function loadRecentEdits(){ try{return JSON.parse(localStorage.getItem('mf_recent_edits')||'{}');}catch(e){return{};} }
-function saveRecentEdits(){ try{localStorage.setItem('mf_recent_edits',JSON.stringify(recentEdits));}catch(e){} }
-function markRecentEdit(id){ recentEdits[id]=Date.now(); saveRecentEdits(); }
-function isProtected(id){ var t=recentEdits[id]; return t && (Date.now()-t) < EDIT_PROTECT_MS; }
+// Edit ledger: หลังแก้ไข record จะเชื่อ snapshot ของ local เสมอ จนกว่า cloud จะตรงกันจริง
+// (กัน cloud/Sheet ที่ยังเขียนไม่สำเร็จเด้งทับค่าที่แก้) + retry push อัตโนมัติ
+var EDIT_LEDGER_MAX_MS = 1800000; // ยกเลิก ledger หลัง 30 นาที (กันค้างตลอดไป)
+var EDIT_RETRY_MS = 25000;        // re-push ห่างกันอย่างน้อย 25 วิ
+var editLedger = loadEditLedger();
+function loadEditLedger(){ try{return JSON.parse(localStorage.getItem('mf_edit_ledger')||'{}');}catch(e){return{};} }
+function saveEditLedger(){ try{localStorage.setItem('mf_edit_ledger',JSON.stringify(editLedger));}catch(e){} }
+// บันทึก snapshot ของ record ที่เพิ่งแก้ + cloudPayload ไว้ retry
+function markEdited(id, rec, cloudPayload){
+  editLedger[id] = { ts: Date.now(), lastPush: Date.now(), snap: JSON.parse(JSON.stringify(rec)), payload: JSON.parse(JSON.stringify(cloudPayload)) };
+  saveEditLedger();
+}
+function clearLedger(id){ if(editLedger[id]){ delete editLedger[id]; saveEditLedger(); } }
+function ledgerLive(id){ var e=editLedger[id]; return e && (Date.now()-e.ts) < EDIT_LEDGER_MAX_MS; }
+// เทียบ allChems สอง object ว่าตรงกันไหม (ปัดทศนิยม 2 ตำแหน่ง)
+function chemsEqual(a, b){
+  a = sanitizeAllChems(a||{}); b = sanitizeAllChems(b||{});
+  var ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (var i=0;i<ka.length;i++){
+    var k = ka[i];
+    if (!(k in b)) return false;
+    if (Math.round(a[k]*100) !== Math.round(b[k]*100)) return false;
+  }
+  return true;
+}
 
 // ═══════════════════════════════════════════════════════════
 // LOCAL STORAGE
@@ -834,11 +853,11 @@ function handleSave(rec, sheetName, cloudPayload) {
       rec.cloudSynced = records[idx].cloudSynced;
       rec.updatedAt = new Date().toISOString();
       records[idx] = rec;
-      markRecentEdit(editId);
       cloudPayload.id = editId;
       cloudPayload.action = 'update';
       cloudPayload.sheet = sheetName;
       cloudPayload.updatedAt = rec.updatedAt;
+      markEdited(editId, rec, cloudPayload);
       // Queue for offline resilience
       pendingEdits = pendingEdits.filter(function(p){return p.id!==editId;});
       pendingEdits.push(JSON.parse(JSON.stringify(cloudPayload)));
@@ -1709,8 +1728,28 @@ function cloudSync() {
     cloud.forEach(function(r){
       var loc = localMap[r.id];
       var savedCloudAC = r.type==='mx' ? sanitizeAllChems(r.allChems||{}) : null;
-      // ถ้า local ใหม่กว่า cloud หรืออยู่ใน protection window (เพิ่งแก้ไข) → เชื่อ local ทั้งหมด
-      var localIsNewer = loc && ((loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt)) || isProtected(r.id));
+      // ── Edit ledger: ถ้ามี snapshot ที่แก้ไว้และ cloud ยังไม่ตรง → เชื่อ snapshot + retry push ──
+      var ledger = ledgerLive(r.id) ? editLedger[r.id] : null;
+      if (ledger) {
+        var snap = ledger.snap;
+        var cloudMatches = (r.type==='mx')
+          ? chemsEqual(savedCloudAC, snap.allChems)
+          : (r.updatedAt && snap.updatedAt && r.updatedAt >= snap.updatedAt);
+        if (cloudMatches) {
+          clearLedger(r.id);   // cloud ยืนยันแล้ว → ปล่อยให้ cloud เป็นเจ้าของข้อมูลต่อไป
+          ledger = null;
+        } else {
+          // cloud ยังเป็นค่าเก่า → เขียน snapshot ทับ และ retry push (throttle)
+          Object.keys(snap).forEach(function(k){ r[k] = snap[k]; });
+          r.cloudSynced = true;
+          if (navigator.onLine && (Date.now()-ledger.lastPush) > EDIT_RETRY_MS) {
+            ledger.lastPush = Date.now(); saveEditLedger();
+            cloudWrite(ledger.payload);
+          }
+        }
+      }
+      // local ใหม่กว่า cloud (แก้ระหว่าง sync ก่อนเข้า ledger) → เชื่อ local
+      var localIsNewer = !ledger && loc && loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt);
       if (localIsNewer) {
         var fields = Object.keys(loc);
         fields.forEach(function(k){ r[k] = loc[k]; });
@@ -1719,9 +1758,9 @@ function cloudSync() {
       if(r.type==='mx'){
         var localAC = loc ? sanitizeAllChems(loc.allChems||{}) : {};
         var cloudAC = savedCloudAC;
-        // local ใหม่กว่า → เชื่อ local allChems (ค่าที่เพิ่งแก้)
-        // cloud ใหม่กว่าหรือเท่ากัน → เชื่อ cloud allChems
-        if (localIsNewer) {
+        if (ledger) {
+          r.allChems = sanitizeAllChems(ledger.snap.allChems||{});
+        } else if (localIsNewer) {
           r.allChems = Object.keys(localAC).length > 0 ? localAC : cloudAC;
         } else {
           r.allChems = Object.keys(cloudAC).length > 0 ? cloudAC : localAC;
@@ -2562,6 +2601,7 @@ function deleteRecord(id){
   if(!ok)return;
   // 1. Remove locally immediately
   records=records.filter(function(r){return r.id!==id;});
+  clearLedger(id);
   // Remember this ID is deleted - never bring it back from cloud
   if(deletedIds.indexOf(id) < 0) deletedIds.push(id);
   saveDeletedIds();
