@@ -285,8 +285,11 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     <div class="crow"><span style="color:var(--muted)">App</span><span class="cval">Chem Control · Mega Farm</span></div>
     <div class="crow"><span style="color:var(--muted)">Version</span><span class="cval">v12</span></div>
   </div>
-  <button onclick="doRefresh()" style="width:100%;background:var(--dim);border:1px solid var(--bdr);color:var(--acc);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+  <button onclick="doRefresh()" style="width:100%;background:var(--dim);border:1px solid var(--bdr);color:var(--acc);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">
     🔄 Force Sync Now
+  </button>
+  <button onclick="forceUpdateApp()" style="width:100%;background:rgba(91,61,191,0.10);border:1px solid rgba(91,61,191,0.35);color:var(--purple);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+    🔃 อัปเดตแอป (ล้าง Cache)
   </button>
 </div>
 
@@ -619,7 +622,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.26b'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.20c'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -1821,6 +1824,26 @@ function doRefresh() {
   setSyncUI(false);
   toast('🔄 Syncing...');
   cloudSync();
+}
+
+function forceUpdateApp() {
+  if (!confirm('อัปเดตแอป?\nจะล้าง cache และโหลดใหม่')) return;
+  var p = [];
+  if ('serviceWorker' in navigator) {
+    p.push(
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        return Promise.all(regs.map(function(r) { return r.unregister(); }));
+      })
+    );
+  }
+  if ('caches' in window) {
+    p.push(
+      caches.keys().then(function(keys) {
+        return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+      })
+    );
+  }
+  Promise.all(p).then(function() { location.reload(true); });
 }
 
 // ═══════════════════════════════════════════════════════════
