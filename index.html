@@ -171,7 +171,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     </div>
     <div class="stat" style="cursor:pointer" onclick="showForm('rt')">
       <div class="stat-v" id="cnt-rt" style="color:var(--warn);font-size:32px">0</div>
-      <div class="stat-l">↩️ คืนคลัง RT</div>
+      <div class="stat-l">↩️ Return RT</div>
       <div style="font-size:11px;color:var(--muted)" id="cnt-rt-total"></div>
     </div>
   </div>
@@ -197,13 +197,13 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     </div>
     <div class="fcard" onclick="showForm('st')">
       <div style="font-size:28px">📥</div>
-      <div style="font-size:14px;font-weight:700">รับเข้าคลัง</div>
+      <div style="font-size:14px;font-weight:700">ការទទួល</div>
       <div style="font-size:11px;color:var(--muted)">Stock In</div>
       <span class="badge" style="background:rgba(155,126,245,.2);color:var(--purple)">ST-01</span>
     </div>
     <div class="fcard" onclick="showForm('rt')">
       <div style="font-size:28px">↩️</div>
-      <div style="font-size:14px;font-weight:700">คืนเข้าคลัง</div>
+      <div style="font-size:14px;font-weight:700">ការសងវិញ</div>
       <div style="font-size:11px;color:var(--muted)">Return</div>
       <span class="badge" style="background:rgba(245,166,35,.2);color:var(--warn)">RT-01</span>
     </div>
@@ -211,7 +211,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   <div style="background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('report')">
     <div>
       <div style="font-size:15px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">Summary · By Plot</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">By Plot</div>
     </div>
     <span style="color:var(--warn);font-size:20px">→</span>
   </div>
@@ -219,15 +219,15 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 30s</span>
   </button>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <div class="sec" style="margin-bottom:0" id="lbl-daily-sp">📅 รายงานฉีดพ่นวันนี้</div>
+    <div class="sec" style="margin-bottom:0" id="lbl-daily-sp">📅 Today's Spray Report</div>
     <span style="font-size:11px;color:var(--muted)" id="lbl-daily-sp-date"></span>
   </div>
   <div id="daily-sp-report"></div>
 
   <div style="background:var(--dim);border:1.5px solid var(--bdr);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('stock')">
     <div>
-      <div style="font-size:15px;font-weight:700;color:var(--acc)">📦 Stock คงเหลือ</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">บนรถ (CR−MX) · คลัง (Initial−CR)</div>
+      <div style="font-size:15px;font-weight:700;color:var(--acc)">📦 Stock Balance</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">On Truck (CR−MX) · Warehouse (Initial−CR)</div>
     </div>
     <span style="color:var(--acc);font-size:20px">→</span>
   </div>
@@ -238,8 +238,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 <div class="pg" id="pg-report">
   <div style="font-size:13px;font-weight:800;margin-bottom:11px">📋 របាយការណ៍</div>
   <div class="subnav">
-    <button class="snb on" onclick="showRpt('sum')" id="snb-sum"><span>📊</span><span>Summary</span></button>
-    <button class="snb" onclick="showRpt('plot')" id="snb-plot"><span>📍</span><span>By Plot</span></button>
+    <button class="snb on" onclick="showRpt('plot')" id="snb-plot"><span>📍</span><span>By Plot</span></button>
   </div>
   <div id="rpt-content"></div>
 </div>
@@ -289,21 +288,21 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     🔄 Force Sync Now
   </button>
   <button onclick="forceUpdateApp()" style="width:100%;background:rgba(91,61,191,0.10);border:1px solid rgba(91,61,191,0.35);color:var(--purple);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
-    🔃 อัปเดตแอป (ล้าง Cache)
+    🔃 Update App (Clear Cache)
   </button>
 </div>
 
 <!-- STOCK PAGE -->
 <div class="pg" id="pg-stock">
-  <div style="font-size:13px;font-weight:800;margin-bottom:11px">📦 Stock คงเหลือ</div>
+  <div style="font-size:13px;font-weight:800;margin-bottom:11px">📦 Stock Balance</div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <div class="sec" style="margin-bottom:0">🚛 STOCK คงเหลือบนรถ</div>
+    <div class="sec" style="margin-bottom:0">🚛 STOCK On Truck</div>
     <span style="font-size:9px;color:var(--muted)">CR − MX (Real-time)</span>
   </div>
   <div id="alerts"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;margin-top:14px">
-    <div class="sec" style="margin-bottom:0">🏭 STOCK คลัง (Warehouse)</div>
-    <span style="font-size:9px;color:var(--muted)">ต้นทุน − เบิก CR</span>
+    <div class="sec" style="margin-bottom:0">🏭 STOCK Warehouse</div>
+    <span style="font-size:9px;color:var(--muted)">Initial − CR issued</span>
   </div>
   <div id="wh-stock"></div>
 </div>
@@ -319,7 +318,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 
 <!-- EDIT BANNER (shown when editing an existing record) -->
 <div id="edit-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:8px 12px;letter-spacing:.3px">
-  ✏️ แก้ไข: <span id="edit-id-label"></span> &nbsp;|&nbsp; กด ← ต้রఁป់ เพื่อยกเลิก
+  ✏️ Editing: <span id="edit-id-label"></span> &nbsp;|&nbsp; press ← Back to cancel
 </div>
 
 <!-- CR FORM -->
@@ -398,7 +397,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     </div>
   </div>
   <button type="button" onclick="autoWeather()" id="btn-weather" style="width:100%;padding:8px;background:rgba(91,164,245,.12);color:var(--blue);border:1px solid rgba(91,164,245,.3);border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:6px">
-    📍 ดึงสภาพอากาศจาก GPS อัตโนมัติ
+    📍 Auto-fetch weather from GPS
   </button>
   <div id="weather-status" style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:4px;display:none"></div>
   <div class="grp">
@@ -426,44 +425,44 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 <div class="fw" id="fw-st">
   <div class="fhdr">
     <button class="back" onclick="hideForm()">← ត្រឡប់</button>
-    <div class="ftitle">📥 รับสินค้าเข้าคลัง (Stock In)</div>
+    <div class="ftitle">📥 Stock In</div>
     <span class="badge" style="background:rgba(155,126,245,.2);color:var(--purple)">ST-01</span>
   </div>
   <div class="g2">
-    <div class="grp"><label>วันที่ (Date)</label><input type="date" id="st-date"></div>
-    <div class="grp"><label>เลขที่ใบ (Ref No.)</label><input type="text" id="st-ref" placeholder="INV-001"></div>
+    <div class="grp"><label>Date</label><input type="date" id="st-date"></div>
+    <div class="grp"><label>Ref No.</label><input type="text" id="st-ref" placeholder="INV-001"></div>
   </div>
   <div class="g2">
-    <div class="grp"><label>ผู้รับ (Receiver)</label><select id="st-recv"><option value="">— เลือก —</option><option>Jirayu</option><option>Sin</option><option>Thea</option><option>Vith</option><option>Ratanak</option></select></div>
-    <div class="grp"><label>ผู้อนุมัติ (Approver)</label><input type="text" id="st-apv" placeholder="หัวหน้า"></div>
+    <div class="grp"><label>Receiver</label><select id="st-recv"><option value="">— Select —</option><option>Jirayu</option><option>Sin</option><option>Thea</option><option>Vith</option><option>Ratanak</option></select></div>
+    <div class="grp"><label>Approver</label><input type="text" id="st-apv" placeholder="Supervisor"></div>
   </div>
-  <div class="sec">สารเคมีที่รับเข้า (Chemicals Received)</div>
+  <div class="sec">Chemicals Received</div>
   <div id="st-chems"></div>
-  <button class="abtn" style="color:var(--purple)" onclick="addSTChem()">+ เพิ่มสารเคมี (Add Chemical)</button>
-  <div class="grp" style="margin-top:9px"><label>Note</label><input type="text" id="st-note" placeholder="ใบส่งของ / หมายเหตุ"></div>
-  <button class="sbtn" style="background:var(--purple)" onclick="submitST()">✓ ยืนยันรับเข้าคลัง (Confirm Stock In)</button>
+  <button class="abtn" style="color:var(--purple)" onclick="addSTChem()">+ Add Chemical</button>
+  <div class="grp" style="margin-top:9px"><label>Note</label><input type="text" id="st-note" placeholder="Delivery note / remark"></div>
+  <button class="sbtn" style="background:var(--purple)" onclick="submitST()">✓ Confirm Stock In</button>
 </div>
 
 <!-- RT FORM -->
 <div class="fw" id="fw-rt">
   <div class="fhdr">
     <button class="back" onclick="hideForm()">← ត្រឡប់</button>
-    <div class="ftitle">↩️ คืนสารเคมีเข้าคลัง (Return)</div>
+    <div class="ftitle">↩️ Return</div>
     <span class="badge" style="background:rgba(245,166,35,.2);color:var(--warn)">RT-01</span>
   </div>
   <div class="g2">
-    <div class="grp"><label>วันที่ (Date)</label><input type="date" id="rt-date"></div>
-    <div class="grp"><label>เหตุผล (Reason)</label><input type="text" id="rt-reason" placeholder="เหลือจากงาน..."></div>
+    <div class="grp"><label>Date</label><input type="date" id="rt-date"></div>
+    <div class="grp"><label>Reason</label><input type="text" id="rt-reason" placeholder="Left over from job..."></div>
   </div>
   <div class="g2">
-    <div class="grp"><label>ผู้คืน (Returned by)</label><select id="rt-by"><option value="">— เลือก —</option><option>Jirayu</option><option>Sin</option><option>Thea</option><option>Vith</option><option>Ratanak</option></select></div>
-    <div class="grp"><label>ผู้รับ (Receiver)</label><input type="text" id="rt-recv" placeholder="ผู้รับคืน"></div>
+    <div class="grp"><label>Returned by</label><select id="rt-by"><option value="">— Select —</option><option>Jirayu</option><option>Sin</option><option>Thea</option><option>Vith</option><option>Ratanak</option></select></div>
+    <div class="grp"><label>Receiver</label><input type="text" id="rt-recv" placeholder="Receiver"></div>
   </div>
-  <div class="sec">สารเคมีที่คืน (Chemicals Returned)</div>
+  <div class="sec">Chemicals Returned</div>
   <div id="rt-chems"></div>
-  <button class="abtn" style="color:var(--warn)" onclick="addRTChem()">+ เพิ่มสารเคมี (Add Chemical)</button>
-  <div class="grp" style="margin-top:9px"><label>Note</label><input type="text" id="rt-note" placeholder="หมายเหตุ"></div>
-  <button class="sbtn" style="background:var(--warn)" onclick="submitRT()">✓ ยืนยันคืนเข้าคลัง (Confirm Return)</button>
+  <button class="abtn" style="color:var(--warn)" onclick="addRTChem()">+ Add Chemical</button>
+  <div class="grp" style="margin-top:9px"><label>Note</label><input type="text" id="rt-note" placeholder="Remark"></div>
+  <button class="sbtn" style="background:var(--warn)" onclick="submitRT()">✓ Confirm Return</button>
 </div>
 
 <!-- CHEM MODAL -->
@@ -504,7 +503,7 @@ var USE_CLOUD  = true;
 // ═══════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════
-// s: = คลังคงเหลือ ณ 2026-06-14 (snapshot จาก Initial − CR + RT ถึงวันนี้)
+// s: = คลังRemaining ณ 2026-06-14 (snapshot จาก Initial − CR + RT ถึงวันนี้)
 var CHEMS = [
   {n:'Emamecthrin',u:'Kg',t:'Insecticide',s:216.5},
   {n:'Belt',u:'Kg',t:'Insecticide',s:280.7},
@@ -597,6 +596,21 @@ function getSprayType(chemNames){
   return {label:'—',color:'var(--muted)',bg:'transparent'};
 }
 
+// ── Corn growth stage (อ้างอิงตาราง Day after planting) ──────────────
+// D0 = วันแรกที่พ่น Burn down / Pre-emergence (วันล่าสุดที่ <= วันของแถว)
+var STAGE_TABLE=[['Planting',0],['VE',4],['V1',7],['V2',10],['V3',13],['V4',16],['V5',19],['V6',22],['V7',25],['V8',28],['V9',31],['V10',33],['V11',36],['V12',39],['V13',42],['V14',45],['V15',48],['R1',51],['R2',60],['R3',70],['R4',80],['R5',90],['R6',105]];
+function stageFromDays(d){
+  if(d==null||d<0)return null;
+  var s=STAGE_TABLE[0][0];
+  for(var i=0;i<STAGE_TABLE.length;i++){ if(d>=STAGE_TABLE[i][1]) s=STAGE_TABLE[i][0]; else break; }
+  return s;
+}
+function daysDiff(d0,d1){
+  var a=new Date(d0+'T00:00:00'),b=new Date(d1+'T00:00:00');
+  if(isNaN(a.getTime())||isNaN(b.getTime()))return null;
+  return Math.round((b-a)/86400000);
+}
+
 var PLOTS = ['Pivot 1','Pivot 2','Pivot 3','Pivot 4','Pivot 5/1','Pivot 5/2','Pivot 6','Pivot 7','Pivot 8','Pivot 9','Pivot 10','Pivot 11','Avocado 1','Avocado 2E','Avocado 2E-1','Avocado 2E-2','Avocado 2W2','Avocado 2W','Avocado 3Curve','Avocado 3P11','Avocado 4','Coconut 2','Coconut 3','Cashew Nut A','Cashew Nut B','Cashew Nut C','Cashew Nut D','Cashew Nut SM','Jackfruit 1','Jackfruit 2','Jackfruit 3','Mango 2','Mango 2B1','Mango 2B2','Mango 2B3','Mango 2D','Mango 2M','Mango 2Curve','Mango 2WH','Mango 3','Mango 3Tri','Mango 4','Tamarind 2','Tamarind 2N','Tamarind 2V','Tamarind 3N1','Tamarind 3N2','Tamarind 3N3','Tamarind 3N4','Tamarind 3SE','Tamarind 3SW','Tamarind 4N','Tamarind 4NP2','Tamarind 4S','Tamarind 4SD','Tamarind 4SP1'];
 
 // ═══════════════════════════════════════════════════════════
@@ -622,7 +636,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.20c'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.20f'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -632,7 +646,8 @@ function loadDeletedIds() {
 function saveDeletedIds() {
   try { localStorage.setItem('mf_deleted', JSON.stringify(deletedIds)); } catch(e) {} 
 }
-var rptView = 'sum';
+var rptView = 'plot';
+var rptPlotFilter = 'all';
 var syncTimer = null;
 var lastCloudN = 0;
 // ── Edit mode ────────────────────────────────────────────────
@@ -882,9 +897,9 @@ function handleSave(rec, sheetName, cloudPayload) {
 function editRecord(id) {
   var rec = records.find(function(r){return r.id===id;});
   if (!rec) return;
-  var pin = window.prompt('Admin PIN (แก้ไขข้อมูล Edit):','');
+  var pin = window.prompt('Admin PIN (Edit data):','');
   if (pin===null) return;
-  if (pin!==ADMIN_PIN){toast('❌ PIN ผิด');return;}
+  if (pin!==ADMIN_PIN){toast('❌ Wrong PIN');return;}
   editId = id;
   editMode = true;
   var tabMap={cr:'cr',mx:'mx',sp:'sp',st:'st',rt:'rt'};
@@ -900,7 +915,7 @@ function editRecord(id) {
   else if(rec.type==='sp') populateSPForm(rec);
   else if(rec.type==='st') populateSTForm(rec);
   else if(rec.type==='rt') populateRTForm(rec);
-  toast('✏️ กำลังแก้ไข '+id);
+  toast('✏️ Editing '+id);
 }
 
 function populateCRForm(rec){
@@ -998,7 +1013,7 @@ function renderDailySpReport() {
   });
 
   if (!todaySP.length) {
-    el.innerHTML = '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px 13px;margin-bottom:10px;text-align:center;color:var(--muted);font-size:11px">ยังไม่มีข้อมูลฉีดพ่นวันนี้</div>';
+    el.innerHTML = '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px 13px;margin-bottom:10px;text-align:center;color:var(--muted);font-size:11px">No spray records today</div>';
     return;
   }
 
@@ -1023,14 +1038,14 @@ function renderDailySpReport() {
   // ── Summary card: header + Plot/Ha/Time table ──
   html += '<div style="background:linear-gradient(135deg,rgba(61,219,114,.12),rgba(15,122,104,.08));border:1.5px solid rgba(61,219,114,.35);border-radius:11px;padding:11px 13px;margin-bottom:8px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-    +   '<span style="font-size:11px;font-weight:800;color:var(--acc)">🌿 รายงานฉีดพ่นวันนี้ — '+todaySP.length+' รอบ</span>'
+    +   '<span style="font-size:11px;font-weight:800;color:var(--acc)">🌿 Spray Report Today — '+todaySP.length+' rounds</span>'
     +   '<span style="font-size:10px;color:var(--teal);font-weight:700">'+t+'</span>'
     + '</div>'
     // Column header
     + '<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:4px;padding:4px 6px;background:rgba(61,219,114,.15);border-radius:7px;margin-bottom:4px">'
-    +   '<span style="font-size:9px;font-weight:800;color:var(--teal)">📍 แปลง</span>'
+    +   '<span style="font-size:9px;font-weight:800;color:var(--teal)">📍 Plot</span>'
     +   '<span style="font-size:9px;font-weight:800;color:var(--blue);text-align:center">Ha</span>'
-    +   '<span style="font-size:9px;font-weight:800;color:var(--muted);text-align:center">⏱ เวลา</span>'
+    +   '<span style="font-size:9px;font-weight:800;color:var(--muted);text-align:center">⏱ Time</span>'
     + '</div>';
   // Per-plot rows
   todaySP.forEach(function(r, idx){
@@ -1044,7 +1059,7 @@ function renderDailySpReport() {
   });
   // Totals row
   html += '<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:4px;padding:5px 6px;background:rgba(61,219,114,.2);border-radius:7px;margin-top:5px;border-top:1px solid rgba(61,219,114,.3);align-items:center">'
-    + '<span style="font-size:10px;font-weight:800;color:var(--teal)">รวม '+todaySP.length+' รอบ</span>'
+    + '<span style="font-size:10px;font-weight:800;color:var(--teal)">Total '+todaySP.length+' rounds</span>'
     + '<span style="font-size:12px;font-weight:800;color:var(--blue);text-align:center">'+totalHa.toFixed(1)+' ha</span>'
     + '<span style="font-size:9px;color:var(--muted);text-align:center"></span>'
     + '</div>'
@@ -1075,7 +1090,7 @@ function renderDailySpReport() {
                + '<span style="font-weight:700;color:var(--acc)">'+parseFloat(q||0).toFixed(3)+' '+u2+'</span>'
                + '</div>';
         }).join('')
-      : '<div style="font-size:10px;color:var(--faint)">— ไม่มีข้อมูลสารเคมี —</div>';
+      : '<div style="font-size:10px;color:var(--faint)">— No chemical data —</div>';
 
     html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px 13px;margin-bottom:7px">'
       // Header row: plot name + id
@@ -1093,7 +1108,7 @@ function renderDailySpReport() {
       +     '<div style="font-size:8px;color:var(--muted)">ha</div></div>'
       +   '<div style="background:rgba(245,166,35,.08);border-radius:7px;padding:5px 7px;text-align:center">'
       +     '<div style="font-size:11px;font-weight:800;color:var(--warn)">'+(r.tStart&&r.tEnd?r.tStart+'–'+r.tEnd:(r.hrs?r.hrs+'h':'—'))+'</div>'
-      +     '<div style="font-size:8px;color:var(--muted)">'+(r.tStart&&r.tEnd?'เวลา':'ชม.')+'</div></div>'
+      +     '<div style="font-size:8px;color:var(--muted)">'+(r.tStart&&r.tEnd?'Time':'Hrs')+'</div></div>'
       + '</div>'
       // Meta row
       + '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;display:flex;flex-wrap:wrap;gap:6px">'
@@ -1105,7 +1120,7 @@ function renderDailySpReport() {
       + '</div>'
       // Chem section
       + '<div style="background:rgba(61,219,114,.05);border:1px solid rgba(61,219,114,.2);border-radius:8px;padding:7px 10px">'
-      +   '<div style="font-size:9px;font-weight:700;color:var(--teal);margin-bottom:4px">🧪 สารเคมีที่ฉีด</div>'
+      +   '<div style="font-size:9px;font-weight:700;color:var(--teal);margin-bottom:4px">🧪 Chemicals Sprayed</div>'
       +   chemHtml
       + '</div>'
       + (r.note ? '<div style="font-size:9px;color:var(--muted);margin-top:5px">📝 '+r.note+'</div>' : '')
@@ -1137,8 +1152,8 @@ function renderStats() {
   var rtAll = records.filter(function(r){return r.type==='rt';}).length;
   var stTot = document.getElementById('cnt-st-total');
   var rtTot = document.getElementById('cnt-rt-total');
-  if(stTot) stTot.textContent = 'รวม '+stAll+' ครั้ง';
-  if(rtTot) rtTot.textContent = 'รวม '+rtAll+' ครั้ง';
+  if(stTot) stTot.textContent = 'Total '+stAll+' times';
+  if(rtTot) rtTot.textContent = 'Total '+rtAll+' times';
 }
 
 function calcStock() {
@@ -1200,7 +1215,7 @@ function renderAlerts() {
   var keys = Object.keys(stock);
 
   if (keys.length === 0) {
-    el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">ยังไม่มีข้อมูล CR-01 — กรอกการเบิกสารเคมีก่อน</div>';
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">No CR-01 data — enter a requisition first</div>';
     return;
   }
 
@@ -1223,8 +1238,8 @@ function renderAlerts() {
   var totalPct = totalLoaded>0 ? (totalRemain/totalLoaded*100).toFixed(0) : 0;
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;margin-bottom:10px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    + '<span style="font-size:11px;font-weight:700;color:var(--acc)">🚛 Stock บนรถ (CR − MX)</span>'
-    + '<span style="font-size:10px;color:var(--muted)">คงเหลือ '+totalPct+'%</span></div>'
+    + '<span style="font-size:11px;font-weight:700;color:var(--acc)">🚛 Stock On Truck (CR − MX)</span>'
+    + '<span style="font-size:10px;color:var(--muted)">Remaining '+totalPct+'%</span></div>'
     + '<div class="bar-bg"><div class="bar-f" style="width:'+totalPct+'%;background:'+(totalPct<20?'var(--danger)':totalPct<50?'var(--warn)':'var(--acc)')+'"></div></div>'
     + '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px">'
     + '<span>🔴 OUT: '+out.length+'</span><span>🟡 LOW: '+low.length+'</span><span>🟢 OK: '+ok_items.length+'</span></div>'
@@ -1233,7 +1248,7 @@ function renderAlerts() {
   // ── Table: all chemicals with stock ──────────────────────────
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px">';
   html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700">'
-    + '<span>สารเคมี</span><span>เบิก</span><span>ใช้</span><span>คงเหลือ</span><span>%</span></div>';
+    + '<span>Chemical</span><span>Issued</span><span>Used</span><span>Remaining</span><span>%</span></div>';
 
   var allSorted = out.concat(low).concat(ok_items);
   allSorted.forEach(function(item){
@@ -1315,7 +1330,7 @@ function renderWarehouseStock() {
     return ws[k].initial > 0 || ws[k].issued > 0;
   });
   if (active.length === 0) {
-    el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">ยังไม่มีข้อมูลสต็อกคลัง</div>';
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">No warehouse stock data</div>';
     return;
   }
   var out = [], low = [], ok_items = [];
@@ -1332,19 +1347,19 @@ function renderWarehouseStock() {
   var barColor = totalPct < 20 ? 'var(--danger)' : totalPct < 50 ? 'var(--warn)' : 'var(--purple)';
   var html = '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;margin-bottom:10px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    + '<span style="font-size:11px;font-weight:700;color:var(--purple)">🏭 Stock คลัง (Initial − CR)</span>'
-    + '<span style="font-size:10px;color:var(--muted)">คงเหลือ ' + totalPct + '%</span></div>'
+    + '<span style="font-size:11px;font-weight:700;color:var(--purple)">🏭 Stock Warehouse (Initial − CR)</span>'
+    + '<span style="font-size:10px;color:var(--muted)">Remaining ' + totalPct + '%</span></div>'
     + '<div class="bar-bg"><div class="bar-f" style="width:' + Math.max(0, totalPct) + '%;background:' + barColor + '"></div></div>'
     + '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px">'
     + '<span>🔴 OUT: ' + out.length + '</span><span>🟡 LOW: ' + low.length + '</span><span>🟢 OK: ' + ok_items.length + '</span></div>'
     + '</div>';
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px">';
   html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700">'
-    + '<span style="flex:2">สารเคมี</span>'
-    + '<span style="flex:1;text-align:right">ต้นทุน+ST</span>'
-    + '<span style="flex:1;text-align:right">−เบิก CR</span>'
-    + '<span style="flex:1;text-align:right">+คืน RT</span>'
-    + '<span style="flex:1;text-align:right">คงเหลือ</span></div>';
+    + '<span style="flex:2">Chemical</span>'
+    + '<span style="flex:1;text-align:right">Initial+ST</span>'
+    + '<span style="flex:1;text-align:right">−CR issued</span>'
+    + '<span style="flex:1;text-align:right">+RT return</span>'
+    + '<span style="flex:1;text-align:right">Remaining</span></div>';
   out.concat(low).concat(ok_items).forEach(function(k) {
     var s = ws[k];
     var col    = (s.overissued || s.remain <= 0) ? 'var(--danger)' : s.pct < 20 ? 'var(--warn)' : 'var(--purple)';
@@ -1370,7 +1385,7 @@ function setSyncUI(ok) {
   var el = document.getElementById('chip-sync');
   var now = pad(new Date().getHours())+':'+pad(new Date().getMinutes());
   if (!navigator.onLine) {
-    el.textContent = '📵 ออฟไลน์';
+    el.textContent = '📵 Offline';
     el.style.color = 'var(--warn)';
   } else {
     el.textContent = ok ? '🟢 '+now : '🔴 sync fail';
@@ -1381,7 +1396,7 @@ function setSyncUI(ok) {
 // ── Online/Offline detection ────────────────────────────────
 window.addEventListener('offline', function() {
   setSyncUI(false);
-  toast('📵 ออฟไลน์ — ข้อมูลบันทึกในเครื่อง');
+  toast('📵 Offline — data saved locally');
 });
 // ─── RULE: ทุกเครื่องเห็นข้อมูลเหมือนกัน ───────────────────
 // sync ทันทีเมื่อผู้ใช้กลับมาที่หน้าแอพ (จาก background / tab อื่น)
@@ -1405,7 +1420,7 @@ window.addEventListener('focus', function() {
   }
 });
 window.addEventListener('online', function() {
-  toast('🌐 กลับมา Online — กำลัง sync...');
+  toast('🌐 Back Online — syncing...');
   setSyncUI(false);
   setTimeout(cloudSync, 500);  // sync ทันทีที่กลับมา online
 });
@@ -1425,12 +1440,12 @@ function renderSTChems() {
     if(c.n && whs[c.n]){
       var ws2=whs[c.n];
       var col2=ws2.overissued?'var(--danger)':ws2.remain<=0?'var(--danger)':ws2.pct<20?'var(--warn)':'var(--purple)';
-      whInfo='<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 คลัง ปัจจุบัน: '+ws2.remain.toFixed(1)+' '+ws2.unit+'</div>';
+      whInfo='<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 Warehouse now: '+ws2.remain.toFixed(1)+' '+ws2.unit+'</div>';
     }
     html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remST('+i+')">✕</button></div>';
     html+='<div onclick="openChem('+i+',\'st\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
     html+=whInfo;
-    html+='<div class="g2"><div><label>Qty รับเข้า</label><input type="number" step=".01" placeholder="0" value="'+(c.q||'')+'" oninput="stChems['+i+'].q=this.value"></div>';
+    html+='<div class="g2"><div><label>Qty In</label><input type="number" step=".01" placeholder="0" value="'+(c.q||'')+'" oninput="stChems['+i+'].q=this.value"></div>';
     html+='<div><label>Unit</label><input type="text" value="'+u+'" readonly style="color:var(--muted)"></div></div></div>';
   });
   document.getElementById('st-chems').innerHTML=html;
@@ -1439,7 +1454,7 @@ function addSTChem(){stChems.push({n:'',q:''});renderSTChems();}
 function remST(i){stChems.splice(i,1);if(!stChems.length)stChems=[{n:'',q:''}];renderSTChems();}
 function submitST() {
   var chems = stChems.filter(function(c){return c.n && parseFloat(c.q)>0;});
-  if(!chems.length){toast('❌ กรอกสารเคมีที่รับเข้าก่อน');return;}
+  if(!chems.length){toast('❌ Enter chemicals received first');return;}
   var isEdit=!!editId;
   var rec={id:uid('ST'),type:'st',
     date:document.getElementById('st-date').value,
@@ -1451,7 +1466,7 @@ function submitST() {
     createdAt:new Date().toISOString()};
   handleSave(rec,'ST-01',{id:rec.id,date:rec.date,ref:rec.ref,receiver:rec.receiver,approver:rec.approver,chemicals:rec.chemicals,note:rec.note,createdAt:rec.createdAt});
   renderWarehouseStock();
-  toast('✅ ST-01 '+(isEdit?'แก้ไขแล้ว!':'รับสินค้าเข้าคลัง! เพิ่ม Stock')+' ('+rec.id+')');
+  toast('✅ ST-01 '+(isEdit?'Updated!':'Stock In saved! Stock added')+' ('+rec.id+')');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1468,13 +1483,13 @@ function renderRTChems() {
       var ts=calcStock(); var tb=ts[c.n];
       if(tb){
         var col3=tb.remain<=0?'var(--danger)':tb.remain<2?'var(--warn)':'var(--teal)';
-        truckInfo='<div style="font-size:9px;margin-bottom:4px;color:'+col3+'">🚛 บนรถ: '+tb.remain.toFixed(2)+' '+u+'</div>';
+        truckInfo='<div style="font-size:9px;margin-bottom:4px;color:'+col3+'">🚛 On truck: '+tb.remain.toFixed(2)+' '+u+'</div>';
       }
     }
     html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remRT('+i+')">✕</button></div>';
     html+='<div onclick="openChem('+i+',\'rt\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
     html+=truckInfo;
-    html+='<div class="g2"><div><label>Qty คืน</label><input type="number" step=".01" placeholder="0" value="'+(c.q||'')+'" oninput="rtChems['+i+'].q=this.value"></div>';
+    html+='<div class="g2"><div><label>Qty Return</label><input type="number" step=".01" placeholder="0" value="'+(c.q||'')+'" oninput="rtChems['+i+'].q=this.value"></div>';
     html+='<div><label>Unit</label><input type="text" value="'+u+'" readonly style="color:var(--muted)"></div></div></div>';
   });
   document.getElementById('rt-chems').innerHTML=html;
@@ -1483,7 +1498,7 @@ function addRTChem(){rtChems.push({n:'',q:''});renderRTChems();}
 function remRT(i){rtChems.splice(i,1);if(!rtChems.length)rtChems=[{n:'',q:''}];renderRTChems();}
 function submitRT() {
   var chems = rtChems.filter(function(c){return c.n && parseFloat(c.q)>0;});
-  if(!chems.length&&!editId){toast('❌ กรอกสารเคมีที่คืนก่อน');return;}
+  if(!chems.length&&!editId){toast('❌ Enter chemicals to return first');return;}
   var isEdit=!!editId;
   var rec={id:uid('RT'),type:'rt',
     date:document.getElementById('rt-date').value,
@@ -1498,7 +1513,7 @@ function submitRT() {
     note:rec.note,createdAt:rec.createdAt});
   renderWarehouseStock();
   renderAlerts();
-  toast('✅ RT-01 '+(isEdit?'แก้ไขแล้ว!':'คืนสารเคมีเข้าคลังแล้ว!')+' ('+rec.id+')');
+  toast('✅ RT-01 '+(isEdit?'Updated!':'Returned to warehouse!')+' ('+rec.id+')');
 }
 
 function cloudJSONP(params, cb) {
@@ -1709,7 +1724,7 @@ function cloudSync() {
       .forEach(function(r){
         _delRetried[r.id]=true;
         cloudJSONP({action:'delete',sheet:typeSheet[r.type]||'CR-01',id:r.id}, function(res){
-          if(res && res.ok) toast('🗑 '+r.id+' លុបពី Sheet (retry สำเร็จ)');
+          if(res && res.ok) toast('🗑 '+r.id+' លុបពី Sheet (retry ok)');
         });
       });
     // Filter out records that admin has permanently deleted on this device
@@ -1827,7 +1842,7 @@ function doRefresh() {
 }
 
 function forceUpdateApp() {
-  if (!confirm('อัปเดตแอป?\nจะล้าง cache และโหลดใหม่')) return;
+  if (!confirm('Update app?\nClear cache and reload')) return;
   var p = [];
   if ('serviceWorker' in navigator) {
     p.push(
@@ -1858,7 +1873,7 @@ function renderCRChems() {
     if (c.n && whs[c.n]) {
       var ws2 = whs[c.n];
       var col2 = ws2.overissued ? 'var(--danger)' : ws2.remain <= 0 ? 'var(--danger)' : ws2.pct < 20 ? 'var(--warn)' : 'var(--purple)';
-      whInfo = '<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 คลัง: คงเหลือ '+ws2.remain.toFixed(1)+' '+ws2.unit+' ('+Math.max(0,ws2.pct).toFixed(0)+'%)</div>';
+      whInfo = '<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 Warehouse: Remaining '+ws2.remain.toFixed(1)+' '+ws2.unit+' ('+Math.max(0,ws2.pct).toFixed(0)+'%)</div>';
     }
     html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remCR('+i+')">✕</button></div>';
     html+='<div onclick="openChem('+i+',\'cr\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
@@ -1878,7 +1893,7 @@ function submitCR() {
     createdAt:new Date().toISOString()};
   handleSave(rec,'CR-01',{id:rec.id,date:rec.date,requester:rec.requester,approver:rec.approver,chemicals:rec.chemicals,note:rec.note,createdAt:rec.createdAt});
   renderWarehouseStock();
-  toast('✅ CR-01 '+(isEdit?'แก้ไขแล้ว!':'บันทึกแล้ว! ตัด Stock คลัง')+' ('+rec.id+')');
+  toast('✅ CR-01 '+(isEdit?'Updated!':'Saved! Warehouse stock deducted')+' ('+rec.id+')');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1920,10 +1935,10 @@ function calcTotal(){
   } else {box.style.display='none';}
 }
 function submitMX(){
-  if(!document.getElementById('mx-plot').value.trim()){toast('❌ กรุณาเลือก ចំការ (Plot) ก่อนบันทึก');document.getElementById('mx-plot').focus();return;}
-  if(!document.getElementById('mx-sprayer').value){toast('❌ กรุณาเลือกเครื่องพ่น (Sprayer) ก่อนบันทึก');document.getElementById('mx-sprayer').focus();return;}
+  if(!document.getElementById('mx-plot').value.trim()){toast('❌ Please select ចំការ (Plot) first');document.getElementById('mx-plot').focus();return;}
+  if(!document.getElementById('mx-sprayer').value){toast('❌ Please select Sprayer first');document.getElementById('mx-sprayer').focus();return;}
   var wpt=parseFloat(document.getElementById('mx-wpt').value)||0;
-  if(wpt<=0){toast('❌ กรุณากรอก ទឹក/ថង (L) ก่อน — ปริมาณน้ำต้องมากกว่า 0');document.getElementById('mx-wpt').focus();return;}
+  if(wpt<=0){toast('❌ Please enter ទឹក/ថង (L) first — water must be greater than 0');document.getElementById('mx-wpt').focus();return;}
   // Sync quantities from DOM first (in case oninput didn't fire on some browsers)
   document.querySelectorAll('.mx-qty').forEach(function(inp){
     var ti=parseInt(inp.getAttribute('data-ti'));
@@ -1940,7 +1955,7 @@ function submitMX(){
     totalWater:mxTanks.length*wpt,tanks:JSON.parse(JSON.stringify(mxTanks)),
     allChems:allC,note:document.getElementById('mx-note').value,createdAt:new Date().toISOString()};
   handleSave(rec,'MX-01',{id:rec.id,date:rec.date,time:rec.time,mixer:rec.mixer,plot:rec.plot,sprayer:rec.sprayer,waterPerTank:rec.waterPerTank,totalWater:rec.totalWater,allChems:rec.allChems,note:rec.note,createdAt:rec.createdAt});
-  toast('✅ MX-01 '+(isEdit?'แก้ไขแล้ว!':'បានរក្សាទុក!')+' ('+rec.id+')');
+  toast('✅ MX-01 '+(isEdit?'Updated!':'បានរក្សាទុក!')+' ('+rec.id+')');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1972,14 +1987,14 @@ function fillMXSelect(){
   container.innerHTML = mxList.map(function(m){
     var d = normalizeDate(m.date);
     var dayBadge = d===today ? '<span style="background:#2C4E38;color:#EBE8E0;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">TODAY</span>'
-                 : d===yesterday ? '<span style="background:#C47A2A;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">เมื่อวาน</span>' : '';
+                 : d===yesterday ? '<span style="background:#C47A2A;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">Yesterday</span>' : '';
     var ac = sanitizeAllChems(m.allChems||{});
     var chemHtml = Object.keys(ac).length
       ? Object.keys(ac).map(function(k){
           var u=(CHEMS.find(function(x){return x.n===k;})||{u:''}).u;
           return '<span style="background:rgba(44,78,56,.12);color:var(--acc);font-size:9px;padding:1px 6px;border-radius:8px;margin:1px">'+k+' '+parseFloat(ac[k]).toFixed(2)+' '+u+'</span>';
         }).join('')
-      : '<span style="color:var(--muted);font-size:9px">ไม่มีข้อมูลยา</span>';
+      : '<span style="color:var(--muted);font-size:9px">No chemical data</span>';
     return '<div id="mxcard-'+m.id+'" onclick="selectMXCard(\''+m.id+'\')" style="border:2px solid var(--bdr);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--card);transition:all .2s">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
         + '<span style="font-size:11px;font-weight:700;color:var(--teal)">⚗️ '+(m.plot||'?')+'</span>'
@@ -2018,7 +2033,7 @@ function previewMX(){
     var mxW=mxEffectiveWater(mx);
     var h='<div style="font-size:10px;color:var(--teal);font-weight:700;margin-bottom:5px">✅ ថងយាដែលជ្រើស: '+mx.id+' · '+(mx.plot||'?')+'</div>';
     h+='<div class="crow"><span>💧 ទឹកសរុប (Total Water)</span><span class="cval" style="color:var(--blue)">'
-      +(mxW>0 ? mxW.toFixed(0)+' L' : '<span style="color:var(--warn)">⚠️ ไม่มีข้อมูลน้ำ — แก้ไข MX-01 ก่อน</span>')+'</span></div>';
+      +(mxW>0 ? mxW.toFixed(0)+' L' : '<span style="color:var(--warn)">⚠️ No water data — edit MX-01 first</span>')+'</span></div>';
     Object.keys(ac).forEach(function(k){
       var u=(CHEMS.find(function(x){return x.n===k;})||{u:''}).u;
       h+='<div class="crow"><span>'+k+'</span><span class="cval" style="color:var(--teal)">'+parseFloat(ac[k]).toFixed(2)+' '+u+'</span></div>';
@@ -2034,17 +2049,17 @@ function autoWeather() {
   var btn = document.getElementById('btn-weather');
   var status = document.getElementById('weather-status');
   if (!navigator.geolocation) {
-    toast('❌ เบราว์เซอร์ไม่รองรับ GPS');
+    toast('❌ Browser does not support GPS');
     return;
   }
-  btn.textContent = '⏳ กำลังดึง GPS...';
+  btn.textContent = '⏳ Fetching GPS...';
   btn.disabled = true;
   status.style.display = 'block';
-  status.textContent = 'กำลังขอ GPS...';
+  status.textContent = 'Requesting GPS...';
   navigator.geolocation.getCurrentPosition(function(pos) {
     var lat = pos.coords.latitude.toFixed(4);
     var lon = pos.coords.longitude.toFixed(4);
-    status.textContent = 'GPS: ' + lat + ', ' + lon + ' — กำลังดึงอากาศ...';
+    status.textContent = 'GPS: ' + lat + ', ' + lon + ' — fetching weather...';
     fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=weather_code,wind_speed_10m,wind_gusts_10m&wind_speed_unit=kmh&timezone=auto')
       .then(function(r){ return r.json(); })
       .then(function(d) {
@@ -2067,21 +2082,21 @@ function autoWeather() {
         var wiSel = document.getElementById('sp-wind');
         for (var i=0;i<wxSel.options.length;i++) { if(wxSel.options[i].value===wx||wxSel.options[i].text===wx) { wxSel.selectedIndex=i; break; } }
         for (var j=0;j<wiSel.options.length;j++) { if(wiSel.options[j].value===wi||wiSel.options[j].text===wi) { wiSel.selectedIndex=j; break; } }
-        status.textContent = '✅ ' + wx + ' · ลม ' + wind.toFixed(1) + ' km/h';
-        btn.textContent = '✅ อัปเดตสภาพอากาศแล้ว';
+        status.textContent = '✅ ' + wx + ' · Wind ' + wind.toFixed(1) + ' km/h';
+        btn.textContent = '✅ Weather updated';
         btn.disabled = false;
-        toast('🌤 ดึงสภาพอากาศสำเร็จ: ' + wx + ' · ' + wind.toFixed(0) + ' km/h');
+        toast('🌤 Weather fetched: ' + wx + ' · ' + wind.toFixed(0) + ' km/h');
       })
       .catch(function() {
-        status.textContent = '❌ ดึงอากาศไม่ได้ กรุณาเลือกเอง';
-        btn.textContent = '📍 ดึงสภาพอากาศจาก GPS อัตโนมัติ';
+        status.textContent = '❌ Could not fetch weather, select manually';
+        btn.textContent = '📍 Auto-fetch weather from GPS';
         btn.disabled = false;
-        toast('❌ ดึงข้อมูลอากาศไม่สำเร็จ');
+        toast('❌ Failed to fetch weather');
       });
   }, function(err) {
-    var msg = err.code===1 ? 'ไม่อนุญาต GPS' : err.code===2 ? 'GPS ไม่พร้อม' : 'GPS timeout';
-    status.textContent = '❌ ' + msg + ' — กรุณาเลือกเอง';
-    btn.textContent = '📍 ดึงสภาพอากาศจาก GPS อัตโนมัติ';
+    var msg = err.code===1 ? 'GPS denied' : err.code===2 ? 'GPS not ready' : 'GPS timeout';
+    status.textContent = '❌ ' + msg + ' — select manually';
+    btn.textContent = '📍 Auto-fetch weather from GPS';
     btn.disabled = false;
     toast('❌ ' + msg);
   }, { timeout: 10000, maximumAge: 60000 });
@@ -2121,7 +2136,7 @@ function calcChemDel(wu){
   var tot=mxEffectiveWater(mx);
   if(!tot){
     box.style.display='block';
-    box.innerHTML='<div style="color:var(--warn);font-size:10px;padding:6px 0">⚠️ MX นี้ไม่มีข้อมูลปริมาณน้ำ<br>กรุณาแก้ไข MX-01 ก่อน แล้วเพิ่ม ទឹក/ថង</div>';
+    box.innerHTML='<div style="color:var(--warn);font-size:10px;padding:6px 0">⚠️ This MX has no water data<br>Edit MX-01 first then add ទឹក/ថង</div>';
     box._chemD={};
     return;
   }
@@ -2136,13 +2151,13 @@ function calcChemDel(wu){
   box._chemD=chemD;
 }
 function submitSP(){
-  if(!(parseFloat(document.getElementById('sp-area').value)>0)){toast('❌ กรุณากรอกพื้นที่ ផ្ទៃដី (Ha) ก่อนบันทึก');document.getElementById('sp-area').focus();return;}
+  if(!(parseFloat(document.getElementById('sp-area').value)>0)){toast('❌ Please enter area ផ្ទៃដី (Ha) first');document.getElementById('sp-area').focus();return;}
   var wb=parseFloat(document.getElementById('sp-wb').value)||0;
   var wa=document.getElementById('sp-wa').value.trim();
-  if(!(wb>0)||wa===''){toast('❌ กรุณากรอกข้อมูลน้ำ ទឹកមុន/ទឹកក្រោយ (Water Tracking) ให้ครบก่อนบันทึก');document.getElementById(!(wb>0)?'sp-wb':'sp-wa').focus();return;}
+  if(!(wb>0)||wa===''){toast('❌ Please complete water data ទឹកមុន/ទឹកក្រោយ (Water Tracking) first');document.getElementById(!(wb>0)?'sp-wb':'sp-wa').focus();return;}
   wa=parseFloat(wa)||0;
   var wu=wb-wa;
-  if(wu<=0){toast('❌ น้ำที่ใช้ = '+wu.toFixed(0)+' L — ទឹកមុន ต้องมากกว่า ទឹកក្រោយ');document.getElementById('sp-wa').focus();return;}
+  if(wu<=0){toast('❌ Water used = '+wu.toFixed(0)+' L — ទឹកមុន must be greater than ទឹកក្រោយ');document.getElementById('sp-wa').focus();return;}
   var ts=document.getElementById('sp-ts').value,te=document.getElementById('sp-te').value;
   var hrs=null;if(ts&&te){var sm=ts.split(':').map(Number),em=te.split(':').map(Number);var m=(em[0]*60+em[1])-(sm[0]*60+sm[1]);if(m>0)hrs=(m/60).toFixed(1);}
   var area=parseFloat(document.getElementById('sp-area').value)||0;
@@ -2158,7 +2173,7 @@ function submitSP(){
     chemDelivered:chemD,note:document.getElementById('sp-note').value,
     createdAt:new Date().toISOString()};
   handleSave(rec,'SP-01',{id:rec.id,date:rec.date,tStart:rec.tStart,tEnd:rec.tEnd,hrs:rec.hrs||'',haH:rec.haH||'',operator:rec.operator,plot:rec.plot,area:rec.area,weather:rec.weather,wind:rec.wind,mxId:rec.mxId,waterBefore:rec.waterBefore,waterAfter:rec.waterAfter,waterUsed:rec.waterUsed,chemDelivered:rec.chemDelivered,note:rec.note,createdAt:rec.createdAt});
-  toast('✅ SP-01 '+(isEdit?'แก้ไขแล้ว!':'បានរក្សាទុក!')+' ('+rec.id+')');
+  toast('✅ SP-01 '+(isEdit?'Updated!':'បានរក្សាទុក!')+' ('+rec.id+')');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2284,24 +2299,47 @@ function renderRpt(v){
       if(!mxByPlot[pKey])mxByPlot[pKey]=[];
       mxByPlot[pKey].push(r);
     });
-    var plotKeys=Object.keys(mxByPlot).sort();
-    html='<div class="sec">📍 By Plot (MX) — '+plotKeys.length+' plots</div>';
-    if(!plotKeys.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No MX records yet</div>';}
+    var allPlotKeys=Object.keys(mxByPlot).sort();
+    // reset filter ถ้า plot ที่เลือกไว้ไม่มีข้อมูลแล้ว
+    if(rptPlotFilter!=='all'&&allPlotKeys.indexOf(rptPlotFilter)<0)rptPlotFilter='all';
+    html='<div class="sec">📍 By Plot (MX) — '+allPlotKeys.length+' plots</div>';
+    // Dropdown เลือก plot
+    html+='<select onchange="rptPlotFilter=this.value;renderRpt(\'plot\')" style="width:100%;padding:10px;margin-bottom:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--text);font-family:inherit;font-size:13px;font-weight:700">';
+    html+='<option value="all"'+(rptPlotFilter==='all'?' selected':'')+'>📍 All Plots ('+allPlotKeys.length+')</option>';
+    allPlotKeys.forEach(function(pk){
+      html+='<option value="'+pk+'"'+(rptPlotFilter===pk?' selected':'')+'>'+pk+'</option>';
+    });
+    html+='</select>';
+    var plotKeys=rptPlotFilter==='all'?allPlotKeys:[rptPlotFilter];
+    if(!allPlotKeys.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No MX records yet</div>';}
     plotKeys.forEach(function(p){
-      var recs=mxByPlot[p].slice().sort(function(a,b){
-        var da=a.date||'',db=b.date||'';
-        return da>db?-1:da<db?1:0;
-      });
-      // สรุปสารเคมีรวมทั้ง plot
-      var totChems={};
-      recs.forEach(function(r){
+      // resolve เคมี + ประเภท ของแต่ละ MX record
+      var enriched=mxByPlot[p].map(function(r){
         var ac=sanitizeAllChems(r.allChems||{});
         if(!Object.keys(ac).length&&r.tanks){var rb={};r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)rb[c.n]=(rb[c.n]||0)+q;});});ac=rb;}
-        Object.keys(ac).forEach(function(cn){totChems[cn]=(totChems[cn]||0)+ac[cn];});
+        return {date:normalizeDate(r.date),type:getSprayType(Object.keys(ac)),chems:ac};
+      }).filter(function(e){return e.date;});
+      // group ตาม date+ประเภทสาร → รวมเคมี
+      var groupMap={};
+      enriched.forEach(function(e){
+        var k=e.date+'||'+e.type.label;
+        if(!groupMap[k])groupMap[k]={date:e.date,type:e.type,chems:{}};
+        Object.keys(e.chems).forEach(function(cn){groupMap[k].chems[cn]=(groupMap[k].chems[cn]||0)+e.chems[cn];});
       });
+      var groups=Object.keys(groupMap).map(function(k){return groupMap[k];})
+        .sort(function(a,b){return a.date>b.date?-1:a.date<b.date?1:0;});
+      // anchor D0 = วัน Burn down/Pre-emergence
+      var anchors=enriched.filter(function(e){return e.type.label==='Burn down'||e.type.label==='Pre-emergence';})
+        .map(function(e){return e.date;}).filter(Boolean).sort();
+      function d0For(date){var best=null;anchors.forEach(function(a){if(a<=date&&(best===null||a>best))best=a;});return best;}
+      var latestPlanting=anchors.length?anchors[anchors.length-1]:null;
+      // สรุปสารเคมีรวมทั้ง plot
+      var totChems={};
+      groups.forEach(function(g){Object.keys(g.chems).forEach(function(cn){totChems[cn]=(totChems[cn]||0)+g.chems[cn];});});
       html+='<div class="card">';
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px">';
       html+='<div style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+p+'</div>';
+      if(latestPlanting)html+='<div style="font-size:9px;font-weight:700;color:var(--muted);background:var(--dim);padding:3px 8px;border-radius:20px;white-space:nowrap">🌱 Planting: '+latestPlanting+'</div>';
       html+='</div>';
       // สรุปรวม
       var totChemKeys=Object.keys(totChems);
@@ -2309,7 +2347,7 @@ function renderRpt(v){
         var totUid='rpt-tot-'+p.replace(/\W/g,'_');
         html+='<div style="cursor:pointer;margin-bottom:4px" onclick="var e=document.getElementById(\''+totUid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">';
         html+='<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed rgba(26,107,54,0.2);padding-bottom:4px">';
-        html+='<span style="font-size:10px;font-weight:700;color:var(--acc)">📊 รวมสารเคมี</span>';
+        html+='<span style="font-size:10px;font-weight:700;color:var(--acc)">📊 Total Chemicals</span>';
         html+='<span style="font-size:10px;color:var(--muted)">▾</span>';
         html+='</div>';
         html+='<div id="'+totUid+'" style="display:none;padding:6px 0">';
@@ -2319,24 +2357,30 @@ function renderRpt(v){
         });
         html+='</div></div>';
       }
-      // รายวัน
+      // รายวัน (รวมตาม date+ประเภท)
       html+='<div style="border-top:1px solid rgba(26,107,54,0.12);padding-top:4px">';
-      recs.forEach(function(r,idx){
-        var ac=sanitizeAllChems(r.allChems||{});
-        if(!Object.keys(ac).length&&r.tanks){var rb={};r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)rb[c.n]=(rb[c.n]||0)+q;});});ac=rb;}
+      groups.forEach(function(g,idx){
         var uid='rpt-bp-'+p.replace(/\W/g,'_')+'-'+idx;
-        var chemNames=Object.keys(ac);
-        var st2=getSprayType(chemNames);
-        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(26,107,54,0.07);cursor:pointer" onclick="var el=document.getElementById(\''+uid+'\');el.style.display=el.style.display===\'none\'?\'block\':\'none\'">';
-        html+='<span style="font-size:11px;color:var(--muted)">'+normalizeDate(r.date)+'</span>';
-        html+='<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:'+st2.bg+';color:'+st2.color+'">'+st2.label+' ▾</span>';
+        var chemNames=Object.keys(g.chems);
+        var st2=g.type;
+        var d0=d0For(g.date);
+        var days=d0?daysDiff(d0,g.date):null;
+        var stage=stageFromDays(days);
+        var stageBadge=stage
+          ? '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(15,122,104,0.14);color:var(--teal);white-space:nowrap">🌽 '+stage+' · D'+days+'</span>'
+          : '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(122,170,138,0.18);color:var(--faint);white-space:nowrap">🌽 —</span>';
+        html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(26,107,54,0.07);cursor:pointer" onclick="var el=document.getElementById(\''+uid+'\');el.style.display=el.style.display===\'none\'?\'block\':\'none\'">';
+        html+='<span style="font-size:11px;color:var(--muted);white-space:nowrap">'+g.date+'</span>';
+        html+=stageBadge;
+        html+='<span style="flex:1"></span>';
+        html+='<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:'+st2.bg+';color:'+st2.color+';white-space:nowrap">'+st2.label+' ▾</span>';
         html+='</div>';
         html+='<div id="'+uid+'" style="display:none;background:rgba(26,107,54,0.05);border-radius:8px;padding:8px 10px;margin:4px 0 6px">';
         chemNames.forEach(function(cn){
           var u=(CHEMS.find(function(x){return x.n===cn;})||{u:''}).u;
-          html+='<div class="crow"><span style="color:var(--muted)">→ '+cn+'</span><span class="cval" style="color:var(--teal)">'+parseFloat(ac[cn]).toFixed(2)+' '+u+'</span></div>';
+          html+='<div class="crow"><span style="color:var(--muted)">→ '+cn+'</span><span class="cval" style="color:var(--teal)">'+parseFloat(g.chems[cn]).toFixed(2)+' '+u+'</span></div>';
         });
-        if(!chemNames.length)html+='<div style="font-size:9px;color:var(--warn)">⚠️ ไม่พบข้อมูลสารเคมี</div>';
+        if(!chemNames.length)html+='<div style="font-size:9px;color:var(--warn)">⚠️ No chemical data found</div>';
         html+='</div>';
       });
       html+='</div></div>';
@@ -2393,9 +2437,9 @@ function buildChemDetail(r) {
       rows.push('<div class="crow"><span style="color:var(--muted)">'+c.n+'</span><span class="cval" style="color:'+chemColor+'">'+parseFloat(c.q||0).toFixed(2)+' '+u+'</span></div>');
     });
     if (r.type==='rt') {
-      if (r.reason)   rows.push('<div class="crow"><span style="color:var(--muted)">เหตุผล</span><span class="cval">'+r.reason+'</span></div>');
-      if (r.returnedBy) rows.push('<div class="crow"><span style="color:var(--muted)">👤 คืนโดย</span><span class="cval">'+r.returnedBy+'</span></div>');
-      if (r.receiver) rows.push('<div class="crow"><span style="color:var(--muted)">👤 ผู้รับ</span><span class="cval">'+r.receiver+'</span></div>');
+      if (r.reason)   rows.push('<div class="crow"><span style="color:var(--muted)">Reason</span><span class="cval">'+r.reason+'</span></div>');
+      if (r.returnedBy) rows.push('<div class="crow"><span style="color:var(--muted)">👤 Returned by</span><span class="cval">'+r.returnedBy+'</span></div>');
+      if (r.receiver) rows.push('<div class="crow"><span style="color:var(--muted)">👤 Receiver</span><span class="cval">'+r.receiver+'</span></div>');
     }
   }
   // MX — allChems (with fallback to tanks data)
@@ -2416,9 +2460,9 @@ function buildChemDetail(r) {
       var u = (CHEMS.find(function(x){return x.n===n;})||{u:''}).u;
       rows.push('<div class="crow"><span style="color:var(--muted)">'+n+'</span><span class="cval" style="color:var(--teal)">'+parseFloat(ac[n]).toFixed(2)+' '+u+'</span></div>');
     });
-    if (r.totalWater) rows.push('<div class="crow"><span style="color:var(--muted)">💧 น้ำรวม</span><span class="cval" style="color:var(--blue)">'+r.totalWater+' L</span></div>');
-    if (r.sprayer)    rows.push('<div class="crow"><span style="color:var(--muted)">🚁 เครื่อง</span><span class="cval">'+r.sprayer+'</span></div>');
-    if (Object.keys(ac).length === 0 && !r.tanks) rows.push('<div style="font-size:10px;color:var(--warn)">⚠️ ข้อมูลสารเคมีหาย — กรุณาลบและคีย์ใหม่</div>');
+    if (r.totalWater) rows.push('<div class="crow"><span style="color:var(--muted)">💧 Total Water</span><span class="cval" style="color:var(--blue)">'+r.totalWater+' L</span></div>');
+    if (r.sprayer)    rows.push('<div class="crow"><span style="color:var(--muted)">🚁 Sprayer</span><span class="cval">'+r.sprayer+'</span></div>');
+    if (Object.keys(ac).length === 0 && !r.tanks) rows.push('<div style="font-size:10px;color:var(--warn)">⚠️ Chemical data lost — delete and re-enter</div>');
   }
   // SP — chemDelivered + water + area
   if (r.type==='sp') {
@@ -2430,14 +2474,14 @@ function buildChemDetail(r) {
         var cands = records.filter(function(m){return m.type==='mx'&&m.date===r.date&&m.plot===r.plot;});
         if (cands.length === 1) mxRec = cands[0];
         else if (cands.length > 1) {
-          // หลาย MX — รวม allChems ทั้งหมด (merge) แล้วใช้ totalWater รวม
+          // หลาย MX — Total allChems ทั้งหมด (merge) แล้วใช้ totalWater รวม
           var merged = {}; var totW = 0;
           cands.forEach(function(m){ totW += mxEffectiveWater(m); var ac2=sanitizeAllChems(m.allChems||{}); Object.keys(ac2).forEach(function(n){ merged[n]=(merged[n]||0)+parseFloat(ac2[n]); }); });
           var wu2=spEffectiveWaterUsed(r);
           if (totW>0&&wu2>0) {
             var rat2=wu2/totW;
             Object.keys(merged).forEach(function(n){ var u3=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u; cd[n]={qty:(merged[n]*rat2).toFixed(3),unit:u3}; });
-            if (Object.keys(cd).length) rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">⚠️ ประมาณจาก '+cands.length+' MX ('+cands.map(function(m){return m.id;}).join(',')+') — Link MX ใหม่เพื่อความแม่นยำ</div>');
+            if (Object.keys(cd).length) rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">⚠️ Estimated from '+cands.length+' MX ('+cands.map(function(m){return m.id;}).join(',')+') — Re-link MX for accuracy</div>');
           }
           mxRec = null; // already handled
         }
@@ -2450,14 +2494,14 @@ function buildChemDetail(r) {
         if (rat3>0) {
           // Normal proportional calculation
           Object.keys(ac3).forEach(function(n){ var u4=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u; cd[n]={qty:(parseFloat(ac3[n])*rat3).toFixed(3),unit:u4}; });
-          if (Object.keys(cd).length) rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">⚠️ ประมาณจาก '+mxRec.id+' — Link MX ใหม่เพื่อความแม่นยำ</div>');
+          if (Object.keys(cd).length) rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">⚠️ Estimated from '+mxRec.id+' — Re-link MX for accuracy</div>');
         } else if (Object.keys(ac3).length > 0) {
           // Can't compute ratio — show full tank chemicals with context-aware warning
           Object.keys(ac3).forEach(function(n){ var u4=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u; cd[n]={qty:parseFloat(ac3[n]).toFixed(3),unit:u4}; });
           if (Object.keys(cd).length) {
             var warnMsg = tot3 > 0
-              ? '⚠️ SP ไม่มีข้อมูลน้ำที่ใช้ — แสดงยาทั้งถัง '+mxRec.id
-              : '⚠️ MX ไม่มีข้อมูลปริมาณน้ำ — แสดงยาทั้งถัง '+mxRec.id+' (กรุณาแก้ไข MX เพิ่ม ទឹក/ថង)';
+              ? '⚠️ SP has no water-used data — showing full-tank chemicals '+mxRec.id
+              : '⚠️ MX has no water data — showing full-tank chemicals '+mxRec.id+' (edit MX to add ទឹក/ថង)';
             rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">'+warnMsg+'</div>');
           }
         }
@@ -2468,13 +2512,13 @@ function buildChemDetail(r) {
       rows.push('<div class="crow"><span style="color:var(--muted)">'+n+'</span><span class="cval" style="color:var(--blue)">'+parseFloat(q||0).toFixed(3)+' '+u2+'</span></div>');
     });
     var wuShow=spEffectiveWaterUsed(r);
-    if (wuShow>0)  rows.push('<div class="crow"><span style="color:var(--muted)">💧 น้ำที่ใช้</span><span class="cval" style="color:var(--blue)">'+wuShow.toFixed(0)+' L</span></div>');
-    if (r.area)       rows.push('<div class="crow"><span style="color:var(--muted)">📐 พื้นที่</span><span class="cval">'+r.area+' ha</span></div>');
-    if (r.hrs)        rows.push('<div class="crow"><span style="color:var(--muted)">⏱ เวลา</span><span class="cval">'+r.tStart+' – '+r.tEnd+' ('+r.hrs+'h)</span></div>');
-    if (r.weather)    rows.push('<div class="crow"><span style="color:var(--muted)">🌤 อากาศ</span><span class="cval">'+r.weather+'</span></div>');
+    if (wuShow>0)  rows.push('<div class="crow"><span style="color:var(--muted)">💧 Water Used</span><span class="cval" style="color:var(--blue)">'+wuShow.toFixed(0)+' L</span></div>');
+    if (r.area)       rows.push('<div class="crow"><span style="color:var(--muted)">📐 Area</span><span class="cval">'+r.area+' ha</span></div>');
+    if (r.hrs)        rows.push('<div class="crow"><span style="color:var(--muted)">⏱ Time</span><span class="cval">'+r.tStart+' – '+r.tEnd+' ('+r.hrs+'h)</span></div>');
+    if (r.weather)    rows.push('<div class="crow"><span style="color:var(--muted)">🌤 Weather</span><span class="cval">'+r.weather+'</span></div>');
     if (r.mxId)       rows.push('<div class="crow"><span style="color:var(--muted)">🔗 MX</span><span class="cval" style="color:var(--purple)">'+r.mxId+'</span></div>');
   }
-  if (!rows.length) rows.push('<div style="font-size:10px;color:var(--faint)">— ไม่มีรายละเอียดสารเคมี —</div>');
+  if (!rows.length) rows.push('<div style="font-size:10px;color:var(--faint)">— No chemical details —</div>');
   return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)">'+rows.join('')+'</div>';
 }
 
@@ -2522,9 +2566,9 @@ function renderHistByPlot(el){
         // แสดงข้อมูล raw ที่มีอยู่เพื่อ debug
         var rawKeys=Object.keys(r).filter(function(k){return ['id','type','date','createdAt','updatedAt','cloudSynced','plot','tanks','allChems','mixer','sprayer','note','time','waterPerTank','totalWater'].indexOf(k)<0;});
         var rawHasVal=rawKeys.filter(function(k){return r[k]&&parseFloat(r[k])>0;});
-        chemRows='<div style="font-size:9px;color:var(--warn);padding:4px 0">⚠️ ไม่พบ allChems/tanks'
-          +(rawHasVal.length?' — พบค่าใน column: '+rawHasVal.map(function(k){return k+'='+r[k];}).join(', '):'')
-          +'<br>ID: '+r.id+' | tanks:'+(r.tanks?r.tanks.length:'ไม่มี')+'</div>';
+        chemRows='<div style="font-size:9px;color:var(--warn);padding:4px 0">⚠️ allChems/tanks not found'
+          +(rawHasVal.length?' — values found in column: '+rawHasVal.map(function(k){return k+'='+r[k];}).join(', '):'')
+          +'<br>ID: '+r.id+' | tanks:'+(r.tanks?r.tanks.length:'none')+'</div>';
       }
       return '<div style="border-bottom:1px solid rgba(26,107,54,0.08)">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;cursor:pointer" onclick="var e=document.getElementById(\''+uid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">'
@@ -2555,7 +2599,7 @@ function renderHistByPlot(el){
         +'<span style="font-size:10px;color:var(--muted)">'+recs.length+' MX</span>'
       +'</div>'
       +(totRow?'<div style="cursor:pointer;margin-bottom:6px" onclick="var e=document.getElementById(\''+totUid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">'
-        +'<div style="font-size:10px;font-weight:700;color:var(--acc);border-bottom:1px dashed rgba(26,107,54,0.2);padding-bottom:4px;margin-bottom:4px">📊 รวมสารเคมี ▾</div>'
+        +'<div style="font-size:10px;font-weight:700;color:var(--acc);border-bottom:1px dashed rgba(26,107,54,0.2);padding-bottom:4px;margin-bottom:4px">📊 Total Chemicals ▾</div>'
         +'<div id="'+totUid+'" style="display:none">'+totRow+'</div>'
         +'</div>':'')
       +'<div style="border-top:1px solid rgba(26,107,54,0.12);padding-top:4px">'+rows+'</div>'
@@ -2601,7 +2645,7 @@ function renderHist(){
       + '</div>'
       + '<div onclick="toggleExpand(\''+r.id+'\')" style="margin-top:6px;font-size:10px;color:var(--muted);cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px">'
         + '<span style="font-size:8px">'+arrow+'</span>'
-        + '<span>'+(expanded?'ซ่อนรายละเอียด':'ดูรายละเอียด')+'</span>'
+        + '<span>'+(expanded?'Hide details':'Show details')+'</span>'
       + '</div>'
       + detail
       + '</div>';

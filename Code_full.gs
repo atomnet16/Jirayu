@@ -35,6 +35,77 @@ function computeSprayType(allChems) {
   return '';
 }
 
+// ── Corn growth stage (เขียน column Stage ใน MX-01) ──────────────────
+// D0 = วัน Burn down / Pre-emergence ล่าสุดที่ <= วันของแถว (ปลูกรอบใหม่ = reset)
+var STAGE_TABLE_GAS = [['Planting',0],['VE',4],['V1',7],['V2',10],['V3',13],['V4',16],['V5',19],['V6',22],['V7',25],['V8',28],['V9',31],['V10',33],['V11',36],['V12',39],['V13',42],['V14',45],['V15',48],['R1',51],['R2',60],['R3',70],['R4',80],['R5',90],['R6',105]];
+function stageFromDaysGAS(d) {
+  if (d == null || d < 0) return '';
+  var s = STAGE_TABLE_GAS[0][0];
+  for (var i = 0; i < STAGE_TABLE_GAS.length; i++) { if (d >= STAGE_TABLE_GAS[i][1]) s = STAGE_TABLE_GAS[i][0]; else break; }
+  return s;
+}
+// scan ทั้ง MX-01 → จัดกลุ่มตาม plot → หา anchor → เขียน column Stage
+function updateMXStages() {
+  var sh = SS.getSheetByName('MX-01');
+  if (!sh) return;
+  var tz = Session.getScriptTimeZone();
+  var lastCol = sh.getLastColumn();
+  var headers = sh.getRange(1,1,1,lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var iStage = headers.indexOf('Stage');
+  if (iStage < 0) {
+    sh.getRange(1, lastCol+1).setValue('Stage')
+      .setBackground('#1a3d26').setFontColor('#3DDB72').setFontWeight('bold');
+    headers.push('Stage'); iStage = headers.length - 1;
+  }
+  var data = sh.getDataRange().getValues();
+  if (data.length < 2) return;
+  var iDate = headers.indexOf('Date'), iPlot = headers.indexOf('Plot'), iType = headers.indexOf('SprayType');
+  if (iDate < 0 || iPlot < 0) return;
+  // chem ที่ใช้ระบุ Burn down/Pre-emergence (พอสำหรับหา anchor)
+  var anchorChems = {};
+  SPRAY_TYPE_RULES_GAS.forEach(function(rule){
+    if (rule.label === 'Burn down' || rule.label === 'Pre-emergence')
+      rule.chems.forEach(function(c){ anchorChems[c] = rule.label; });
+  });
+  function normDate(v){
+    if (v instanceof Date && !isNaN(v)) return Utilities.formatDate(v, tz, 'yyyy-MM-dd');
+    return String(v||'').substring(0,10);
+  }
+  function rowType(row){
+    if (iType >= 0) { var t = String(row[iType]||'').trim(); if (t) return t; }
+    var ac = {};
+    headers.forEach(function(h,ci){ var v = parseFloat(row[ci]); if (!isNaN(v) && v>0 && anchorChems[h] !== undefined) ac[h] = v; });
+    return computeSprayType(ac);
+  }
+  // anchor dates ต่อ plot
+  var anchorsByPlot = {};
+  for (var i = 1; i < data.length; i++) {
+    var plot = String(data[i][iPlot]||'').trim(), d = normDate(data[i][iDate]);
+    if (!plot || !d) continue;
+    var t = rowType(data[i]);
+    if (t === 'Burn down' || t === 'Pre-emergence') {
+      if (!anchorsByPlot[plot]) anchorsByPlot[plot] = [];
+      anchorsByPlot[plot].push(d);
+    }
+  }
+  Object.keys(anchorsByPlot).forEach(function(p){ anchorsByPlot[p].sort(); });
+  // เขียน Stage ทีละแถว
+  var out = [];
+  for (var j = 1; j < data.length; j++) {
+    var plot2 = String(data[j][iPlot]||'').trim(), d2 = normDate(data[j][iDate]), stage = '';
+    if (plot2 && d2 && anchorsByPlot[plot2]) {
+      var best = null;
+      anchorsByPlot[plot2].forEach(function(a){ if (a <= d2 && (best === null || a > best)) best = a; });
+      if (best) {
+        var diff = Math.round((new Date(d2+'T00:00:00') - new Date(best+'T00:00:00'))/86400000);
+        stage = stageFromDaysGAS(diff);
+      }
+    }
+    out.push([stage]);
+  }
+  if (out.length) sh.getRange(2, iStage+1, out.length, 1).setValues(out);
+}
+
 // ── Field value lookup ─────────────────────────────────────────────
 function getFieldValue(header, d) {
   var j = function(v) { return (v && typeof v === 'object') ? JSON.stringify(v) : (v !== undefined && v !== null ? String(v) : ''); };
@@ -555,6 +626,7 @@ function doPost(e) {
       if (ids.indexOf(String(payload.id))<0) {
         sh.appendRow(row);
         if (sheetName==='MX-01'&&payload.allChems) appendChemicals(sh,sh.getLastRow(),payload.allChems);
+        if (sheetName==='MX-01') { try { updateMXStages(); } catch(e) {} }
         if (sheetName==='SP-01') updateSPSummary();
       }
       return ok('appended '+payload.id);
@@ -581,6 +653,7 @@ function doPost(e) {
       if (!row.length) return ok('empty row');
       sh.getRange(rowIdx,1,1,row.length).setValues([row]);
       if (sheetName==='MX-01'&&payload.allChems) appendChemicals(sh,rowIdx,payload.allChems);
+      if (sheetName==='MX-01') { try { updateMXStages(); } catch(e) {} }
       if (sheetName==='SP-01') updateSPSummary();
       return ok('updated '+id);
     }
@@ -660,6 +733,8 @@ function doPost(e) {
       });
       // ★ อัพเดท CR_Issued + CalcQty ใน STOCK_INIT ทุกครั้งที่ sync
       try { updateStockInitCalc(); } catch(e) {}
+      // ★ อัพเดท column Stage ใน MX-01 (Burn down/Pre-em = D0)
+      if (sheets['MX-01']) { try { updateMXStages(); } catch(e) {} }
       return ok(JSON.stringify(counts));
     }
 
