@@ -39,19 +39,19 @@ input[type=date]::-webkit-calendar-picker-indicator,
 input[type=time]::-webkit-calendar-picker-indicator{filter:opacity(.6)}
 
 /* NAV */
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,0.55);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-top:1px solid rgba(255,255,255,0.75);display:flex;padding:6px 0 14px;z-index:100}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--faint);font-size:11px;font-weight:700;font-family:inherit}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,0.55);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-top:1px solid rgba(255,255,255,0.75);display:flex;padding:8px 0 16px;z-index:100}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--faint);font-size:13px;font-weight:700;font-family:inherit}
 .nb.on{color:var(--acc)}
-.nb span:first-child{font-size:26px}
+.nb span:first-child{font-size:32px}
 
 /* HEADER */
-.hdr{background:rgba(255,255,255,0.45);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-bottom:1px solid rgba(255,255,255,0.6);padding:10px 15px;position:sticky;top:0;z-index:50}
+.hdr{background:rgba(255,255,255,0.45);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-bottom:1px solid rgba(255,255,255,0.6);padding:12px 16px;position:sticky;top:0;z-index:50}
 .hdr-r{display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:10px;letter-spacing:2px;color:var(--acc);font-weight:700}
-.logo-s{font-size:9px;color:var(--muted)}
-.chips{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.chip-d{font-size:10px;background:rgba(26,107,54,0.15);color:var(--acc);padding:2px 8px;border-radius:20px;font-weight:700;border:1px solid rgba(26,107,54,0.3)}
-.chip-s{font-size:9px;color:var(--muted)}
+.logo{font-size:13px;letter-spacing:2px;color:var(--acc);font-weight:700}
+.logo-s{font-size:11px;color:var(--muted)}
+.chips{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.chip-d{font-size:12px;background:rgba(26,107,54,0.15);color:var(--acc);padding:3px 10px;border-radius:20px;font-weight:700;border:1px solid rgba(26,107,54,0.3)}
+.chip-s{font-size:11px;color:var(--muted)}
 
 /* PAGES */
 .pg{display:none;padding:14px 14px 0}
@@ -64,9 +64,9 @@ input[type=time]::-webkit-calendar-picker-indicator{filter:opacity(.6)}
 
 /* STATS */
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:13px}
-.stat{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:10px;padding:10px 6px;text-align:center;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
-.stat-v{font-size:36px;font-weight:900}
-.stat-l{font-size:11px;color:var(--muted);margin-top:3px;font-weight:700}
+.stat{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:12px;padding:14px 6px;text-align:center;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
+.stat-v{font-size:42px;font-weight:900}
+.stat-l{font-size:13px;color:var(--muted);margin-top:4px;font-weight:700}
 
 /* FORMS */
 .fw{display:none;padding:13px 14px}
@@ -88,13 +88,13 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 .calc{border-radius:9px;padding:10px 12px;margin-bottom:10px}
 .crow{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
 .cval{font-weight:800;font-size:12px}
-.badge{font-size:10px;padding:4px 10px;border-radius:20px;font-weight:800;letter-spacing:.3px}
+.badge{font-size:12px;padding:5px 12px;border-radius:20px;font-weight:800;letter-spacing:.3px}
 
 /* REPORT */
 .subnav{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:13px}
 .snb{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 3px;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
 .snb.on{background:rgba(26,107,54,0.18);border-color:rgba(26,107,54,0.5);color:var(--acc)}
-.sec{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:9px;font-weight:800}
+.sec{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:800}
 .bar-bg{height:5px;background:rgba(26,107,54,0.15);border-radius:3px;overflow:hidden;margin-top:5px}
 .bar-f{height:100%;background:var(--acc);border-radius:3px}
 
@@ -164,71 +164,71 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px">
     <div class="stat" style="cursor:pointer" onclick="showForm('st')">
-      <div class="stat-v" id="cnt-st" style="color:var(--purple);font-size:20px">0</div>
+      <div class="stat-v" id="cnt-st" style="color:var(--purple);font-size:32px">0</div>
       <div class="stat-l">📥 Stock In ST</div>
-      <div style="font-size:8px;color:var(--muted)" id="cnt-st-total"></div>
+      <div style="font-size:11px;color:var(--muted)" id="cnt-st-total"></div>
     </div>
     <div class="stat" style="cursor:pointer" onclick="showForm('rt')">
-      <div class="stat-v" id="cnt-rt" style="color:var(--warn);font-size:20px">0</div>
+      <div class="stat-v" id="cnt-rt" style="color:var(--warn);font-size:32px">0</div>
       <div class="stat-l">↩️ คืนคลัง RT</div>
-      <div style="font-size:8px;color:var(--muted)" id="cnt-rt-total"></div>
+      <div style="font-size:11px;color:var(--muted)" id="cnt-rt-total"></div>
     </div>
   </div>
   <div class="sec">ទម្រង់ (FORMS)</div>
   <div class="g3" style="margin-bottom:13px">
     <div class="fcard" onclick="showForm('cr')">
-      <div style="font-size:20px">📦</div>
-      <div style="font-size:11px;font-weight:700">ការស្នើសុំ</div>
-      <div style="font-size:8px;color:var(--muted)">Requisition</div>
+      <div style="font-size:28px">📦</div>
+      <div style="font-size:14px;font-weight:700">ការស្នើសុំ</div>
+      <div style="font-size:11px;color:var(--muted)">Requisition</div>
       <span class="badge" style="background:rgba(61,219,114,.2);color:var(--acc)">CR-01</span>
     </div>
     <div class="fcard" onclick="showForm('mx')">
-      <div style="font-size:20px">⚗️</div>
-      <div style="font-size:11px;font-weight:700">ការលាយ</div>
-      <div style="font-size:8px;color:var(--muted)">Mixing</div>
+      <div style="font-size:28px">⚗️</div>
+      <div style="font-size:14px;font-weight:700">ការលាយ</div>
+      <div style="font-size:11px;color:var(--muted)">Mixing</div>
       <span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
     </div>
     <div class="fcard" onclick="showForm('sp')">
-      <div style="font-size:20px">🌿</div>
-      <div style="font-size:11px;font-weight:700">ការបាញ់</div>
-      <div style="font-size:8px;color:var(--muted)">Spraying</div>
+      <div style="font-size:28px">🌿</div>
+      <div style="font-size:14px;font-weight:700">ការបាញ់</div>
+      <div style="font-size:11px;color:var(--muted)">Spraying</div>
       <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">SP-01</span>
     </div>
     <div class="fcard" onclick="showForm('st')">
-      <div style="font-size:20px">📥</div>
-      <div style="font-size:11px;font-weight:700">รับเข้าคลัง</div>
-      <div style="font-size:8px;color:var(--muted)">Stock In</div>
+      <div style="font-size:28px">📥</div>
+      <div style="font-size:14px;font-weight:700">รับเข้าคลัง</div>
+      <div style="font-size:11px;color:var(--muted)">Stock In</div>
       <span class="badge" style="background:rgba(155,126,245,.2);color:var(--purple)">ST-01</span>
     </div>
     <div class="fcard" onclick="showForm('rt')">
-      <div style="font-size:20px">↩️</div>
-      <div style="font-size:11px;font-weight:700">คืนเข้าคลัง</div>
-      <div style="font-size:8px;color:var(--muted)">Return</div>
+      <div style="font-size:28px">↩️</div>
+      <div style="font-size:14px;font-weight:700">คืนเข้าคลัง</div>
+      <div style="font-size:11px;color:var(--muted)">Return</div>
       <span class="badge" style="background:rgba(245,166,35,.2);color:var(--warn)">RT-01</span>
     </div>
   </div>
-  <div style="background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);border-radius:12px;padding:11px 13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('report')">
+  <div style="background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('report')">
     <div>
-      <div style="font-size:12px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
-      <div style="font-size:9px;color:var(--muted);margin-top:2px">Summary · By Plot · By Chem · Balance</div>
+      <div style="font-size:15px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">Summary · By Plot · By Chem · Balance</div>
     </div>
-    <span style="color:var(--warn);font-size:16px">→</span>
+    <span style="color:var(--warn);font-size:20px">→</span>
   </div>
-  <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
-    🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:9px;opacity:.7">auto 30s</span>
+  <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
+    🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 30s</span>
   </button>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
     <div class="sec" style="margin-bottom:0" id="lbl-daily-sp">📅 รายงานฉีดพ่นวันนี้</div>
-    <span style="font-size:9px;color:var(--muted)" id="lbl-daily-sp-date"></span>
+    <span style="font-size:11px;color:var(--muted)" id="lbl-daily-sp-date"></span>
   </div>
   <div id="daily-sp-report"></div>
 
-  <div style="background:var(--dim);border:1.5px solid var(--bdr);border-radius:12px;padding:11px 13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('stock')">
+  <div style="background:var(--dim);border:1.5px solid var(--bdr);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('stock')">
     <div>
-      <div style="font-size:12px;font-weight:700;color:var(--acc)">📦 Stock คงเหลือ</div>
-      <div style="font-size:9px;color:var(--muted);margin-top:2px">บนรถ (CR−MX) · คลัง (Initial−CR)</div>
+      <div style="font-size:15px;font-weight:700;color:var(--acc)">📦 Stock คงเหลือ</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">บนรถ (CR−MX) · คลัง (Initial−CR)</div>
     </div>
-    <span style="color:var(--acc);font-size:16px">→</span>
+    <span style="color:var(--acc);font-size:20px">→</span>
   </div>
 
 </div>
