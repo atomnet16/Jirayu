@@ -99,8 +99,9 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 .bar-f{height:100%;background:var(--acc);border-radius:3px}
 
 /* HISTORY */
-.ftabs{display:flex;gap:6px;margin-bottom:11px}
-.ft{flex:1;background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 3px;font-size:11px;font-weight:700;cursor:pointer}
+.ftabs{display:flex;gap:6px;margin-bottom:11px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+.ftabs::-webkit-scrollbar{display:none}
+.ft{flex:0 0 auto;min-width:48px;background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 6px;font-size:11px;font-weight:700;cursor:pointer}
 .ft.on{background:rgba(26,107,54,0.18);border-color:rgba(26,107,54,0.5);color:var(--acc)}
 .delbtn{background:rgba(192,48,42,0.1);border:1.5px solid var(--danger);color:var(--danger);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:700}
 
