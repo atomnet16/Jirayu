@@ -640,6 +640,13 @@ var editMode = false;
 var pendingEdits = loadPendingEdits();
 function loadPendingEdits(){ try{return JSON.parse(localStorage.getItem('mf_edits')||'[]');}catch(e){return[];} }
 function savePendingEdits(){ try{localStorage.setItem('mf_edits',JSON.stringify(pendingEdits));}catch(e){} }
+// Protection window: หลังแก้ไข record ให้เชื่อ local เสมอชั่วคราว (กัน cloud เก่าเด้งทับ)
+var EDIT_PROTECT_MS = 90000;
+var recentEdits = loadRecentEdits();
+function loadRecentEdits(){ try{return JSON.parse(localStorage.getItem('mf_recent_edits')||'{}');}catch(e){return{};} }
+function saveRecentEdits(){ try{localStorage.setItem('mf_recent_edits',JSON.stringify(recentEdits));}catch(e){} }
+function markRecentEdit(id){ recentEdits[id]=Date.now(); saveRecentEdits(); }
+function isProtected(id){ var t=recentEdits[id]; return t && (Date.now()-t) < EDIT_PROTECT_MS; }
 
 // ═══════════════════════════════════════════════════════════
 // LOCAL STORAGE
@@ -827,6 +834,7 @@ function handleSave(rec, sheetName, cloudPayload) {
       rec.cloudSynced = records[idx].cloudSynced;
       rec.updatedAt = new Date().toISOString();
       records[idx] = rec;
+      markRecentEdit(editId);
       cloudPayload.id = editId;
       cloudPayload.action = 'update';
       cloudPayload.sheet = sheetName;
@@ -1701,8 +1709,8 @@ function cloudSync() {
     cloud.forEach(function(r){
       var loc = localMap[r.id];
       var savedCloudAC = r.type==='mx' ? sanitizeAllChems(r.allChems||{}) : null;
-      // ถ้า local ใหม่กว่า cloud (เช่น เพิ่งแก้ไขในแอป) → ใช้ข้อมูล local ทั้งหมด
-      var localIsNewer = loc && loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt);
+      // ถ้า local ใหม่กว่า cloud หรืออยู่ใน protection window (เพิ่งแก้ไข) → เชื่อ local ทั้งหมด
+      var localIsNewer = loc && ((loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt)) || isProtected(r.id));
       if (localIsNewer) {
         var fields = Object.keys(loc);
         fields.forEach(function(k){ r[k] = loc[k]; });

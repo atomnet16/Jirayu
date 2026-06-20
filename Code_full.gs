@@ -101,10 +101,18 @@ function appendChemicals(sh, rowNum, allChems) {
   var keys = Object.keys(allChems);
   if (keys.length === 0) return;
   var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  // normalize: ตัด suffix หน่วย "(Kg)"/"(L)" + ช่องว่าง เพื่อจับคู่คอลัมน์ที่ชื่อไม่ตรงเป๊ะ
+  function norm(s){ return String(s).replace(/\s*\([A-Za-z]+\)\s*$/, '').replace(/\s+/g,' ').trim().toLowerCase(); }
+  var headerIdx = {};
+  headers.forEach(function(h, i){ var n = norm(h); if (n && !(n in headerIdx)) headerIdx[n] = i; });
   keys.forEach(function(chemName) {
     var val = parseFloat(allChems[chemName]);
     if (isNaN(val) || val <= 0) return;
     var colIdx = headers.indexOf(chemName);
+    if (colIdx < 0) {
+      var nIdx = headerIdx[norm(chemName)];
+      if (nIdx !== undefined) colIdx = nIdx;
+    }
     if (colIdx >= 0) sh.getRange(rowNum, colIdx + 1).setValue(val);
   });
 }
@@ -591,6 +599,7 @@ function doPost(e) {
             if (shouldUpdate) {
               var row = buildRow(name,d,headers);
               if (row.length){ sh.getRange(rowIdx,1,1,row.length).setValues([row]); updated++; }
+              if (isMX&&d.allChems&&Object.keys(d.allChems).length>0) appendChemicals(sh,rowIdx,d.allChems);
             }
             if (name==='SP-01'&&!shouldUpdate) {
               var spRowVals = sh.getRange(rowIdx,1,1,sh.getLastColumn()).getValues()[0];
