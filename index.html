@@ -40,18 +40,18 @@ input[type=time]::-webkit-calendar-picker-indicator{filter:opacity(.6)}
 
 /* NAV */
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,0.55);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-top:1px solid rgba(255,255,255,0.75);display:flex;padding:8px 0 16px;z-index:100}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--faint);font-size:26px;font-weight:700;font-family:inherit}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--faint);font-size:13px;font-weight:700;font-family:inherit}
 .nb.on{color:var(--acc)}
-.nb span:first-child{font-size:64px}
+.nb span:first-child{font-size:32px}
 
 /* HEADER */
 .hdr{background:rgba(255,255,255,0.45);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-bottom:1px solid rgba(255,255,255,0.6);padding:12px 16px;position:sticky;top:0;z-index:50}
 .hdr-r{display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:26px;letter-spacing:2px;color:var(--acc);font-weight:700}
-.logo-s{font-size:22px;color:var(--muted)}
+.logo{font-size:13px;letter-spacing:2px;color:var(--acc);font-weight:700}
+.logo-s{font-size:11px;color:var(--muted)}
 .chips{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
-.chip-d{font-size:24px;background:rgba(26,107,54,0.15);color:var(--acc);padding:3px 10px;border-radius:20px;font-weight:700;border:1px solid rgba(26,107,54,0.3)}
-.chip-s{font-size:22px;color:var(--muted)}
+.chip-d{font-size:12px;background:rgba(26,107,54,0.15);color:var(--acc);padding:3px 10px;border-radius:20px;font-weight:700;border:1px solid rgba(26,107,54,0.3)}
+.chip-s{font-size:11px;color:var(--muted)}
 
 /* PAGES */
 .pg{display:none;padding:14px 14px 0}
@@ -65,44 +65,44 @@ input[type=time]::-webkit-calendar-picker-indicator{filter:opacity(.6)}
 /* STATS */
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:13px}
 .stat{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:12px;padding:14px 6px;text-align:center;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
-.stat-v{font-size:84px;font-weight:900}
-.stat-l{font-size:26px;color:var(--muted);margin-top:4px;font-weight:700}
+.stat-v{font-size:42px;font-weight:900}
+.stat-l{font-size:13px;color:var(--muted);margin-top:4px;font-weight:700}
 
 /* FORMS */
 .fw{display:none;padding:13px 14px}
 .fw.on{display:block}
 .fhdr{display:flex;align-items:center;gap:8px;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid rgba(26,107,54,0.2)}
-.ftitle{font-size:34px;font-weight:900;flex:1}
-.back{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1.5px solid var(--bdr);color:var(--text);border-radius:8px;padding:12px 18px;font-size:26px;font-weight:700;cursor:pointer}
+.ftitle{font-size:17px;font-weight:900;flex:1}
+.back{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1.5px solid var(--bdr);color:var(--text);border-radius:8px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer}
 .grp{margin-bottom:11px}
-label{font-size:24px;color:var(--text);font-weight:700;display:block;margin-bottom:6px}
-input[type=text],input[type=number],input[type=date],input[type=time]{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.8);border-radius:9px;color:var(--text);padding:14px 13px;font-size:30px;font-weight:600;outline:none}
+label{font-size:12px;color:var(--text);font-weight:700;display:block;margin-bottom:6px}
+input[type=text],input[type=number],input[type=date],input[type=time]{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.8);border-radius:9px;color:var(--text);padding:14px 13px;font-size:15px;font-weight:600;outline:none}
 input[type=text]:focus,input[type=number]:focus,input[type=date]:focus,input[type=time]:focus{border-color:var(--acc);background:rgba(255,255,255,0.8)}
-select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.8);border-radius:9px;color:var(--text);padding:14px 13px;font-size:28px;font-weight:600;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath fill='%231A6B36' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.8);border-radius:9px;color:var(--text);padding:14px 13px;font-size:14px;font-weight:600;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath fill='%231A6B36' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sbtn{width:100%;border:none;border-radius:12px;color:#FFFFFF;padding:19px;font-size:32px;font-weight:900;cursor:pointer;margin-top:14px;letter-spacing:.2px}
-.abtn{width:100%;background:rgba(255,255,255,0.4);border:2px dashed rgba(26,107,54,0.35);border-radius:9px;padding:13px;font-size:26px;cursor:pointer;font-weight:700;margin-top:6px;color:var(--text)}
-.rm{background:none;border:none;color:var(--danger);cursor:pointer;padding:0 4px;font-size:28px}
+.sbtn{width:100%;border:none;border-radius:12px;color:#FFFFFF;padding:19px;font-size:16px;font-weight:900;cursor:pointer;margin-top:14px;letter-spacing:.2px}
+.abtn{width:100%;background:rgba(255,255,255,0.4);border:2px dashed rgba(26,107,54,0.35);border-radius:9px;padding:13px;font-size:13px;cursor:pointer;font-weight:700;margin-top:6px;color:var(--text)}
+.rm{background:none;border:none;color:var(--danger);cursor:pointer;padding:0 4px;font-size:14px}
 .cr{background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.75);border-radius:8px;padding:8px 10px;margin-bottom:6px}
 .tc{background:rgba(255,255,255,0.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1.5px solid rgba(15,122,104,0.35);border-radius:10px;padding:10px 12px;margin-bottom:8px}
 .calc{border-radius:9px;padding:10px 12px;margin-bottom:10px}
-.crow{display:flex;justify-content:space-between;font-size:22px;padding:2px 0}
-.cval{font-weight:800;font-size:24px}
-.badge{font-size:24px;padding:5px 12px;border-radius:20px;font-weight:800;letter-spacing:.3px}
+.crow{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
+.cval{font-weight:800;font-size:12px}
+.badge{font-size:12px;padding:5px 12px;border-radius:20px;font-weight:800;letter-spacing:.3px}
 
 /* REPORT */
 .subnav{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:13px}
-.snb{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 3px;font-size:20px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.snb{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 3px;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
 .snb.on{background:rgba(26,107,54,0.18);border-color:rgba(26,107,54,0.5);color:var(--acc)}
-.sec{font-size:26px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:800}
+.sec{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:800}
 .bar-bg{height:5px;background:rgba(26,107,54,0.15);border-radius:3px;overflow:hidden;margin-top:5px}
 .bar-f{height:100%;background:var(--acc);border-radius:3px}
 
 /* HISTORY */
 .ftabs{display:flex;gap:6px;margin-bottom:11px}
-.ft{flex:1;background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 3px;font-size:22px;font-weight:700;cursor:pointer}
+.ft{flex:1;background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 3px;font-size:11px;font-weight:700;cursor:pointer}
 .ft.on{background:rgba(26,107,54,0.18);border-color:rgba(26,107,54,0.5);color:var(--acc)}
-.delbtn{background:rgba(192,48,42,0.1);border:1.5px solid var(--danger);color:var(--danger);border-radius:6px;padding:3px 8px;font-size:20px;cursor:pointer;font-family:inherit;font-weight:700}
+.delbtn{background:rgba(192,48,42,0.1);border:1.5px solid var(--danger);color:var(--danger);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:700}
 
 /* ALERTS */
 .aout{background:rgba(192,48,42,0.08);border:1.5px solid rgba(192,48,42,0.4);border-radius:8px;padding:7px 11px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
@@ -113,29 +113,29 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 .cmo.on{display:flex}
 .cmb{background:rgba(232,245,236,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px 16px 0 0;width:100%;max-height:78vh;display:flex;flex-direction:column}
 .cmh{padding:13px 14px 9px;border-bottom:1px solid rgba(26,107,54,0.2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.cms{width:100%;background:rgba(255,255,255,0.7);border:1.5px solid rgba(255,255,255,0.85);border-radius:9px;color:var(--text);padding:9px 12px;font-size:26px;outline:none;font-family:inherit}
+.cms{width:100%;background:rgba(255,255,255,0.7);border:1.5px solid rgba(255,255,255,0.85);border-radius:9px;color:var(--text);padding:9px 12px;font-size:13px;outline:none;font-family:inherit}
 .cml{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .cmi{padding:10px 14px;border-bottom:1px solid rgba(26,107,54,0.12);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .cmi:active,.cmi.sel{background:rgba(26,107,54,0.1)}
 .cmi.sel{border-left:3px solid var(--acc)}
 .cmi.sel .cn{color:var(--acc);font-weight:700}
-.cn{font-size:26px;font-weight:600}
-.ct{font-size:20px;color:var(--muted)}
+.cn{font-size:13px;font-weight:600}
+.ct{font-size:10px;color:var(--muted)}
 
 /* PLOT MODAL */
 .pmo{display:none;position:fixed;inset:0;background:rgba(10,30,15,0.4);z-index:200;align-items:center;justify-content:center}
 .pmo.on{display:flex}
 .pmb{background:rgba(232,245,236,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:14px;width:calc(100% - 30px);max-height:70vh;display:flex;flex-direction:column;overflow:hidden}
 .pml{overflow-y:auto}
-.pmi{padding:9px 13px;border-bottom:1px solid rgba(26,107,54,0.12);cursor:pointer;font-size:24px}
+.pmi{padding:9px 13px;border-bottom:1px solid rgba(26,107,54,0.12);cursor:pointer;font-size:12px}
 .pmi:active{background:var(--adim)}
 
 /* EXPORT BOX */
 .ebox{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-top:12px}
-.etxt{width:100%;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.8);border-radius:8px;color:var(--text);padding:9px;font-size:20px;font-family:monospace;margin-top:6px;resize:none;height:55px}
+.etxt{width:100%;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.8);border-radius:8px;color:var(--text);padding:9px;font-size:10px;font-family:monospace;margin-top:6px;resize:none;height:55px}
 
 /* TOAST */
-#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--acc);color:#FFFFFF;border-radius:20px;padding:7px 16px;font-size:24px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--acc);color:#FFFFFF;border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -164,78 +164,78 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px">
     <div class="stat" style="cursor:pointer" onclick="showForm('st')">
-      <div class="stat-v" id="cnt-st" style="color:var(--purple);font-size:64px">0</div>
+      <div class="stat-v" id="cnt-st" style="color:var(--purple);font-size:32px">0</div>
       <div class="stat-l">📥 Stock In ST</div>
-      <div style="font-size:22px;color:var(--muted)" id="cnt-st-total"></div>
+      <div style="font-size:11px;color:var(--muted)" id="cnt-st-total"></div>
     </div>
     <div class="stat" style="cursor:pointer" onclick="showForm('rt')">
-      <div class="stat-v" id="cnt-rt" style="color:var(--warn);font-size:64px">0</div>
+      <div class="stat-v" id="cnt-rt" style="color:var(--warn);font-size:32px">0</div>
       <div class="stat-l">↩️ คืนคลัง RT</div>
-      <div style="font-size:22px;color:var(--muted)" id="cnt-rt-total"></div>
+      <div style="font-size:11px;color:var(--muted)" id="cnt-rt-total"></div>
     </div>
   </div>
   <div class="sec">ទម្រង់ (FORMS)</div>
   <div class="g3" style="margin-bottom:13px">
     <div class="fcard" onclick="showForm('cr')">
-      <div style="font-size:56px">📦</div>
-      <div style="font-size:28px;font-weight:700">ការស្នើសុំ</div>
-      <div style="font-size:22px;color:var(--muted)">Requisition</div>
+      <div style="font-size:28px">📦</div>
+      <div style="font-size:14px;font-weight:700">ការស្នើសុំ</div>
+      <div style="font-size:11px;color:var(--muted)">Requisition</div>
       <span class="badge" style="background:rgba(61,219,114,.2);color:var(--acc)">CR-01</span>
     </div>
     <div class="fcard" onclick="showForm('mx')">
-      <div style="font-size:56px">⚗️</div>
-      <div style="font-size:28px;font-weight:700">ការលាយ</div>
-      <div style="font-size:22px;color:var(--muted)">Mixing</div>
+      <div style="font-size:28px">⚗️</div>
+      <div style="font-size:14px;font-weight:700">ការលាយ</div>
+      <div style="font-size:11px;color:var(--muted)">Mixing</div>
       <span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
     </div>
     <div class="fcard" onclick="showForm('sp')">
-      <div style="font-size:56px">🌿</div>
-      <div style="font-size:28px;font-weight:700">ការបាញ់</div>
-      <div style="font-size:22px;color:var(--muted)">Spraying</div>
+      <div style="font-size:28px">🌿</div>
+      <div style="font-size:14px;font-weight:700">ការបាញ់</div>
+      <div style="font-size:11px;color:var(--muted)">Spraying</div>
       <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">SP-01</span>
     </div>
     <div class="fcard" onclick="showForm('st')">
-      <div style="font-size:56px">📥</div>
-      <div style="font-size:28px;font-weight:700">รับเข้าคลัง</div>
-      <div style="font-size:22px;color:var(--muted)">Stock In</div>
+      <div style="font-size:28px">📥</div>
+      <div style="font-size:14px;font-weight:700">รับเข้าคลัง</div>
+      <div style="font-size:11px;color:var(--muted)">Stock In</div>
       <span class="badge" style="background:rgba(155,126,245,.2);color:var(--purple)">ST-01</span>
     </div>
     <div class="fcard" onclick="showForm('rt')">
-      <div style="font-size:56px">↩️</div>
-      <div style="font-size:28px;font-weight:700">คืนเข้าคลัง</div>
-      <div style="font-size:22px;color:var(--muted)">Return</div>
+      <div style="font-size:28px">↩️</div>
+      <div style="font-size:14px;font-weight:700">คืนเข้าคลัง</div>
+      <div style="font-size:11px;color:var(--muted)">Return</div>
       <span class="badge" style="background:rgba(245,166,35,.2);color:var(--warn)">RT-01</span>
     </div>
   </div>
   <div style="background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('report')">
     <div>
-      <div style="font-size:30px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
-      <div style="font-size:24px;color:var(--muted);margin-top:3px">Summary · By Plot · By Chem · Balance</div>
+      <div style="font-size:15px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">Summary · By Plot · By Chem · Balance</div>
     </div>
-    <span style="color:var(--warn);font-size:40px">→</span>
+    <span style="color:var(--warn);font-size:20px">→</span>
   </div>
-  <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:28px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
-    🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:22px;opacity:.7">auto 30s</span>
+  <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
+    🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 30s</span>
   </button>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
     <div class="sec" style="margin-bottom:0" id="lbl-daily-sp">📅 รายงานฉีดพ่นวันนี้</div>
-    <span style="font-size:22px;color:var(--muted)" id="lbl-daily-sp-date"></span>
+    <span style="font-size:11px;color:var(--muted)" id="lbl-daily-sp-date"></span>
   </div>
   <div id="daily-sp-report"></div>
 
   <div style="background:var(--dim);border:1.5px solid var(--bdr);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('stock')">
     <div>
-      <div style="font-size:30px;font-weight:700;color:var(--acc)">📦 Stock คงเหลือ</div>
-      <div style="font-size:24px;color:var(--muted);margin-top:3px">บนรถ (CR−MX) · คลัง (Initial−CR)</div>
+      <div style="font-size:15px;font-weight:700;color:var(--acc)">📦 Stock คงเหลือ</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">บนรถ (CR−MX) · คลัง (Initial−CR)</div>
     </div>
-    <span style="color:var(--acc);font-size:40px">→</span>
+    <span style="color:var(--acc);font-size:20px">→</span>
   </div>
 
 </div>
 
 <!-- REPORT PAGE -->
 <div class="pg" id="pg-report">
-  <div style="font-size:26px;font-weight:800;margin-bottom:11px">📋 របាយការណ៍</div>
+  <div style="font-size:13px;font-weight:800;margin-bottom:11px">📋 របាយការណ៍</div>
   <div class="subnav">
     <button class="snb on" onclick="showRpt('sum')" id="snb-sum"><span>📊</span><span>Summary</span></button>
     <button class="snb" onclick="showRpt('plot')" id="snb-plot"><span>📍</span><span>By Plot</span></button>
@@ -258,14 +258,14 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   </div>
   <div id="hist-list"></div>
   <div class="ebox">
-    <div style="font-size:22px;color:var(--muted);margin-bottom:7px">💾 ទិន្នន័យ (Data)</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:7px">💾 ទិន្នន័យ (Data)</div>
     <button class="sbtn" style="background:var(--warn);margin-top:0" onclick="doExport()">📋 Export & Copy</button>
-    <div id="exp-ok" style="font-size:20px;color:var(--acc);margin-top:5px;display:none">✅ Copied!</div>
+    <div id="exp-ok" style="font-size:10px;color:var(--acc);margin-top:5px;display:none">✅ Copied!</div>
     <button class="sbtn" style="background:var(--teal);margin-top:7px" onclick="doBkp()">💾 Download Backup</button>
     <input type="file" id="import-file" accept=".json" onchange="doImport(this)" style="display:none">
     <button class="sbtn" style="background:var(--blue);margin-top:7px" onclick="document.getElementById('import-file').click()">📂 Import Backup</button>
-    <div id="import-status" style="font-size:20px;color:var(--acc);margin-top:5px;display:none"></div>
-    <div style="font-size:20px;color:var(--muted);margin-top:8px">📋 Paste JSON:</div>
+    <div id="import-status" style="font-size:10px;color:var(--acc);margin-top:5px;display:none"></div>
+    <div style="font-size:10px;color:var(--muted);margin-top:8px">📋 Paste JSON:</div>
     <textarea id="import-paste" class="etxt" placeholder='[{"id":"CR-..."}]'></textarea>
     <button class="sbtn" style="background:var(--purple);margin-top:5px" onclick="doPaste()">⬆️ Import Pasted JSON</button>
   </div>
@@ -275,32 +275,32 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 <div class="pg" id="pg-settings">
   <div class="sec">⚙️ SETTINGS</div>
   <div class="card" style="margin-bottom:11px">
-    <div style="font-size:22px;font-weight:700;margin-bottom:9px;color:var(--acc)">📡 Sync Status</div>
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">📡 Sync Status</div>
     <div class="crow"><span style="color:var(--muted)">Last Sync</span><span class="cval" id="set-last-sync">—</span></div>
     <div class="crow"><span style="color:var(--muted)">Script URL</span><span class="cval" id="set-script-status">checking...</span></div>
     <div class="crow"><span style="color:var(--muted)">Records (Local)</span><span class="cval" id="set-rec-count">0</span></div>
   </div>
   <div class="card" style="margin-bottom:11px">
-    <div style="font-size:22px;font-weight:700;margin-bottom:9px;color:var(--acc)">ℹ️ About</div>
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">ℹ️ About</div>
     <div class="crow"><span style="color:var(--muted)">App</span><span class="cval">Chem Control · Mega Farm</span></div>
     <div class="crow"><span style="color:var(--muted)">Version</span><span class="cval">v12</span></div>
   </div>
-  <button onclick="doRefresh()" style="width:100%;background:var(--dim);border:1px solid var(--bdr);color:var(--acc);border-radius:10px;padding:10px;font-size:24px;font-weight:700;cursor:pointer;font-family:inherit">
+  <button onclick="doRefresh()" style="width:100%;background:var(--dim);border:1px solid var(--bdr);color:var(--acc);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
     🔄 Force Sync Now
   </button>
 </div>
 
 <!-- STOCK PAGE -->
 <div class="pg" id="pg-stock">
-  <div style="font-size:26px;font-weight:800;margin-bottom:11px">📦 Stock คงเหลือ</div>
+  <div style="font-size:13px;font-weight:800;margin-bottom:11px">📦 Stock คงเหลือ</div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
     <div class="sec" style="margin-bottom:0">🚛 STOCK คงเหลือบนรถ</div>
-    <span style="font-size:18px;color:var(--muted)">CR − MX (Real-time)</span>
+    <span style="font-size:9px;color:var(--muted)">CR − MX (Real-time)</span>
   </div>
   <div id="alerts"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;margin-top:14px">
     <div class="sec" style="margin-bottom:0">🏭 STOCK คลัง (Warehouse)</div>
-    <span style="font-size:18px;color:var(--muted)">ต้นทุน − เบิก CR</span>
+    <span style="font-size:9px;color:var(--muted)">ต้นทุน − เบิก CR</span>
   </div>
   <div id="wh-stock"></div>
 </div>
@@ -315,7 +315,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 </nav>
 
 <!-- EDIT BANNER (shown when editing an existing record) -->
-<div id="edit-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff;font-size:24px;font-weight:700;text-align:center;padding:8px 12px;letter-spacing:.3px">
+<div id="edit-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:8px 12px;letter-spacing:.3px">
   ✏️ แก้ไข: <span id="edit-id-label"></span> &nbsp;|&nbsp; กด ← ต้রఁป់ เพื่อยกเลิก
 </div>
 
@@ -394,20 +394,20 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
       <select id="sp-wind"><option value="">ជ្រើស...</option><option>ស្ងប់ &lt;5km/h</option><option>ស្រាល 5-15</option><option>ខ្លាំង &gt;15</option></select>
     </div>
   </div>
-  <button type="button" onclick="autoWeather()" id="btn-weather" style="width:100%;padding:8px;background:rgba(91,164,245,.12);color:var(--blue);border:1px solid rgba(91,164,245,.3);border-radius:8px;font-size:24px;cursor:pointer;margin-bottom:6px">
+  <button type="button" onclick="autoWeather()" id="btn-weather" style="width:100%;padding:8px;background:rgba(91,164,245,.12);color:var(--blue);border:1px solid rgba(91,164,245,.3);border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:6px">
     📍 ดึงสภาพอากาศจาก GPS อัตโนมัติ
   </button>
-  <div id="weather-status" style="font-size:20px;color:var(--muted);text-align:center;margin-bottom:4px;display:none"></div>
+  <div id="weather-status" style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:4px;display:none"></div>
   <div class="grp">
-    <label style="font-size:24px;font-weight:700;color:var(--teal)">⚗️ ថងយាដែលប្រើ — ជ្រើសសារធាតុ (Select the Mix Used)</label>
-    <div style="font-size:20px;color:var(--muted);margin-bottom:6px">👇 ចុចលើថងយាដែលចាក់ (Tap the mix tank that was sprayed today)</div>
+    <label style="font-size:12px;font-weight:700;color:var(--teal)">⚗️ ថងយាដែលប្រើ — ជ្រើសសារធាតុ (Select the Mix Used)</label>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">👇 ចុចលើថងយាដែលចាក់ (Tap the mix tank that was sprayed today)</div>
     <input type="hidden" id="sp-mx" value="">
     <div id="sp-mx-cards" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto"></div>
-    <div id="sp-mx-none" style="display:none;font-size:20px;color:var(--muted);padding:8px;text-align:center"> មិនមានថងយា (No mix records yet)</div>
+    <div id="sp-mx-none" style="display:none;font-size:10px;color:var(--muted);padding:8px;text-align:center"> មិនមានថងយា (No mix records yet)</div>
   </div>
   <div id="sp-mx-prev" style="display:none" class="calc"></div>
   <div class="calc" style="background:rgba(91,164,245,.08);border:1px solid rgba(91,164,245,.25)">
-    <div style="font-size:20px;color:var(--blue);font-weight:700;margin-bottom:6px">💧 ទឹក (Water Tracking)</div>
+    <div style="font-size:10px;color:var(--blue);font-weight:700;margin-bottom:6px">💧 ទឹក (Water Tracking)</div>
     <div class="g2">
       <div><label>ទឹកមុន L (Before)</label><input type="number" id="sp-wb" placeholder="0" oninput="calcWater()"></div>
       <div><label>ទឹកក្រោយ L (After)</label><input type="number" id="sp-wa" placeholder="0" oninput="calcWater()"></div>
@@ -467,8 +467,8 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 <div class="cmo" id="chem-modal" onclick="if(event.target===this)closeChem()">
   <div class="cmb">
     <div class="cmh">
-      <span style="font-size:26px;font-weight:700">ជ្រើសសារធាតុ (Chemical)</span>
-      <button onclick="closeChem()" style="background:none;border:none;color:var(--muted);font-size:40px;cursor:pointer;line-height:1">✕</button>
+      <span style="font-size:13px;font-weight:700">ជ្រើសសារធាតុ (Chemical)</span>
+      <button onclick="closeChem()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">✕</button>
     </div>
     <div style="padding:9px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0">
       <input class="cms" id="chem-search" type="text" placeholder="ស្វែងរក (Search)..." oninput="filterChems()" autocomplete="off">
@@ -482,7 +482,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   <div class="pmb">
     <div style="padding:10px 13px;border-bottom:1px solid var(--bdr);flex-shrink:0;display:flex;gap:8px;align-items:center">
       <input class="cms" id="plot-search" type="text" placeholder="ស្វែងរក..." oninput="filterPlots()" autocomplete="off" style="flex:1">
-      <button onclick="closePlot()" style="background:none;border:none;color:var(--muted);font-size:36px;cursor:pointer">✕</button>
+      <button onclick="closePlot()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">✕</button>
     </div>
     <div class="pml" id="plot-list"></div>
   </div>
@@ -925,7 +925,7 @@ function renderDailySpReport() {
   });
 
   if (!todaySP.length) {
-    el.innerHTML = '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px 13px;margin-bottom:10px;text-align:center;color:var(--muted);font-size:22px">ยังไม่มีข้อมูลฉีดพ่นวันนี้</div>';
+    el.innerHTML = '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px 13px;margin-bottom:10px;text-align:center;color:var(--muted);font-size:11px">ยังไม่มีข้อมูลฉีดพ่นวันนี้</div>';
     return;
   }
 
@@ -950,30 +950,30 @@ function renderDailySpReport() {
   // ── Summary card: header + Plot/Ha/Time table ──
   html += '<div style="background:linear-gradient(135deg,rgba(61,219,114,.12),rgba(15,122,104,.08));border:1.5px solid rgba(61,219,114,.35);border-radius:11px;padding:11px 13px;margin-bottom:8px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-    +   '<span style="font-size:22px;font-weight:800;color:var(--acc)">🌿 รายงานฉีดพ่นวันนี้ — '+todaySP.length+' รอบ</span>'
-    +   '<span style="font-size:20px;color:var(--teal);font-weight:700">'+t+'</span>'
+    +   '<span style="font-size:11px;font-weight:800;color:var(--acc)">🌿 รายงานฉีดพ่นวันนี้ — '+todaySP.length+' รอบ</span>'
+    +   '<span style="font-size:10px;color:var(--teal);font-weight:700">'+t+'</span>'
     + '</div>'
     // Column header
     + '<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:4px;padding:4px 6px;background:rgba(61,219,114,.15);border-radius:7px;margin-bottom:4px">'
-    +   '<span style="font-size:18px;font-weight:800;color:var(--teal)">📍 แปลง</span>'
-    +   '<span style="font-size:18px;font-weight:800;color:var(--blue);text-align:center">Ha</span>'
-    +   '<span style="font-size:18px;font-weight:800;color:var(--muted);text-align:center">⏱ เวลา</span>'
+    +   '<span style="font-size:9px;font-weight:800;color:var(--teal)">📍 แปลง</span>'
+    +   '<span style="font-size:9px;font-weight:800;color:var(--blue);text-align:center">Ha</span>'
+    +   '<span style="font-size:9px;font-weight:800;color:var(--muted);text-align:center">⏱ เวลา</span>'
     + '</div>';
   // Per-plot rows
   todaySP.forEach(function(r, idx){
     var timeStr = (r.tStart && r.tEnd) ? r.tStart+'–'+r.tEnd : (r.tStart || '—');
     var rowBg = idx%2===0 ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.25)';
     html += '<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:4px;padding:4px 6px;background:'+rowBg+';border-radius:6px;margin-bottom:2px;align-items:center">'
-      + '<span style="font-size:20px;font-weight:700;color:var(--fg)">'+(r.plot||'—')+'</span>'
-      + '<span style="font-size:22px;font-weight:800;color:var(--blue);text-align:center">'+(parseFloat(r.area)||0).toFixed(1)+'</span>'
-      + '<span style="font-size:18px;color:var(--muted);text-align:center">'+timeStr+'</span>'
+      + '<span style="font-size:10px;font-weight:700;color:var(--fg)">'+(r.plot||'—')+'</span>'
+      + '<span style="font-size:11px;font-weight:800;color:var(--blue);text-align:center">'+(parseFloat(r.area)||0).toFixed(1)+'</span>'
+      + '<span style="font-size:9px;color:var(--muted);text-align:center">'+timeStr+'</span>'
       + '</div>';
   });
   // Totals row
   html += '<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:4px;padding:5px 6px;background:rgba(61,219,114,.2);border-radius:7px;margin-top:5px;border-top:1px solid rgba(61,219,114,.3);align-items:center">'
-    + '<span style="font-size:20px;font-weight:800;color:var(--teal)">รวม '+todaySP.length+' รอบ</span>'
-    + '<span style="font-size:24px;font-weight:800;color:var(--blue);text-align:center">'+totalHa.toFixed(1)+' ha</span>'
-    + '<span style="font-size:18px;color:var(--muted);text-align:center"></span>'
+    + '<span style="font-size:10px;font-weight:800;color:var(--teal)">รวม '+todaySP.length+' รอบ</span>'
+    + '<span style="font-size:12px;font-weight:800;color:var(--blue);text-align:center">'+totalHa.toFixed(1)+' ha</span>'
+    + '<span style="font-size:9px;color:var(--muted);text-align:center"></span>'
     + '</div>'
     + '</div>';
 
@@ -997,33 +997,33 @@ function renderDailySpReport() {
     var chemHtml = Object.keys(cd).length
       ? Object.keys(cd).map(function(n){
           var v = cd[n]; var q = typeof v==='object'?v.qty:v; var u2 = typeof v==='object'?v.unit:'';
-          return '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:20px">'
+          return '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px">'
                + '<span style="color:var(--muted)">'+n+'</span>'
                + '<span style="font-weight:700;color:var(--acc)">'+parseFloat(q||0).toFixed(3)+' '+u2+'</span>'
                + '</div>';
         }).join('')
-      : '<div style="font-size:20px;color:var(--faint)">— ไม่มีข้อมูลสารเคมี —</div>';
+      : '<div style="font-size:10px;color:var(--faint)">— ไม่มีข้อมูลสารเคมี —</div>';
 
     html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px 13px;margin-bottom:7px">'
       // Header row: plot name + id
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
       +   '<div style="display:flex;align-items:center;gap:6px">'
-      +     '<span style="background:var(--acc);color:#fff;font-size:18px;font-weight:800;padding:2px 7px;border-radius:10px">#'+(idx+1)+'</span>'
-      +     '<span style="font-size:24px;font-weight:800;color:var(--acc)">📍 '+(r.plot||'—')+'</span>'
+      +     '<span style="background:var(--acc);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px">#'+(idx+1)+'</span>'
+      +     '<span style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+(r.plot||'—')+'</span>'
       +   '</div>'
-      +   '<span style="font-size:20px;color:var(--muted)">'+r.id+'</span>'
+      +   '<span style="font-size:10px;color:var(--muted)">'+r.id+'</span>'
       + '</div>'
       // Ha / Time — 2 chips
       + '<div style="display:grid;grid-template-columns:1fr 1.5fr;gap:4px;margin-bottom:7px">'
       +   '<div style="background:rgba(91,164,245,.08);border-radius:7px;padding:5px 7px;text-align:center">'
-      +     '<div style="font-size:24px;font-weight:800;color:var(--blue)">'+(parseFloat(r.area)||0).toFixed(1)+'</div>'
-      +     '<div style="font-size:16px;color:var(--muted)">ha</div></div>'
+      +     '<div style="font-size:12px;font-weight:800;color:var(--blue)">'+(parseFloat(r.area)||0).toFixed(1)+'</div>'
+      +     '<div style="font-size:8px;color:var(--muted)">ha</div></div>'
       +   '<div style="background:rgba(245,166,35,.08);border-radius:7px;padding:5px 7px;text-align:center">'
-      +     '<div style="font-size:22px;font-weight:800;color:var(--warn)">'+(r.tStart&&r.tEnd?r.tStart+'–'+r.tEnd:(r.hrs?r.hrs+'h':'—'))+'</div>'
-      +     '<div style="font-size:16px;color:var(--muted)">'+(r.tStart&&r.tEnd?'เวลา':'ชม.')+'</div></div>'
+      +     '<div style="font-size:11px;font-weight:800;color:var(--warn)">'+(r.tStart&&r.tEnd?r.tStart+'–'+r.tEnd:(r.hrs?r.hrs+'h':'—'))+'</div>'
+      +     '<div style="font-size:8px;color:var(--muted)">'+(r.tStart&&r.tEnd?'เวลา':'ชม.')+'</div></div>'
       + '</div>'
       // Meta row
-      + '<div style="font-size:20px;color:var(--muted);margin-bottom:6px;display:flex;flex-wrap:wrap;gap:6px">'
+      + '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;display:flex;flex-wrap:wrap;gap:6px">'
       +   (r.operator ? '<span>👤 '+r.operator+'</span>' : '')
       +   (r.tStart && r.tEnd ? '<span>⏱ '+r.tStart+'–'+r.tEnd+'</span>' : '')
       +   (r.weather ? '<span>🌤 '+r.weather+'</span>' : '')
@@ -1032,10 +1032,10 @@ function renderDailySpReport() {
       + '</div>'
       // Chem section
       + '<div style="background:rgba(61,219,114,.05);border:1px solid rgba(61,219,114,.2);border-radius:8px;padding:7px 10px">'
-      +   '<div style="font-size:18px;font-weight:700;color:var(--teal);margin-bottom:4px">🧪 สารเคมีที่ฉีด</div>'
+      +   '<div style="font-size:9px;font-weight:700;color:var(--teal);margin-bottom:4px">🧪 สารเคมีที่ฉีด</div>'
       +   chemHtml
       + '</div>'
-      + (r.note ? '<div style="font-size:18px;color:var(--muted);margin-top:5px">📝 '+r.note+'</div>' : '')
+      + (r.note ? '<div style="font-size:9px;color:var(--muted);margin-top:5px">📝 '+r.note+'</div>' : '')
       + '</div>';
   });
 
@@ -1127,7 +1127,7 @@ function renderAlerts() {
   var keys = Object.keys(stock);
 
   if (keys.length === 0) {
-    el.innerHTML = '<div style="font-size:22px;color:var(--muted);padding:8px 0">ยังไม่มีข้อมูล CR-01 — กรอกการเบิกสารเคมีก่อน</div>';
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">ยังไม่มีข้อมูล CR-01 — กรอกการเบิกสารเคมีก่อน</div>';
     return;
   }
 
@@ -1150,16 +1150,16 @@ function renderAlerts() {
   var totalPct = totalLoaded>0 ? (totalRemain/totalLoaded*100).toFixed(0) : 0;
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;margin-bottom:10px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    + '<span style="font-size:22px;font-weight:700;color:var(--acc)">🚛 Stock บนรถ (CR − MX)</span>'
-    + '<span style="font-size:20px;color:var(--muted)">คงเหลือ '+totalPct+'%</span></div>'
+    + '<span style="font-size:11px;font-weight:700;color:var(--acc)">🚛 Stock บนรถ (CR − MX)</span>'
+    + '<span style="font-size:10px;color:var(--muted)">คงเหลือ '+totalPct+'%</span></div>'
     + '<div class="bar-bg"><div class="bar-f" style="width:'+totalPct+'%;background:'+(totalPct<20?'var(--danger)':totalPct<50?'var(--warn)':'var(--acc)')+'"></div></div>'
-    + '<div style="display:flex;justify-content:space-between;font-size:18px;color:var(--muted);margin-top:4px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px">'
     + '<span>🔴 OUT: '+out.length+'</span><span>🟡 LOW: '+low.length+'</span><span>🟢 OK: '+ok_items.length+'</span></div>'
     + '</div>';
 
   // ── Table: all chemicals with stock ──────────────────────────
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px">';
-  html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:18px;color:var(--muted);font-weight:700">'
+  html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700">'
     + '<span>สารเคมี</span><span>เบิก</span><span>ใช้</span><span>คงเหลือ</span><span>%</span></div>';
 
   var allSorted = out.concat(low).concat(ok_items);
@@ -1168,11 +1168,11 @@ function renderAlerts() {
     var col = (item.s.overused||item.s.remain<=0) ? 'var(--danger)' : pct<20 ? 'var(--warn)' : 'var(--acc)';
     var status = item.s.overused ? '⛔' : item.s.remain<=0 ? '🔴' : pct<20 ? '🟡' : '🟢';
     html += '<div style="padding:7px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">'
-      + '<span style="font-size:20px;font-weight:600;flex:2">'+status+' '+item.n+'</span>'
-      + '<span style="font-size:20px;color:var(--muted);flex:1;text-align:right">'+s.loaded.toFixed(1)+'</span>'
-      + '<span style="font-size:20px;color:var(--muted);flex:1;text-align:right">'+s.used.toFixed(1)+'</span>'
-      + '<span style="font-size:20px;font-weight:700;color:'+col+';flex:1;text-align:right">'+s.remain.toFixed(1)+'</span>'
-      + '<span style="font-size:20px;color:'+col+';flex:1;text-align:right">'+pct.toFixed(0)+'%</span>'
+      + '<span style="font-size:10px;font-weight:600;flex:2">'+status+' '+item.n+'</span>'
+      + '<span style="font-size:10px;color:var(--muted);flex:1;text-align:right">'+s.loaded.toFixed(1)+'</span>'
+      + '<span style="font-size:10px;color:var(--muted);flex:1;text-align:right">'+s.used.toFixed(1)+'</span>'
+      + '<span style="font-size:10px;font-weight:700;color:'+col+';flex:1;text-align:right">'+s.remain.toFixed(1)+'</span>'
+      + '<span style="font-size:10px;color:'+col+';flex:1;text-align:right">'+pct.toFixed(0)+'%</span>'
       + '</div>';
   });
   html += '</div>';
@@ -1242,7 +1242,7 @@ function renderWarehouseStock() {
     return ws[k].initial > 0 || ws[k].issued > 0;
   });
   if (active.length === 0) {
-    el.innerHTML = '<div style="font-size:22px;color:var(--muted);padding:8px 0">ยังไม่มีข้อมูลสต็อกคลัง</div>';
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">ยังไม่มีข้อมูลสต็อกคลัง</div>';
     return;
   }
   var out = [], low = [], ok_items = [];
@@ -1259,14 +1259,14 @@ function renderWarehouseStock() {
   var barColor = totalPct < 20 ? 'var(--danger)' : totalPct < 50 ? 'var(--warn)' : 'var(--purple)';
   var html = '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;margin-bottom:10px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    + '<span style="font-size:22px;font-weight:700;color:var(--purple)">🏭 Stock คลัง (Initial − CR)</span>'
-    + '<span style="font-size:20px;color:var(--muted)">คงเหลือ ' + totalPct + '%</span></div>'
+    + '<span style="font-size:11px;font-weight:700;color:var(--purple)">🏭 Stock คลัง (Initial − CR)</span>'
+    + '<span style="font-size:10px;color:var(--muted)">คงเหลือ ' + totalPct + '%</span></div>'
     + '<div class="bar-bg"><div class="bar-f" style="width:' + Math.max(0, totalPct) + '%;background:' + barColor + '"></div></div>'
-    + '<div style="display:flex;justify-content:space-between;font-size:18px;color:var(--muted);margin-top:4px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px">'
     + '<span>🔴 OUT: ' + out.length + '</span><span>🟡 LOW: ' + low.length + '</span><span>🟢 OK: ' + ok_items.length + '</span></div>'
     + '</div>';
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px">';
-  html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:18px;color:var(--muted);font-weight:700">'
+  html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700">'
     + '<span style="flex:2">สารเคมี</span>'
     + '<span style="flex:1;text-align:right">ต้นทุน+ST</span>'
     + '<span style="flex:1;text-align:right">−เบิก CR</span>'
@@ -1280,11 +1280,11 @@ function renderWarehouseStock() {
     var retAmt  = (s.returned||0) > 0 ? '+' + (s.returned||0).toFixed(1) : '—';
     var retCol  = (s.returned||0) > 0 ? 'var(--teal)' : 'var(--faint)';
     html += '<div style="padding:7px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">'
-      + '<span style="font-size:20px;font-weight:600;flex:2">' + status + ' ' + k + '</span>'
-      + '<span style="font-size:20px;color:var(--muted);flex:1;text-align:right">' + baseAmt + '</span>'
-      + '<span style="font-size:20px;color:var(--warn);flex:1;text-align:right">−' + s.issued.toFixed(1) + '</span>'
-      + '<span style="font-size:20px;color:' + retCol + ';flex:1;text-align:right">' + retAmt + '</span>'
-      + '<span style="font-size:22px;font-weight:800;color:' + col + ';flex:1;text-align:right">' + s.remain.toFixed(1) + '</span>'
+      + '<span style="font-size:10px;font-weight:600;flex:2">' + status + ' ' + k + '</span>'
+      + '<span style="font-size:10px;color:var(--muted);flex:1;text-align:right">' + baseAmt + '</span>'
+      + '<span style="font-size:10px;color:var(--warn);flex:1;text-align:right">−' + s.issued.toFixed(1) + '</span>'
+      + '<span style="font-size:10px;color:' + retCol + ';flex:1;text-align:right">' + retAmt + '</span>'
+      + '<span style="font-size:11px;font-weight:800;color:' + col + ';flex:1;text-align:right">' + s.remain.toFixed(1) + '</span>'
       + '</div>';
   });
   html += '</div>';
@@ -1352,9 +1352,9 @@ function renderSTChems() {
     if(c.n && whs[c.n]){
       var ws2=whs[c.n];
       var col2=ws2.overissued?'var(--danger)':ws2.remain<=0?'var(--danger)':ws2.pct<20?'var(--warn)':'var(--purple)';
-      whInfo='<div style="font-size:18px;margin-bottom:4px;color:'+col2+'">🏭 คลัง ปัจจุบัน: '+ws2.remain.toFixed(1)+' '+ws2.unit+'</div>';
+      whInfo='<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 คลัง ปัจจุบัน: '+ws2.remain.toFixed(1)+' '+ws2.unit+'</div>';
     }
-    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:20px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remST('+i+')">✕</button></div>';
+    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remST('+i+')">✕</button></div>';
     html+='<div onclick="openChem('+i+',\'st\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
     html+=whInfo;
     html+='<div class="g2"><div><label>Qty รับเข้า</label><input type="number" step=".01" placeholder="0" value="'+(c.q||'')+'" oninput="stChems['+i+'].q=this.value"></div>';
@@ -1395,10 +1395,10 @@ function renderRTChems() {
       var ts=calcStock(); var tb=ts[c.n];
       if(tb){
         var col3=tb.remain<=0?'var(--danger)':tb.remain<2?'var(--warn)':'var(--teal)';
-        truckInfo='<div style="font-size:18px;margin-bottom:4px;color:'+col3+'">🚛 บนรถ: '+tb.remain.toFixed(2)+' '+u+'</div>';
+        truckInfo='<div style="font-size:9px;margin-bottom:4px;color:'+col3+'">🚛 บนรถ: '+tb.remain.toFixed(2)+' '+u+'</div>';
       }
     }
-    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:20px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remRT('+i+')">✕</button></div>';
+    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remRT('+i+')">✕</button></div>';
     html+='<div onclick="openChem('+i+',\'rt\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
     html+=truckInfo;
     html+='<div class="g2"><div><label>Qty คืน</label><input type="number" step=".01" placeholder="0" value="'+(c.q||'')+'" oninput="rtChems['+i+'].q=this.value"></div>';
@@ -1714,9 +1714,9 @@ function renderCRChems() {
     if (c.n && whs[c.n]) {
       var ws2 = whs[c.n];
       var col2 = ws2.overissued ? 'var(--danger)' : ws2.remain <= 0 ? 'var(--danger)' : ws2.pct < 20 ? 'var(--warn)' : 'var(--purple)';
-      whInfo = '<div style="font-size:18px;margin-bottom:4px;color:'+col2+'">🏭 คลัง: คงเหลือ '+ws2.remain.toFixed(1)+' '+ws2.unit+' ('+Math.max(0,ws2.pct).toFixed(0)+'%)</div>';
+      whInfo = '<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 คลัง: คงเหลือ '+ws2.remain.toFixed(1)+' '+ws2.unit+' ('+Math.max(0,ws2.pct).toFixed(0)+'%)</div>';
     }
-    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:20px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remCR('+i+')">✕</button></div>';
+    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remCR('+i+')">✕</button></div>';
     html+='<div onclick="openChem('+i+',\'cr\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
     html+=whInfo;
     html+='<div class="g2"><div><label>Qty</label><input type="number" step=".01" placeholder="0" value="'+(c.q||'')+'" oninput="crChems['+i+'].q=this.value"></div>';
@@ -1744,10 +1744,10 @@ function renderTanks() {
   var wpt=parseFloat(document.getElementById('mx-wpt').value)||200;
   var html='';
   mxTanks.forEach(function(tank,ti){
-    html+='<div class="tc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:24px;font-weight:700;color:var(--teal)">🪣 ថង #'+(ti+1)+' — '+wpt.toFixed(0)+' L</span>'+(mxTanks.length>1?'<button class="rm" onclick="remTank('+ti+')">✕</button>':'')+'</div>';
+    html+='<div class="tc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:12px;font-weight:700;color:var(--teal)">🪣 ថង #'+(ti+1)+' — '+wpt.toFixed(0)+' L</span>'+(mxTanks.length>1?'<button class="rm" onclick="remTank('+ti+')">✕</button>':'')+'</div>';
     tank.chems.forEach(function(c,ci){
       var u=(CHEMS.find(function(x){return x.n===c.n;})||{u:'—'}).u;
-      html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:20px;color:var(--muted)">Chemical #'+(ci+1)+'</span><button class="rm" onclick="remTankChem('+ti+','+ci+')">✕</button></div>';
+      html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:var(--muted)">Chemical #'+(ci+1)+'</span><button class="rm" onclick="remTankChem('+ti+','+ci+')">✕</button></div>';
       html+='<div onclick="openChem('+ci+',\'mx\','+ti+')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:4px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
       html+='<div class="g2"><div><label>Qty ('+u+')</label><input type="number" step=".001" placeholder="0" value="'+(c.q||'')+'" data-ti="'+ti+'" data-ci="'+ci+'" class="mx-qty" oninput="mxTanks['+ti+'].chems['+ci+'].q=this.value;calcTotal()" onchange="mxTanks['+ti+'].chems['+ci+'].q=this.value;calcTotal()"></div>';
       html+='<div><label>Unit</label><input type="text" value="'+u+'" readonly style="color:var(--muted)"></div></div></div>';
@@ -1770,7 +1770,7 @@ function calcTotal(){
     box.style.display='block';
     box.style.background='rgba(46,204,154,.08)';box.style.border='1px solid rgba(46,204,154,.25)';
     box.className='calc';
-    var h='<div style="font-size:20px;color:var(--teal);font-weight:700;margin-bottom:5px">សរុប All Tanks</div>';
+    var h='<div style="font-size:10px;color:var(--teal);font-weight:700;margin-bottom:5px">សរុប All Tanks</div>';
     keys.forEach(function(k){h+='<div class="crow"><span>'+k+'</span><span class="cval" style="color:var(--teal)">'+all[k].toFixed(2)+'</span></div>';});
     box.innerHTML=h;
   } else {box.style.display='none';}
@@ -1827,21 +1827,21 @@ function fillMXSelect(){
   if(noneEl) noneEl.style.display='none';
   container.innerHTML = mxList.map(function(m){
     var d = normalizeDate(m.date);
-    var dayBadge = d===today ? '<span style="background:#2C4E38;color:#EBE8E0;font-size:18px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">TODAY</span>'
-                 : d===yesterday ? '<span style="background:#C47A2A;color:#fff;font-size:18px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">เมื่อวาน</span>' : '';
+    var dayBadge = d===today ? '<span style="background:#2C4E38;color:#EBE8E0;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">TODAY</span>'
+                 : d===yesterday ? '<span style="background:#C47A2A;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">เมื่อวาน</span>' : '';
     var ac = sanitizeAllChems(m.allChems||{});
     var chemHtml = Object.keys(ac).length
       ? Object.keys(ac).map(function(k){
           var u=(CHEMS.find(function(x){return x.n===k;})||{u:''}).u;
-          return '<span style="background:rgba(44,78,56,.12);color:var(--acc);font-size:18px;padding:1px 6px;border-radius:8px;margin:1px">'+k+' '+parseFloat(ac[k]).toFixed(2)+' '+u+'</span>';
+          return '<span style="background:rgba(44,78,56,.12);color:var(--acc);font-size:9px;padding:1px 6px;border-radius:8px;margin:1px">'+k+' '+parseFloat(ac[k]).toFixed(2)+' '+u+'</span>';
         }).join('')
-      : '<span style="color:var(--muted);font-size:18px">ไม่มีข้อมูลยา</span>';
+      : '<span style="color:var(--muted);font-size:9px">ไม่มีข้อมูลยา</span>';
     return '<div id="mxcard-'+m.id+'" onclick="selectMXCard(\''+m.id+'\')" style="border:2px solid var(--bdr);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--card);transition:all .2s">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-        + '<span style="font-size:22px;font-weight:700;color:var(--teal)">⚗️ '+(m.plot||'?')+'</span>'
-        + '<span style="font-size:20px;color:var(--muted)">'+d+dayBadge+'</span>'
+        + '<span style="font-size:11px;font-weight:700;color:var(--teal)">⚗️ '+(m.plot||'?')+'</span>'
+        + '<span style="font-size:10px;color:var(--muted)">'+d+dayBadge+'</span>'
       + '</div>'
-      + '<div style="font-size:20px;color:var(--muted);margin-bottom:5px">👤 '+(m.mixer||'—')+' · 💧 '+mxEffectiveWater(m)+' L</div>'
+      + '<div style="font-size:10px;color:var(--muted);margin-bottom:5px">👤 '+(m.mixer||'—')+' · 💧 '+mxEffectiveWater(m)+' L</div>'
       + '<div style="display:flex;flex-wrap:wrap;gap:2px">'+chemHtml+'</div>'
       + '</div>';
   }).join('');
@@ -1872,7 +1872,7 @@ function previewMX(){
     var ac=sanitizeAllChems(mx.allChems||{});
     box.style.display='block';box.style.background='rgba(44,78,56,.06)';box.style.border='2px solid var(--acc)';
     var mxW=mxEffectiveWater(mx);
-    var h='<div style="font-size:20px;color:var(--teal);font-weight:700;margin-bottom:5px">✅ ថងយាដែលជ្រើស: '+mx.id+' · '+(mx.plot||'?')+'</div>';
+    var h='<div style="font-size:10px;color:var(--teal);font-weight:700;margin-bottom:5px">✅ ថងយាដែលជ្រើស: '+mx.id+' · '+(mx.plot||'?')+'</div>';
     h+='<div class="crow"><span>💧 ទឹកសរុប (Total Water)</span><span class="cval" style="color:var(--blue)">'
       +(mxW>0 ? mxW.toFixed(0)+' L' : '<span style="color:var(--warn)">⚠️ ไม่มีข้อมูลน้ำ — แก้ไข MX-01 ก่อน</span>')+'</span></div>';
     Object.keys(ac).forEach(function(k){
@@ -1977,7 +1977,7 @@ function calcChemDel(wu){
   var tot=mxEffectiveWater(mx);
   if(!tot){
     box.style.display='block';
-    box.innerHTML='<div style="color:var(--warn);font-size:20px;padding:6px 0">⚠️ MX นี้ไม่มีข้อมูลปริมาณน้ำ<br>กรุณาแก้ไข MX-01 ก่อน แล้วเพิ่ม ទឹក/ថង</div>';
+    box.innerHTML='<div style="color:var(--warn);font-size:10px;padding:6px 0">⚠️ MX นี้ไม่มีข้อมูลปริมาณน้ำ<br>กรุณาแก้ไข MX-01 ก่อน แล้วเพิ่ม ទឹក/ថង</div>';
     box._chemD={};
     return;
   }
@@ -1986,7 +1986,7 @@ function calcChemDel(wu){
   Object.entries(mx.allChems||{}).forEach(function(e){chemD[e[0]]={qty:(parseFloat(e[1])*ratio).toFixed(3),unit:(CHEMS.find(function(x){return x.n===e[0];})||{u:''}).u};});
   if(!Object.keys(chemD).length){box.style.display='none';return;}
   box.style.display='block';box.style.background='rgba(61,219,114,.08)';box.style.border='1px solid rgba(61,219,114,.25)';
-  var h='<div style="font-size:20px;color:var(--acc);font-weight:700;margin-bottom:5px">🌿 '+(ratio*100).toFixed(1)+'% · '+wu.toFixed(0)+'/'+tot+'L</div>';
+  var h='<div style="font-size:10px;color:var(--acc);font-weight:700;margin-bottom:5px">🌿 '+(ratio*100).toFixed(1)+'% · '+wu.toFixed(0)+'/'+tot+'L</div>';
   Object.entries(chemD).forEach(function(e){h+='<div class="crow"><span>'+e[0]+'</span><span class="cval" style="color:var(--acc)">'+e[1].qty+' '+e[1].unit+'</span></div>';});
   box.innerHTML=h;
   box._chemD=chemD;
@@ -2125,18 +2125,18 @@ function renderRpt(v){
     html+='<div class="stat"><div class="stat-v" style="color:var(--blue)">'+sp.filter(function(r){return normalizeDate(r.date)===t;}).length+'</div><div class="stat-l">បាញ់ SP</div></div>';
     html+='</div><div class="sec">All Time</div>';
     html+='<div class="g3" style="margin-bottom:12px">';
-    html+='<div class="stat"><div class="stat-v" style="color:var(--acc);font-size:36px">'+Object.keys(plotData).length+'</div><div class="stat-l">ចំការ</div></div>';
-    html+='<div class="stat"><div class="stat-v" style="color:var(--teal);font-size:32px">'+totalArea.toFixed(1)+'ha</div><div class="stat-l">ផ្ទៃដី</div></div>';
-    html+='<div class="stat"><div class="stat-v" style="color:var(--blue);font-size:28px">'+totalWater.toFixed(0)+'L</div><div class="stat-l">ទឹក</div></div>';
+    html+='<div class="stat"><div class="stat-v" style="color:var(--acc);font-size:18px">'+Object.keys(plotData).length+'</div><div class="stat-l">ចំការ</div></div>';
+    html+='<div class="stat"><div class="stat-v" style="color:var(--teal);font-size:16px">'+totalArea.toFixed(1)+'ha</div><div class="stat-l">ផ្ទៃដី</div></div>';
+    html+='<div class="stat"><div class="stat-v" style="color:var(--blue);font-size:14px">'+totalWater.toFixed(0)+'L</div><div class="stat-l">ទឹក</div></div>';
     html+='</div>';
-    if(sp.length){html+='<div class="sec">ថ្មីៗ Recent SP</div>';sp.slice().reverse().slice(0,3).forEach(function(r){html+='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:22px;font-weight:700;color:var(--acc)">'+r.id+'</span><span style="font-size:20px;color:var(--teal)">'+(r.plot||'—')+'</span></div><div style="font-size:20px;color:var(--muted)">'+normalizeDate(r.date)+' · '+(r.area||'?')+'ha · '+(r.waterUsed||0).toFixed(0)+'L</div></div>';});}
+    if(sp.length){html+='<div class="sec">ថ្មីៗ Recent SP</div>';sp.slice().reverse().slice(0,3).forEach(function(r){html+='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:700;color:var(--acc)">'+r.id+'</span><span style="font-size:10px;color:var(--teal)">'+(r.plot||'—')+'</span></div><div style="font-size:10px;color:var(--muted)">'+normalizeDate(r.date)+' · '+(r.area||'?')+'ha · '+(r.waterUsed||0).toFixed(0)+'L</div></div>';});}
   }
   else if(v==='plot'){
     html='<div class="sec">📍 By Plot — '+Object.keys(plotData).length+' plots</div>';
-    if(!Object.keys(plotData).length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:24px">No spraying records yet</div>';}
+    if(!Object.keys(plotData).length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No spraying records yet</div>';}
     Object.entries(plotData).sort(function(a,b){return b[1].area-a[1].area;}).forEach(function(e){
       var p=e[0],d=e[1];
-      html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-size:24px;font-weight:800;color:var(--acc)">📍 '+p+'</div><div style="display:flex;gap:5px"><span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">'+d.area.toFixed(1)+'ha</span><span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">'+d.count+'x</span></div></div>';
+      html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+p+'</div><div style="display:flex;gap:5px"><span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">'+d.area.toFixed(1)+'ha</span><span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">'+d.count+'x</span></div></div>';
       html+='<div class="crow"><span style="color:var(--muted)">💧 Water</span><span style="font-weight:700">'+d.water.toFixed(0)+' L</span></div>';
       Object.entries(d.chems).forEach(function(ce){var u=(CHEMS.find(function(x){return x.n===ce[0];})||{u:''}).u;html+='<div class="crow"><span style="color:var(--muted)">→ '+ce[0]+'</span><span style="font-weight:700;color:var(--acc)">'+ce[1].toFixed(3)+' '+u+'</span></div>';});
       html+='</div>';
@@ -2146,9 +2146,9 @@ function renderRpt(v){
     html='<div class="sec">🧪 By Chemical</div>';
     var sorted=Object.entries(chemData).sort(function(a,b){return b[1].total-a[1].total;});
     var maxV=sorted[0]?sorted[0][1].total:1;
-    if(!sorted.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:24px">No data yet</div>';}
+    if(!sorted.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No data yet</div>';}
     sorted.forEach(function(e){
-      html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><div><div style="font-size:22px;font-weight:700">'+e[0]+'</div><div style="font-size:18px;color:var(--muted)">'+(CHEMS.find(function(x){return x.n===e[0];})||{t:''}).t+'</div></div><span style="font-size:26px;font-weight:800;color:var(--acc)">'+e[1].total.toFixed(3)+' '+e[1].unit+'</span></div><div class="bar-bg"><div class="bar-f" style="width:'+(e[1].total/maxV*100).toFixed(0)+'%"></div></div></div>';
+      html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><div><div style="font-size:11px;font-weight:700">'+e[0]+'</div><div style="font-size:9px;color:var(--muted)">'+(CHEMS.find(function(x){return x.n===e[0];})||{t:''}).t+'</div></div><span style="font-size:13px;font-weight:800;color:var(--acc)">'+e[1].total.toFixed(3)+' '+e[1].unit+'</span></div><div class="bar-bg"><div class="bar-f" style="width:'+(e[1].total/maxV*100).toFixed(0)+'%"></div></div></div>';
     });
   }
   else if(v==='bal'){
@@ -2157,11 +2157,11 @@ function renderRpt(v){
     var vari=crQty-spQty;var ok2=Math.abs(vari)<1;
     html='<div class="sec">⚖️ CR vs SP Balance</div>';
     html+='<div style="background:'+(ok2?'var(--adim)':'rgba(61,21,21,.8)')+';border:1px solid '+(ok2?'var(--acc)':'var(--danger)')+';border-radius:11px;padding:13px;margin-bottom:12px">';
-    html+='<div style="font-size:24px;color:'+(ok2?'var(--acc)':'var(--danger)')+';font-weight:800;margin-bottom:7px">'+(ok2?'✅ Balance OK':'⚠️ Variance')+'</div>';
+    html+='<div style="font-size:12px;color:'+(ok2?'var(--acc)':'var(--danger)')+';font-weight:800;margin-bottom:7px">'+(ok2?'✅ Balance OK':'⚠️ Variance')+'</div>';
     html+='<div class="crow"><span style="color:var(--muted)">CR Requisitioned</span><span style="font-weight:700">'+crQty.toFixed(2)+'</span></div>';
     html+='<div class="crow"><span style="color:var(--muted)">SP Delivered</span><span style="font-weight:700">'+spQty.toFixed(2)+'</span></div>';
     html+='<div class="crow" style="border-top:1px solid var(--bdr);padding-top:5px;margin-top:4px"><span style="color:var(--muted)">Variance</span><span style="font-weight:800;color:'+(ok2?'var(--acc)':'var(--danger)')+'">'+vari.toFixed(2)+'</span></div></div>';
-    if(mx.length){html+='<div class="sec">MX Records ('+mx.length+')</div>';mx.forEach(function(r){html+='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:22px;font-weight:700">'+r.id+'</span><span style="font-size:20px;color:var(--teal)">'+(r.plot||'—')+'</span></div><div style="font-size:20px;color:var(--muted)">'+normalizeDate(r.date)+' · '+(r.tanks?r.tanks.length:0)+'ថង · '+(r.totalWater||0).toFixed(0)+'L</div></div>';});}
+    if(mx.length){html+='<div class="sec">MX Records ('+mx.length+')</div>';mx.forEach(function(r){html+='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:700">'+r.id+'</span><span style="font-size:10px;color:var(--teal)">'+(r.plot||'—')+'</span></div><div style="font-size:10px;color:var(--muted)">'+normalizeDate(r.date)+' · '+(r.tanks?r.tanks.length:0)+'ថង · '+(r.totalWater||0).toFixed(0)+'L</div></div>';});}
   }
   el.innerHTML=html+'<div style="height:20px"></div>';
 }
@@ -2218,7 +2218,7 @@ function buildChemDetail(r) {
     });
     if (r.totalWater) rows.push('<div class="crow"><span style="color:var(--muted)">💧 น้ำรวม</span><span class="cval" style="color:var(--blue)">'+r.totalWater+' L</span></div>');
     if (r.sprayer)    rows.push('<div class="crow"><span style="color:var(--muted)">🚁 เครื่อง</span><span class="cval">'+r.sprayer+'</span></div>');
-    if (Object.keys(ac).length === 0 && !r.tanks) rows.push('<div style="font-size:20px;color:var(--warn)">⚠️ ข้อมูลสารเคมีหาย — กรุณาลบและคีย์ใหม่</div>');
+    if (Object.keys(ac).length === 0 && !r.tanks) rows.push('<div style="font-size:10px;color:var(--warn)">⚠️ ข้อมูลสารเคมีหาย — กรุณาลบและคีย์ใหม่</div>');
   }
   // SP — chemDelivered + water + area
   if (r.type==='sp') {
@@ -2237,7 +2237,7 @@ function buildChemDetail(r) {
           if (totW>0&&wu2>0) {
             var rat2=wu2/totW;
             Object.keys(merged).forEach(function(n){ var u3=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u; cd[n]={qty:(merged[n]*rat2).toFixed(3),unit:u3}; });
-            if (Object.keys(cd).length) rows.push('<div style="font-size:18px;color:var(--warn);margin-bottom:2px">⚠️ ประมาณจาก '+cands.length+' MX ('+cands.map(function(m){return m.id;}).join(',')+') — Link MX ใหม่เพื่อความแม่นยำ</div>');
+            if (Object.keys(cd).length) rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">⚠️ ประมาณจาก '+cands.length+' MX ('+cands.map(function(m){return m.id;}).join(',')+') — Link MX ใหม่เพื่อความแม่นยำ</div>');
           }
           mxRec = null; // already handled
         }
@@ -2250,7 +2250,7 @@ function buildChemDetail(r) {
         if (rat3>0) {
           // Normal proportional calculation
           Object.keys(ac3).forEach(function(n){ var u4=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u; cd[n]={qty:(parseFloat(ac3[n])*rat3).toFixed(3),unit:u4}; });
-          if (Object.keys(cd).length) rows.push('<div style="font-size:18px;color:var(--warn);margin-bottom:2px">⚠️ ประมาณจาก '+mxRec.id+' — Link MX ใหม่เพื่อความแม่นยำ</div>');
+          if (Object.keys(cd).length) rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">⚠️ ประมาณจาก '+mxRec.id+' — Link MX ใหม่เพื่อความแม่นยำ</div>');
         } else if (Object.keys(ac3).length > 0) {
           // Can't compute ratio — show full tank chemicals with context-aware warning
           Object.keys(ac3).forEach(function(n){ var u4=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u; cd[n]={qty:parseFloat(ac3[n]).toFixed(3),unit:u4}; });
@@ -2258,7 +2258,7 @@ function buildChemDetail(r) {
             var warnMsg = tot3 > 0
               ? '⚠️ SP ไม่มีข้อมูลน้ำที่ใช้ — แสดงยาทั้งถัง '+mxRec.id
               : '⚠️ MX ไม่มีข้อมูลปริมาณน้ำ — แสดงยาทั้งถัง '+mxRec.id+' (กรุณาแก้ไข MX เพิ่ม ទឹក/ថង)';
-            rows.push('<div style="font-size:18px;color:var(--warn);margin-bottom:2px">'+warnMsg+'</div>');
+            rows.push('<div style="font-size:9px;color:var(--warn);margin-bottom:2px">'+warnMsg+'</div>');
           }
         }
       }
@@ -2274,7 +2274,7 @@ function buildChemDetail(r) {
     if (r.weather)    rows.push('<div class="crow"><span style="color:var(--muted)">🌤 อากาศ</span><span class="cval">'+r.weather+'</span></div>');
     if (r.mxId)       rows.push('<div class="crow"><span style="color:var(--muted)">🔗 MX</span><span class="cval" style="color:var(--purple)">'+r.mxId+'</span></div>');
   }
-  if (!rows.length) rows.push('<div style="font-size:20px;color:var(--faint)">— ไม่มีรายละเอียดสารเคมี —</div>');
+  if (!rows.length) rows.push('<div style="font-size:10px;color:var(--faint)">— ไม่มีรายละเอียดสารเคมี —</div>');
   return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)">'+rows.join('')+'</div>';
 }
 
@@ -2282,7 +2282,7 @@ function renderHist(){
   var el=document.getElementById('hist-list');
   if(!el)return;
   var list=histFilter==='all'?records:records.filter(function(r){return r.type===histFilter;});
-  if(!list.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:35px 0;font-size:24px">No records yet</div>';return;}
+  if(!list.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:35px 0;font-size:12px">No records yet</div>';return;}
   var cm={cr:{l:'CR',c:'acc'},mx:{l:'MX',c:'teal'},sp:{l:'SP',c:'blue'},st:{l:'ST',c:'purple'},rt:{l:'RT',c:'warn'}};
   el.innerHTML=list.slice().sort(function(a,b){
     var da=a.createdAt||a.date||'';
@@ -2296,14 +2296,14 @@ function renderHist(){
     var typeLabel = r.type==='cr'?'📦':r.type==='mx'?'⚗️':r.type==='sp'?'🌿':r.type==='st'?'📥':r.type==='rt'?'↩️':'';
     return '<div class="card" id="hc-'+r.id+'">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
-        + '<span style="font-size:24px;font-weight:700">'+typeLabel+' '+r.id+'</span>'
+        + '<span style="font-size:12px;font-weight:700">'+typeLabel+' '+r.id+'</span>'
         + '<div style="display:flex;gap:6px;align-items:center">'
           + '<span class="badge" style="background:rgba(0,0,0,.08);color:var(--'+fm.c+')">'+fm.l+'</span>'
-          + '<button onclick="event.stopPropagation();editRecord(\''+r.id+'\')" style="font-size:20px;background:var(--blue);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer">✏️</button>'
-          + '<button class="delbtn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')" style="font-size:20px">🔐</button>'
+          + '<button onclick="event.stopPropagation();editRecord(\''+r.id+'\')" style="font-size:10px;background:var(--blue);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer">✏️</button>'
+          + '<button class="delbtn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')" style="font-size:10px">🔐</button>'
         + '</div>'
       + '</div>'
-      + '<div style="font-size:20px;color:var(--muted);line-height:1.6">'
+      + '<div style="font-size:10px;color:var(--muted);line-height:1.6">'
         + (r.plot?'📍 '+r.plot+' ':'')
         + (r.area?'· '+r.area+'ha ':'')
         + normalizeDate(r.date)
@@ -2313,8 +2313,8 @@ function renderHist(){
         + ((r.type==='mx'&&r.tanks)?' · '+r.tanks.length+'ថង':'')
         + (r.mxId?' · 🔗'+r.mxId:'')
       + '</div>'
-      + '<div onclick="toggleExpand(\''+r.id+'\')" style="margin-top:6px;font-size:20px;color:var(--muted);cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px">'
-        + '<span style="font-size:16px">'+arrow+'</span>'
+      + '<div onclick="toggleExpand(\''+r.id+'\')" style="margin-top:6px;font-size:10px;color:var(--muted);cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px">'
+        + '<span style="font-size:8px">'+arrow+'</span>'
         + '<span>'+(expanded?'ซ่อนรายละเอียด':'ดูรายละเอียด')+'</span>'
       + '</div>'
       + detail
