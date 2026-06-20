@@ -211,7 +211,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   <div style="background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('report')">
     <div>
       <div style="font-size:15px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">Summary · By Plot · By Chem · Balance</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">Summary · By Plot</div>
     </div>
     <span style="color:var(--warn);font-size:20px">→</span>
   </div>
@@ -240,8 +240,6 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   <div class="subnav">
     <button class="snb on" onclick="showRpt('sum')" id="snb-sum"><span>📊</span><span>Summary</span></button>
     <button class="snb" onclick="showRpt('plot')" id="snb-plot"><span>📍</span><span>By Plot</span></button>
-    <button class="snb" onclick="showRpt('chem')" id="snb-chem"><span>🧪</span><span>By Chem</span></button>
-    <button class="snb" onclick="showRpt('bal')" id="snb-bal"><span>⚖️</span><span>Balance</span></button>
   </div>
   <div id="rpt-content"></div>
 </div>
@@ -2207,7 +2205,7 @@ function selectPlot(p,isNew){
 // ═══════════════════════════════════════════════════════════
 function showRpt(v){
   rptView=v;
-  ['sum','plot','chem','bal'].forEach(function(id){document.getElementById('snb-'+id).classList.toggle('on',id===v);});
+  ['sum','plot','chem','bal'].forEach(function(id){var b=document.getElementById('snb-'+id);if(b)b.classList.toggle('on',id===v);});
   renderRpt(v);
 }
 function renderRpt(v){
@@ -2286,11 +2284,10 @@ function renderRpt(v){
       var totChemKeys=Object.keys(totChems);
       if(totChemKeys.length){
         var totUid='rpt-tot-'+p.replace(/\W/g,'_');
-        var st=getSprayType(totChemKeys);
         html+='<div style="cursor:pointer;margin-bottom:4px" onclick="var e=document.getElementById(\''+totUid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">';
         html+='<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed rgba(26,107,54,0.2);padding-bottom:4px">';
         html+='<span style="font-size:10px;font-weight:700;color:var(--acc)">📊 รวมสารเคมี</span>';
-        html+='<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:'+st.bg+';color:'+st.color+'">'+st.label+' ▾</span>';
+        html+='<span style="font-size:10px;color:var(--muted)">▾</span>';
         html+='</div>';
         html+='<div id="'+totUid+'" style="display:none;padding:6px 0">';
         totChemKeys.forEach(function(cn){
