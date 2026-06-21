@@ -274,7 +274,6 @@ function ensureUpdatedAtCol(sh) {
 // แถวที่ UpdatedAt ว่าง = ช่องโหว่ bounce (ถูก push ทับได้) → เติมให้ครบเพื่อปิดช่องโหว่
 function backfillUpdatedAt() {
   var sheets = ['CR-01','MX-01','SP-01','ST-01','RT-01'];
-  var tz = Session.getScriptTimeZone();
   var totalFilled = 0;
   sheets.forEach(function(name){
     var sh = SS.getSheetByName(name);
@@ -285,16 +284,15 @@ function backfillUpdatedAt() {
     var headers = data[0].map(function(h){ return String(h).trim(); });
     var iU = headers.indexOf('UpdatedAt'), iC = headers.indexOf('CreatedAt');
     if (iU < 0) return;
-    var nowISO = new Date().toISOString();
     var filled = 0;
     for (var i = 1; i < data.length; i++) {
       if (!String(data[i][0]||'').trim()) continue;          // ข้ามแถวว่าง (ไม่มี ID)
-      if (String(data[i][iU]||'').trim()) continue;          // มี UpdatedAt แล้ว
-      var cd = iC>=0 ? data[i][iC] : '';
-      var val = '';
-      if (cd instanceof Date && !isNaN(cd)) val = Utilities.formatDate(cd, tz, "yyyy-MM-dd'T'HH:mm:ss");
-      else val = String(cd||'').trim() || nowISO;
-      sh.getRange(i+1, iU+1).setValue(val);
+      var cur = data[i][iU];
+      var curStr = (cur instanceof Date) ? '' : String(cur||'').trim();
+      if (curStr && /T.*Z$/.test(curStr)) continue;          // เป็น ISO UTC อยู่แล้ว → ข้าม
+      // เติม/แปลงเป็น ISO UTC: ใช้ UpdatedAt เดิม (ถ้ามี) ไม่งั้น CreatedAt ไม่งั้น now
+      var ms = tsMs(cur) || (iC>=0 ? tsMs(data[i][iC]) : 0) || Date.now();
+      sh.getRange(i+1, iU+1).setValue(new Date(ms).toISOString());
       filled++;
     }
     totalFilled += filled;
@@ -641,6 +639,18 @@ function doGet(e) {
 // ═══════════════════════════════════════════════════════════════════
 //  doPost — no-cors write
 // ═══════════════════════════════════════════════════════════════════
+// ── แปลง timestamp ทุกชนิด → epoch ms (แก้ root cause ของ bounce) ──
+// รองรับ: Date object (Sheet auto-convert), ISO UTC จาก client ("...T03..Z"),
+// local-no-Z จาก backfill เก่า ("...T10"), locale string ของ Sheet, ค่าว่าง.
+// เดิมเทียบ timestamp แบบ string → ISO UTC ดู "เก่ากว่า" local 7 ชม. → ค่าเก่าทับค่าใหม่.
+function tsMs(v){
+  if (v instanceof Date) return isNaN(v.getTime()) ? 0 : v.getTime();
+  var s = String(v||'').trim();
+  if (!s) return 0;
+  var t = new Date(s).getTime();
+  return isNaN(t) ? 0 : t;
+}
+
 function doPost(e) {
   try {
     var payload = JSON.parse(e.postData.contents);
@@ -714,19 +724,20 @@ function doPost(e) {
           var existIdx = existingIds.indexOf(String(d.id));
           if (existIdx >= 0) {
             var rowIdx = existIdx+2;
-            var existingUpdatedAt = (idxUpdatedAt>=0)?String(rows[existIdx+1][idxUpdatedAt]).trim():'';
-            var incomingUpdatedAt = String(d.updatedAt||'').trim();
-            // กัน bounce: ถ้าแถวบน sheet ยังไม่มี UpdatedAt (เก่า) → backfill timestamp แล้ว "ไม่" overwrite รอบนี้
+            // เทียบเวลาด้วย epoch ms (ผ่าน tsMs) — ตัดปัญหา format/timezone ปนกันที่ทำให้ string compare เพี้ยน
+            var existingMs = (idxUpdatedAt>=0) ? tsMs(rows[existIdx+1][idxUpdatedAt]) : 0;
+            var incomingMs = tsMs(d.updatedAt);
+            // กัน bounce: ถ้าแถวบน sheet ยังไม่มี UpdatedAt (เก่า) → backfill timestamp (ISO UTC) แล้ว "ไม่" overwrite รอบนี้
             // (sheet คือค่าที่ถูก write ล่าสุด, ไม่ปล่อยให้ push ค่าเก่ามาทับ — การแก้จริงใช้ action update เสมอ)
-            if (idxUpdatedAt>=0 && !existingUpdatedAt) {
-              var backfill = incomingUpdatedAt || String(d.createdAt||'').trim() || new Date().toISOString();
-              sh.getRange(rowIdx, idxUpdatedAt+1).setValue(backfill);
-              existingUpdatedAt = backfill;
+            if (idxUpdatedAt>=0 && existingMs===0) {
+              var backfillMs = incomingMs || tsMs(d.createdAt) || Date.now();
+              sh.getRange(rowIdx, idxUpdatedAt+1).setValue(new Date(backfillMs).toISOString());
+              existingMs = backfillMs;
             }
             // overwrite เฉพาะเมื่อ "ทั้งสองฝั่งมี timestamp" และ incoming ใหม่กว่าจริง
-            var shouldUpdate = (incomingUpdatedAt && existingUpdatedAt && incomingUpdatedAt>existingUpdatedAt);
+            var shouldUpdate = (incomingMs>0 && existingMs>0 && incomingMs>existingMs);
             // incoming ไม่เก่ากว่า sheet → อนุญาตให้เติม cell ว่างได้ (กันเครื่องเก่าเติมค่าที่ลบไปแล้วกลับมา)
-            var incomingNotOlder = (!existingUpdatedAt || !incomingUpdatedAt || incomingUpdatedAt>=existingUpdatedAt);
+            var incomingNotOlder = (existingMs===0 || incomingMs===0 || incomingMs>=existingMs);
             if (shouldUpdate) {
               var row = buildRow(name,d,headers);
               if (row.length){ sh.getRange(rowIdx,1,1,row.length).setValues([row]); updated++; }
