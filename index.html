@@ -642,7 +642,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.21f'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.21i'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -654,6 +654,22 @@ function saveDeletedIds() {
 }
 var rptView = 'plot';
 var rptPlotFilter = 'all';
+var rptPlotOpen = {}; // accordion state ของแต่ละ plot ใน Report By Plot
+function toggleRptPlot(uid){
+  var b=document.getElementById(uid);if(!b)return;
+  var open=b.style.display==='none';
+  b.style.display=open?'block':'none';rptPlotOpen[uid]=open;
+  var c=document.getElementById('chev-'+uid);if(c)c.style.transform=open?'rotate(90deg)':'rotate(0)';
+}
+function toggleRptItem(uid){ // toggle ชั้นใน (Total/รายวัน) + จำ state กัน re-render ปิดเอง
+  var b=document.getElementById(uid);if(!b)return;
+  var open=b.style.display==='none';
+  b.style.display=open?'block':'none';rptPlotOpen[uid]=open;
+}
+function rptExpandAll(open){
+  document.querySelectorAll('.rpt-plot-body').forEach(function(b){b.style.display=open?'block':'none';rptPlotOpen[b.id]=open;});
+  document.querySelectorAll('.rpt-chev').forEach(function(c){c.style.transform=open?'rotate(90deg)':'rotate(0)';});
+}
 var syncTimer = null;
 var lastCloudN = 0;
 // ── Edit mode ────────────────────────────────────────────────
@@ -2303,15 +2319,13 @@ function renderRpt(v){
     var allPlotKeys=Object.keys(mxByPlot).sort();
     // reset filter ถ้า plot ที่เลือกไว้ไม่มีข้อมูลแล้ว
     if(rptPlotFilter!=='all'&&allPlotKeys.indexOf(rptPlotFilter)<0)rptPlotFilter='all';
-    html='<div class="sec">📍 By Plot (MX) — '+allPlotKeys.length+' plots</div>';
-    // Dropdown เลือก plot
-    html+='<select onchange="rptPlotFilter=this.value;renderRpt(\'plot\')" style="width:100%;padding:10px;margin-bottom:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--text);font-family:inherit;font-size:13px;font-weight:700">';
-    html+='<option value="all"'+(rptPlotFilter==='all'?' selected':'')+'>📍 All Plots ('+allPlotKeys.length+')</option>';
-    allPlotKeys.forEach(function(pk){
-      html+='<option value="'+pk+'"'+(rptPlotFilter===pk?' selected':'')+'>'+pk+'</option>';
-    });
-    html+='</select>';
-    var plotKeys=rptPlotFilter==='all'?allPlotKeys:[rptPlotFilter];
+    html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:6px">';
+    html+='<span class="sec" style="margin:0">📍 By Plot (MX) — '+allPlotKeys.length+' plots</span>';
+    html+='<div style="display:flex;gap:6px">';
+    html+='<button onclick="rptExpandAll(true)" style="font-size:10px;font-weight:700;padding:5px 9px;border-radius:8px;border:1px solid var(--bdr);background:var(--card);color:var(--text);cursor:pointer">Expand All</button>';
+    html+='<button onclick="rptExpandAll(false)" style="font-size:10px;font-weight:700;padding:5px 9px;border-radius:8px;border:1px solid var(--bdr);background:var(--card);color:var(--text);cursor:pointer">Collapse All</button>';
+    html+='</div></div>';
+    var plotKeys=allPlotKeys;
     if(!allPlotKeys.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No MX records yet</div>';}
     plotKeys.forEach(function(p){
       // resolve เคมี + ประเภท ของแต่ละ MX record
@@ -2337,21 +2351,30 @@ function renderRpt(v){
       // สรุปสารเคมีรวมทั้ง plot
       var totChems={};
       groups.forEach(function(g){Object.keys(g.chems).forEach(function(cn){totChems[cn]=(totChems[cn]||0)+g.chems[cn];});});
+      var bodyUid='rpt-body-'+p.replace(/\W/g,'_');
+      var pOpen=!!rptPlotOpen[bodyUid];
       html+='<div class="card">';
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px">';
-      html+='<div style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+p+'</div>';
-      if(latestPlanting)html+='<div style="font-size:9px;font-weight:700;color:var(--muted);background:var(--dim);padding:3px 8px;border-radius:20px;white-space:nowrap">🌱 Planting: '+latestPlanting+'</div>';
+      html+='<div onclick="toggleRptPlot(\''+bodyUid+'\')" style="display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer">';
+      html+='<div style="display:flex;align-items:center;gap:6px;min-width:0">';
+      html+='<span id="chev-'+bodyUid+'" class="rpt-chev" style="font-size:11px;color:var(--muted);transition:transform .15s;transform:'+(pOpen?'rotate(90deg)':'rotate(0)')+'">▶</span>';
+      html+='<span style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+p+'</span>';
       html+='</div>';
+      html+='<div style="display:flex;align-items:center;gap:6px;white-space:nowrap">';
+      if(latestPlanting)html+='<span style="font-size:9px;font-weight:700;color:var(--muted);background:var(--dim);padding:3px 8px;border-radius:20px">🌱 '+latestPlanting+'</span>';
+      html+='<span style="font-size:9px;font-weight:700;color:var(--faint)">'+groups.length+' days</span>';
+      html+='</div></div>';
+      html+='<div id="'+bodyUid+'" class="rpt-plot-body" style="display:'+(pOpen?'block':'none')+';margin-top:6px">';
       // สรุปรวม
       var totChemKeys=Object.keys(totChems);
       if(totChemKeys.length){
         var totUid='rpt-tot-'+p.replace(/\W/g,'_');
-        html+='<div style="cursor:pointer;margin-bottom:4px" onclick="var e=document.getElementById(\''+totUid+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">';
+        var totOpen=!!rptPlotOpen[totUid];
+        html+='<div style="cursor:pointer;margin-bottom:4px" onclick="toggleRptItem(\''+totUid+'\')">';
         html+='<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed rgba(26,107,54,0.2);padding-bottom:4px">';
         html+='<span style="font-size:10px;font-weight:700;color:var(--acc)">📊 Total Chemicals</span>';
         html+='<span style="font-size:10px;color:var(--muted)">▾</span>';
         html+='</div>';
-        html+='<div id="'+totUid+'" style="display:none;padding:6px 0">';
+        html+='<div id="'+totUid+'" style="display:'+(totOpen?'block':'none')+';padding:6px 0">';
         totChemKeys.forEach(function(cn){
           var u=(CHEMS.find(function(x){return x.n===cn;})||{u:''}).u;
           html+='<div class="crow"><span style="color:var(--muted)">'+cn+'</span><span class="cval" style="color:var(--acc)">'+totChems[cn].toFixed(2)+' '+u+'</span></div>';
@@ -2370,13 +2393,14 @@ function renderRpt(v){
         var stageBadge=stage
           ? '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(15,122,104,0.14);color:var(--teal);white-space:nowrap">🌽 '+stage+' · D'+days+'</span>'
           : '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(122,170,138,0.18);color:var(--faint);white-space:nowrap">🌽 —</span>';
-        html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(26,107,54,0.07);cursor:pointer" onclick="var el=document.getElementById(\''+uid+'\');el.style.display=el.style.display===\'none\'?\'block\':\'none\'">';
+        var dayOpen=!!rptPlotOpen[uid];
+        html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(26,107,54,0.07);cursor:pointer" onclick="toggleRptItem(\''+uid+'\')">';
         html+='<span style="font-size:11px;color:var(--muted);white-space:nowrap">'+g.date+'</span>';
         html+=stageBadge;
         html+='<span style="flex:1"></span>';
         html+='<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:'+st2.bg+';color:'+st2.color+';white-space:nowrap">'+st2.label+' ▾</span>';
         html+='</div>';
-        html+='<div id="'+uid+'" style="display:none;background:rgba(26,107,54,0.05);border-radius:8px;padding:8px 10px;margin:4px 0 6px">';
+        html+='<div id="'+uid+'" style="display:'+(dayOpen?'block':'none')+';background:rgba(26,107,54,0.05);border-radius:8px;padding:8px 10px;margin:4px 0 6px">';
         chemNames.forEach(function(cn){
           var u=(CHEMS.find(function(x){return x.n===cn;})||{u:''}).u;
           html+='<div class="crow"><span style="color:var(--muted)">→ '+cn+'</span><span class="cval" style="color:var(--teal)">'+parseFloat(g.chems[cn]).toFixed(2)+' '+u+'</span></div>';
@@ -2384,7 +2408,7 @@ function renderRpt(v){
         if(!chemNames.length)html+='<div style="font-size:9px;color:var(--warn)">⚠️ No chemical data found</div>';
         html+='</div>';
       });
-      html+='</div></div>';
+      html+='</div></div></div>';
     });
   }
   else if(v==='chem'){
