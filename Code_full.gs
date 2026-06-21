@@ -360,15 +360,28 @@ function getStockInit() {
   var data = sh.getDataRange().getValues();
   if (data.length < 2) return [];
   var tz = Session.getScriptTimeZone();
+  // อ่านตามชื่อหัวคอลัมน์ (robust ต่อการเพิ่ม/ย้ายคอลัมน์ เช่น Rate / Ha, Remain (Ha))
+  var H = data[0].map(function(x){ return String(x).trim(); });
+  function col(name, fallback){ var i = H.indexOf(name); return i>=0 ? i : fallback; }
+  function num(v){ return parseFloat(String(v).replace(/,/g,'')) || 0; }
+  var iChem = col('Chemical',0), iUnit = col('Unit',1), iQty = col('SnapQty',2), iDate = col('SnapDate',3);
+  var iRate = col('Rate / Ha',-1), iRemainHa = col('Remain (Ha)',-1);
   var out = [];
   for (var i = 1; i < data.length; i++) {
     var r = data[i];
-    var chem = String(r[0]||'').trim();
+    var chem = String(r[iChem]||'').trim();
     if (!chem) continue;
-    var sd = r[3];
+    var sd = r[iDate];
     if (sd instanceof Date && !isNaN(sd)) sd = Utilities.formatDate(sd,tz,'yyyy-MM-dd');
     else sd = String(sd||'').substring(0,10);
-    out.push({ chemical:chem, unit:String(r[1]||'').trim(), snapQty:parseFloat(r[2])||0, snapDate:sd });
+    out.push({
+      chemical: chem,
+      unit:     String(r[iUnit]||'').trim(),
+      snapQty:  num(r[iQty]),
+      snapDate: sd,
+      rate:     iRate>=0     ? num(r[iRate])     : 0,
+      remainHa: iRemainHa>=0 ? num(r[iRemainHa]) : 0
+    });
   }
   return out;
 }

@@ -624,7 +624,12 @@ function stockInitMap(){
   var m={};
   (stockInit||[]).forEach(function(s){
     var n=(s.chemical||s.Chemical||'').trim();
-    if(n) m[n]={qty:parseFloat(s.snapQty!=null?s.snapQty:s.SnapQty)||0, date:normalizeDate(s.snapDate||s.SnapDate||'')||''};
+    if(n) m[n]={
+      qty:parseFloat(s.snapQty!=null?s.snapQty:s.SnapQty)||0,
+      date:normalizeDate(s.snapDate||s.SnapDate||'')||'',
+      remainHa:parseFloat(s.remainHa!=null?s.remainHa:s['Remain (Ha)'])||0,
+      rate:parseFloat(s.rate)||0
+    };
   });
   return m;
 }
@@ -636,7 +641,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.20g'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.21a'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -1283,7 +1288,8 @@ function calcWarehouseStock() {
     stock[c.n] = {
       initial: (si && !isNaN(si.qty)) ? si.qty : (parseFloat(c.s) || 0),
       issued: 0, unit: c.u,
-      snapDate: (si && si.date) ? si.date : WAREHOUSE_START
+      snapDate: (si && si.date) ? si.date : WAREHOUSE_START,
+      remainHa: (si && !isNaN(si.remainHa)) ? si.remainHa : 0
     };
   });
   // CR-01 เบิก — นับเฉพาะรายการ "ตั้งแต่ snapDate ของสารนั้น" เป็นต้นไป
@@ -1355,11 +1361,12 @@ function renderWarehouseStock() {
     + '</div>';
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px">';
   html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700">'
-    + '<span style="flex:2">Chemical</span>'
+    + '<span style="flex:1.7">Chemical</span>'
     + '<span style="flex:1;text-align:right">Initial+ST</span>'
     + '<span style="flex:1;text-align:right">−CR issued</span>'
     + '<span style="flex:1;text-align:right">+RT return</span>'
-    + '<span style="flex:1;text-align:right">Remaining</span></div>';
+    + '<span style="flex:1;text-align:right">Remaining</span>'
+    + '<span style="flex:1.1;text-align:right;color:var(--teal)">Remain (Ha)</span></div>';
   out.concat(low).concat(ok_items).forEach(function(k) {
     var s = ws[k];
     var col    = (s.overissued || s.remain <= 0) ? 'var(--danger)' : s.pct < 20 ? 'var(--warn)' : 'var(--purple)';
@@ -1367,12 +1374,14 @@ function renderWarehouseStock() {
     var baseAmt = (s.initial + (s.received||0)).toFixed(1);          // ต้นทุน + ST รับ เท่านั้น
     var retAmt  = (s.returned||0) > 0 ? '+' + (s.returned||0).toFixed(1) : '—';
     var retCol  = (s.returned||0) > 0 ? 'var(--teal)' : 'var(--faint)';
+    var remainHaTxt = (s.remainHa > 0) ? s.remainHa.toFixed(1) : '—';
     html += '<div style="padding:7px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">'
-      + '<span style="font-size:10px;font-weight:600;flex:2">' + status + ' ' + k + '</span>'
+      + '<span style="font-size:10px;font-weight:600;flex:1.7">' + status + ' ' + k + '</span>'
       + '<span style="font-size:10px;color:var(--muted);flex:1;text-align:right">' + baseAmt + '</span>'
       + '<span style="font-size:10px;color:var(--warn);flex:1;text-align:right">−' + s.issued.toFixed(1) + '</span>'
       + '<span style="font-size:10px;color:' + retCol + ';flex:1;text-align:right">' + retAmt + '</span>'
       + '<span style="font-size:11px;font-weight:800;color:' + col + ';flex:1;text-align:right">' + s.remain.toFixed(1) + '</span>'
+      + '<span style="font-size:11px;font-weight:700;color:var(--teal);flex:1.1;text-align:right">' + remainHaTxt + '</span>'
       + '</div>';
   });
   html += '</div>';
