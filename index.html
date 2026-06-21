@@ -59,8 +59,15 @@ input[type=time]::-webkit-calendar-picker-indicator{filter:opacity(.6)}
 
 /* CARDS */
 .card{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:11px;padding:11px 13px;margin-bottom:7px;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
-.fcard{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1.5px solid var(--bdr);border-radius:12px;padding:16px 12px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .2s;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
-.fcard:active{border-color:var(--acc)}
+.fcard{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1.5px solid var(--bdr);border-radius:18px;padding:16px 10px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;transition:transform .12s,border-color .2s;box-shadow:0 4px 14px rgba(26,107,54,0.1)}
+.fcard:active{border-color:var(--acc);transform:scale(.97)}
+.gforms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px}
+.fcard img{width:78px;height:78px;object-fit:contain;display:block;margin-bottom:2px}
+.fcard .fk{font-size:17px;font-weight:700}
+.fcard .fe{font-size:12px;color:var(--muted)}
+.fcard .badge{display:block;width:100%;text-align:center;margin-top:5px}
+.fcard.ctr{grid-column:1 / 3;justify-self:center;width:calc(50% - 6px)}
+.nb img{width:30px;height:30px;object-fit:contain;display:block}
 
 /* STATS */
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:13px}
@@ -176,44 +183,37 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     </div>
   </div>
   <div class="sec">ទម្រង់ (FORMS)</div>
-  <div class="g3" style="margin-bottom:13px">
+  <div class="gforms">
     <div class="fcard" onclick="showForm('cr')">
-      <div style="font-size:28px">📦</div>
-      <div style="font-size:14px;font-weight:700">ការស្នើសុំ</div>
-      <div style="font-size:11px;color:var(--muted)">Requisition</div>
+      <img src="icons/card-cr.png" alt="">
+      <div class="fk">ការស្នើសុំ</div>
+      <div class="fe">Requisition</div>
       <span class="badge" style="background:rgba(61,219,114,.2);color:var(--acc)">CR-01</span>
     </div>
     <div class="fcard" onclick="showForm('mx')">
-      <div style="font-size:28px">⚗️</div>
-      <div style="font-size:14px;font-weight:700">ការលាយ</div>
-      <div style="font-size:11px;color:var(--muted)">Mixing</div>
+      <img src="icons/card-mx.png" alt="">
+      <div class="fk">ការលាយ</div>
+      <div class="fe">Mixing</div>
       <span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
     </div>
     <div class="fcard" onclick="showForm('sp')">
-      <div style="font-size:28px">🌿</div>
-      <div style="font-size:14px;font-weight:700">ការបាញ់</div>
-      <div style="font-size:11px;color:var(--muted)">Spraying</div>
+      <img src="icons/card-sp.png" alt="">
+      <div class="fk">ការបាញ់</div>
+      <div class="fe">Spraying</div>
       <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">SP-01</span>
     </div>
     <div class="fcard" onclick="showForm('st')">
-      <div style="font-size:28px">📥</div>
-      <div style="font-size:14px;font-weight:700">ការទទួល</div>
-      <div style="font-size:11px;color:var(--muted)">Stock In</div>
+      <img src="icons/card-st.png" alt="">
+      <div class="fk">ការទទួល</div>
+      <div class="fe">Stock In</div>
       <span class="badge" style="background:rgba(155,126,245,.2);color:var(--purple)">ST-01</span>
     </div>
-    <div class="fcard" onclick="showForm('rt')">
-      <div style="font-size:28px">↩️</div>
-      <div style="font-size:14px;font-weight:700">ការសងវិញ</div>
-      <div style="font-size:11px;color:var(--muted)">Return</div>
+    <div class="fcard ctr" onclick="showForm('rt')">
+      <img src="icons/card-rt.png" alt="">
+      <div class="fk">ការសងវិញ</div>
+      <div class="fe">Return</div>
       <span class="badge" style="background:rgba(245,166,35,.2);color:var(--warn)">RT-01</span>
     </div>
-  </div>
-  <div style="background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px" onclick="showTab('report')">
-    <div>
-      <div style="font-size:15px;font-weight:700;color:var(--warn)">📋 របាយការណ៍ (Reports)</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">By Plot</div>
-    </div>
-    <span style="color:var(--warn);font-size:20px">→</span>
   </div>
   <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
     🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 30s</span>
@@ -309,11 +309,11 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 
 <!-- NAV -->
 <nav class="nav">
-  <button class="nb on" onclick="showTab('home')" id="nb-home"><span>🏠</span>Home</button>
-  <button class="nb" onclick="showTab('stock')" id="nb-stock"><span>📦</span>Stock</button>
-  <button class="nb" onclick="showTab('report')" id="nb-report"><span>📋</span>Reports</button>
-  <button class="nb" onclick="showTab('hist')" id="nb-hist"><span>📜</span>History</button>
-  <button class="nb" onclick="showTab('settings')" id="nb-settings"><span>⚙️</span>Settings</button>
+  <button class="nb on" onclick="showTab('home')" id="nb-home"><img src="icons/nav-home.png" alt="">Home</button>
+  <button class="nb" onclick="showTab('stock')" id="nb-stock"><img src="icons/nav-stock.png" alt="">Stock</button>
+  <button class="nb" onclick="showTab('report')" id="nb-report"><img src="icons/nav-reports.png" alt="">Reports</button>
+  <button class="nb" onclick="showTab('hist')" id="nb-hist"><img src="icons/nav-history.png" alt="">History</button>
+  <button class="nb" onclick="showTab('settings')" id="nb-settings"><img src="icons/nav-settings.png" alt="">Settings</button>
 </nav>
 
 <!-- EDIT BANNER (shown when editing an existing record) -->
@@ -641,7 +641,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.21a'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.21e'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -1239,8 +1239,8 @@ function renderAlerts() {
   // ── Summary bar ──────────────────────────────────────────────
   var totalLoaded=0, totalUsed=0;
   keys.forEach(function(k){ totalLoaded+=stock[k].loaded; totalUsed+=stock[k].used; });
-  var totalRemain = totalLoaded - totalUsed;
-  var totalPct = totalLoaded>0 ? (totalRemain/totalLoaded*100).toFixed(0) : 0;
+  var totalRemain = Math.max(0, totalLoaded - totalUsed);
+  var totalPct = totalLoaded>0 ? Math.max(0, totalRemain/totalLoaded*100).toFixed(0) : 0;
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;margin-bottom:10px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
     + '<span style="font-size:11px;font-weight:700;color:var(--acc)">🚛 Stock On Truck (CR − MX)</span>'
@@ -1253,7 +1253,7 @@ function renderAlerts() {
   // ── Table: all chemicals with stock ──────────────────────────
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px">';
   html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700">'
-    + '<span>Chemical</span><span>Issued</span><span>Used</span><span>Remaining</span><span>%</span></div>';
+    + '<span style="flex:2">Chemical</span><span style="flex:1;text-align:right">Remaining</span></div>';
 
   var allSorted = out.concat(low).concat(ok_items);
   allSorted.forEach(function(item){
@@ -1262,10 +1262,7 @@ function renderAlerts() {
     var status = item.s.overused ? '⛔' : item.s.remain<=0 ? '🔴' : pct<20 ? '🟡' : '🟢';
     html += '<div style="padding:7px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">'
       + '<span style="font-size:10px;font-weight:600;flex:2">'+status+' '+item.n+'</span>'
-      + '<span style="font-size:10px;color:var(--muted);flex:1;text-align:right">'+s.loaded.toFixed(1)+'</span>'
-      + '<span style="font-size:10px;color:var(--muted);flex:1;text-align:right">'+s.used.toFixed(1)+'</span>'
-      + '<span style="font-size:10px;font-weight:700;color:'+col+';flex:1;text-align:right">'+s.remain.toFixed(1)+'</span>'
-      + '<span style="font-size:10px;color:'+col+';flex:1;text-align:right">'+pct.toFixed(0)+'%</span>'
+      + '<span style="font-size:11px;font-weight:700;color:'+col+';flex:1;text-align:right">'+Math.max(0,s.remain).toFixed(1)+'</span>'
       + '</div>';
   });
   html += '</div>';
@@ -1348,8 +1345,8 @@ function renderWarehouseStock() {
   });
   var totalInit   = active.reduce(function(a,k){ return a + ws[k].initial; }, 0);
   var totalIssued = active.reduce(function(a,k){ return a + ws[k].issued;  }, 0);
-  var totalRemain = totalInit - totalIssued;
-  var totalPct    = totalInit > 0 ? (totalRemain / totalInit * 100).toFixed(0) : 0;
+  var totalRemain = Math.max(0, totalInit - totalIssued);
+  var totalPct    = totalInit > 0 ? Math.max(0, (totalInit - totalIssued) / totalInit * 100).toFixed(0) : 0;
   var barColor = totalPct < 20 ? 'var(--danger)' : totalPct < 50 ? 'var(--warn)' : 'var(--purple)';
   var html = '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;margin-bottom:10px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
@@ -1361,27 +1358,21 @@ function renderWarehouseStock() {
     + '</div>';
   html += '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:10px">';
   html += '<div style="padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700">'
-    + '<span style="flex:1.7">Chemical</span>'
+    + '<span style="flex:2">Chemical</span>'
     + '<span style="flex:1;text-align:right">Initial+ST</span>'
-    + '<span style="flex:1;text-align:right">−CR issued</span>'
-    + '<span style="flex:1;text-align:right">+RT return</span>'
     + '<span style="flex:1;text-align:right">Remaining</span>'
-    + '<span style="flex:1.1;text-align:right;color:var(--teal)">Remain (Ha)</span></div>';
+    + '<span style="flex:1.2;text-align:right;color:var(--teal)">Remain (Ha)</span></div>';
   out.concat(low).concat(ok_items).forEach(function(k) {
     var s = ws[k];
     var col    = (s.overissued || s.remain <= 0) ? 'var(--danger)' : s.pct < 20 ? 'var(--warn)' : 'var(--purple)';
     var status = s.overissued ? '⛔' : s.remain <= 0 ? '🔴' : s.pct < 20 ? '🟡' : '🟢';
     var baseAmt = (s.initial + (s.received||0)).toFixed(1);          // ต้นทุน + ST รับ เท่านั้น
-    var retAmt  = (s.returned||0) > 0 ? '+' + (s.returned||0).toFixed(1) : '—';
-    var retCol  = (s.returned||0) > 0 ? 'var(--teal)' : 'var(--faint)';
     var remainHaTxt = (s.remainHa > 0) ? s.remainHa.toFixed(1) : '—';
     html += '<div style="padding:7px 13px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">'
-      + '<span style="font-size:10px;font-weight:600;flex:1.7">' + status + ' ' + k + '</span>'
+      + '<span style="font-size:10px;font-weight:600;flex:2">' + status + ' ' + k + '</span>'
       + '<span style="font-size:10px;color:var(--muted);flex:1;text-align:right">' + baseAmt + '</span>'
-      + '<span style="font-size:10px;color:var(--warn);flex:1;text-align:right">−' + s.issued.toFixed(1) + '</span>'
-      + '<span style="font-size:10px;color:' + retCol + ';flex:1;text-align:right">' + retAmt + '</span>'
-      + '<span style="font-size:11px;font-weight:800;color:' + col + ';flex:1;text-align:right">' + s.remain.toFixed(1) + '</span>'
-      + '<span style="font-size:11px;font-weight:700;color:var(--teal);flex:1.1;text-align:right">' + remainHaTxt + '</span>'
+      + '<span style="font-size:11px;font-weight:800;color:' + col + ';flex:1;text-align:right">' + Math.max(0,s.remain).toFixed(1) + '</span>'
+      + '<span style="font-size:11px;font-weight:700;color:var(--teal);flex:1.2;text-align:right">' + remainHaTxt + '</span>'
       + '</div>';
   });
   html += '</div>';
@@ -1882,7 +1873,7 @@ function renderCRChems() {
     if (c.n && whs[c.n]) {
       var ws2 = whs[c.n];
       var col2 = ws2.overissued ? 'var(--danger)' : ws2.remain <= 0 ? 'var(--danger)' : ws2.pct < 20 ? 'var(--warn)' : 'var(--purple)';
-      whInfo = '<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 Warehouse: Remaining '+ws2.remain.toFixed(1)+' '+ws2.unit+' ('+Math.max(0,ws2.pct).toFixed(0)+'%)</div>';
+      whInfo = '<div style="font-size:9px;margin-bottom:4px;color:'+col2+'">🏭 Warehouse: Remaining '+Math.max(0,ws2.remain).toFixed(1)+' '+ws2.unit+' ('+Math.max(0,ws2.pct).toFixed(0)+'%)</div>';
     }
     html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:var(--muted)">#'+(i+1)+'</span><button class="rm" onclick="remCR('+i+')">✕</button></div>';
     html+='<div onclick="openChem('+i+',\'cr\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:5px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
