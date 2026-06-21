@@ -1,4 +1,4 @@
-const CACHE = 'chemcontrol-v23';
+const CACHE = 'chemcontrol-v24';
 const STATIC = [
   '/Jirayu/',
   '/Jirayu/index.html',
@@ -26,10 +26,10 @@ self.addEventListener('activate', e => {
 });
 
 // Fetch strategy:
-// - ไฟล์ static (HTML/SVG/manifest) → Cache-first
+// - index.html / navigation (ตัวแอพ) → Network-first → เข้าแอพตอนมีเน็ตได้ตัวล่าสุดเสมอ, offline ใช้ cache
+// - manifest / icon (static ไม่ค่อยเปลี่ยน) → Cache-first
 // - Google Fonts → Cache-first
-// - GAS (script.google.com) → Network-first, ถ้าหลุดก็ไม่ block
-// - อื่นๆ → Network-first
+// - GAS (script.google.com) → Network-only (dynamic data)
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
@@ -39,6 +39,23 @@ self.addEventListener('fetch', e => {
       JSON.stringify({ error: 'offline' }),
       { headers: { 'Content-Type': 'application/json' } }
     )));
+    return;
+  }
+
+  // ตัวแอพ (index.html / navigation) — NETWORK-FIRST: ได้เวอร์ชันล่าสุดทุกครั้งที่เข้าแอพ
+  const isHTML = e.request.mode === 'navigate'
+    || url.pathname === '/Jirayu/'
+    || url.pathname.endsWith('/index.html');
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      }).catch(() =>
+        caches.match(e.request).then(hit => hit || caches.match('/Jirayu/index.html'))
+      )
+    );
     return;
   }
 
@@ -54,7 +71,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Static assets (index.html, manifest, icon) — cache-first, fallback network
+  // Static assets อื่น (manifest, icon) — cache-first, fallback network
   e.respondWith(
     caches.match(e.request).then(hit => {
       if (hit) return hit;
