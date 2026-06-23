@@ -285,6 +285,11 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     <div class="crow"><span style="color:var(--muted)">App</span><span class="cval">Chem Control · Mega Farm</span></div>
     <div class="crow"><span style="color:var(--muted)">Version</span><span class="cval">v12</span></div>
   </div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">🌾 Production Season</div>
+    <div class="crow" style="margin-bottom:9px"><span style="color:var(--muted)">Current Season</span><span class="cval" id="set-season-lbl">—</span></div>
+    <button onclick="changeSeason()" style="width:100%;background:rgba(15,122,104,0.1);border:1px solid rgba(15,122,104,0.35);color:var(--teal);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔄 Change Season (PIN)</button>
+  </div>
   <button onclick="doRefresh()" style="width:100%;background:var(--dim);border:1px solid var(--bdr);color:var(--acc);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">
     🔄 Force Sync Now
   </button>
@@ -360,6 +365,9 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     <div class="grp"><label>ម៉ាស៊ីន (Sprayer)</label>
       <select id="mx-sprayer"><option value="">ជ្រើស...</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
     </div>
+  </div>
+  <div class="grp"><label>Crop Type</label>
+    <select id="mx-crop"><option value="">— Select —</option><option>Corn</option><option>Cassava</option><option>Soy Bean</option><option>Mung Bean</option></select>
   </div>
   <div class="grp"><label>ទឹក/ថង L (Water/Tank)</label><input type="number" id="mx-wpt" value="2000" oninput="renderTanks()"></div>
   <div id="mx-tanks"></div>
@@ -642,7 +650,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v12.06.21i'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v12.06.23a'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 var curPlotTarget = '';
 var histFilter = 'all';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
@@ -654,6 +662,25 @@ function saveDeletedIds() {
 }
 var rptView = 'plot';
 var rptPlotFilter = 'all';
+var rptSeasonFilter = 'all';
+var currentSeason = (function(){ try{return localStorage.getItem('mf_current_season')||'Rain Season / 26';}catch(e){return 'Rain Season / 26';} })();
+function saveSeason(s){ try{localStorage.setItem('mf_current_season',s);}catch(e){} }
+function nextSeason(s){
+  var m=s.match(/^(Rain|Dry) Season \/ (\d+)$/);
+  if(!m) return s;
+  return m[1]==='Rain' ? 'Dry Season / '+m[2] : 'Rain Season / '+(parseInt(m[2])+1);
+}
+function changeSeason(){
+  var pin=window.prompt('Admin PIN (Change Season):','');
+  if(pin===null)return;
+  if(pin!==ADMIN_PIN){toast('❌ Wrong PIN');return;}
+  var nxt=nextSeason(currentSeason);
+  if(!window.confirm('Change season to:\n'+nxt+'\n\nConfirm?'))return;
+  currentSeason=nxt; saveSeason(currentSeason);
+  var el=document.getElementById('set-season-lbl'); if(el)el.textContent=currentSeason;
+  toast('✅ Season: '+currentSeason);
+}
+var CROP_EMOJI={'Corn':'🌽','Cassava':'🌿','Soy Bean':'🫘','Mung Bean':'🟢'};
 var rptPlotOpen = {}; // accordion state ของแต่ละ plot ใน Report By Plot
 function toggleRptPlot(uid){
   var b=document.getElementById(uid);if(!b)return;
@@ -784,6 +811,8 @@ function renderSettings() {
     : '<span style="color:var(--danger)">● Disabled</span>';
   var rcEl = document.getElementById('set-rec-count');
   if (rcEl) rcEl.textContent = records.length;
+  var slEl = document.getElementById('set-season-lbl');
+  if (slEl) slEl.textContent = currentSeason;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -855,7 +884,7 @@ function hideForm() {
   showTab(_prevTab);
   document.querySelector('.nav').style.display = '';
   // Reset form fields
-  ['cr-req','cr-apv','cr-note','st-recv','st-apv','st-note','st-ref','rt-by','rt-recv','rt-note','rt-reason','mx-mixer','mx-note','sp-op','sp-note'].forEach(function(id){
+  ['cr-req','cr-apv','cr-note','st-recv','st-apv','st-note','st-ref','rt-by','rt-recv','rt-note','rt-reason','mx-mixer','mx-crop','mx-note','sp-op','sp-note'].forEach(function(id){
     var el = document.getElementById(id); if (!el) return;
     if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
   });
@@ -955,6 +984,7 @@ function populateMXForm(rec){
   var el=document.getElementById('mx-mixer'); if(el) el.value=rec.mixer||'';
   document.getElementById('mx-plot').value=rec.plot||'';
   var sp=document.getElementById('mx-sprayer'); if(sp) sp.value=rec.sprayer||'';
+  var cr2=document.getElementById('mx-crop'); if(cr2) cr2.value=rec.cropType||'';
   document.getElementById('mx-wpt').value=rec.waterPerTank||2000;
   document.getElementById('mx-note').value=rec.note||'';
   var ac=rec.allChems||{};
@@ -1665,6 +1695,8 @@ function cloudSync() {
       r.time=r.time||r.Time||'';
       r.waterPerTank=parseFloat(r.waterPerTank||r.WaterPerTank||r['Water/Tank(L)']||0);
       r.totalWater=parseFloat(r.totalWater||r.TotalWater||r['Total Water(L)']||0);
+      r.cropType=r.cropType||r.CropType||'';
+      r.season=r.season||r.Season||'Rain Season / 26';
       r.note=r.note||r.Note||'';
       r.createdAt=r.createdAt||r.CreatedAt||'';
       cloud.push(r);
@@ -1970,8 +2002,9 @@ function submitMX(){
     plot:document.getElementById('mx-plot').value,
     sprayer:document.getElementById('mx-sprayer').value,waterPerTank:wpt,
     totalWater:mxTanks.length*wpt,tanks:JSON.parse(JSON.stringify(mxTanks)),
-    allChems:allC,note:document.getElementById('mx-note').value,createdAt:new Date().toISOString()};
-  handleSave(rec,'MX-01',{id:rec.id,date:rec.date,time:rec.time,mixer:rec.mixer,plot:rec.plot,sprayer:rec.sprayer,waterPerTank:rec.waterPerTank,totalWater:rec.totalWater,allChems:rec.allChems,note:rec.note,createdAt:rec.createdAt});
+    allChems:allC,cropType:document.getElementById('mx-crop').value||'',
+    season:currentSeason,note:document.getElementById('mx-note').value,createdAt:new Date().toISOString()};
+  handleSave(rec,'MX-01',{id:rec.id,date:rec.date,time:rec.time,mixer:rec.mixer,plot:rec.plot,sprayer:rec.sprayer,waterPerTank:rec.waterPerTank,totalWater:rec.totalWater,allChems:rec.allChems,cropType:rec.cropType,season:rec.season,note:rec.note,createdAt:rec.createdAt});
   toast('✅ MX-01 '+(isEdit?'Updated!':'បានរក្សាទុក!')+' ('+rec.id+')');
 }
 
@@ -2317,28 +2350,42 @@ function renderRpt(v){
       mxByPlot[pKey].push(r);
     });
     var allPlotKeys=Object.keys(mxByPlot).sort();
-    // reset filter ถ้า plot ที่เลือกไว้ไม่มีข้อมูลแล้ว
-    if(rptPlotFilter!=='all'&&allPlotKeys.indexOf(rptPlotFilter)<0)rptPlotFilter='all';
-    html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:6px">';
+    // collect all seasons present in data
+    var allSeasons=[];
+    mx.forEach(function(r){var s=r.season||'Rain Season / 26';if(allSeasons.indexOf(s)<0)allSeasons.push(s);});
+    allSeasons.sort();
+    if(rptSeasonFilter!=='all'&&allSeasons.indexOf(rptSeasonFilter)<0)rptSeasonFilter='all';
+    html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px">';
     html+='<span class="sec" style="margin:0">📍 By Plot (MX) — '+allPlotKeys.length+' plots</span>';
     html+='<div style="display:flex;gap:6px">';
     html+='<button onclick="rptExpandAll(true)" style="font-size:10px;font-weight:700;padding:5px 9px;border-radius:8px;border:1px solid var(--bdr);background:var(--card);color:var(--text);cursor:pointer">Expand All</button>';
     html+='<button onclick="rptExpandAll(false)" style="font-size:10px;font-weight:700;padding:5px 9px;border-radius:8px;border:1px solid var(--bdr);background:var(--card);color:var(--text);cursor:pointer">Collapse All</button>';
     html+='</div></div>';
-    var plotKeys=allPlotKeys;
-    if(!allPlotKeys.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No MX records yet</div>';}
+    // Season filter
+    html+='<select onchange="rptSeasonFilter=this.value;renderRpt(\'plot\')" style="width:100%;padding:8px 10px;margin-bottom:10px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--text);font-family:inherit;font-size:12px;font-weight:700">';
+    html+='<option value="all"'+(rptSeasonFilter==='all'?' selected':'')+'>🌾 All Seasons</option>';
+    allSeasons.forEach(function(s){html+='<option value="'+s+'"'+(rptSeasonFilter===s?' selected':'')+'>'+s+'</option>';});
+    html+='</select>';
+    // filter plots by season
+    var filteredMxByPlot={};
+    Object.keys(mxByPlot).forEach(function(pk){
+      var recs=rptSeasonFilter==='all'?mxByPlot[pk]:mxByPlot[pk].filter(function(r){return (r.season||'Rain Season / 26')===rptSeasonFilter;});
+      if(recs.length)filteredMxByPlot[pk]=recs;
+    });
+    var plotKeys=Object.keys(filteredMxByPlot).sort();
+    if(!plotKeys.length){html+='<div style="text-align:center;color:var(--muted);padding:30px 0;font-size:12px">No records for this season</div>';}
     plotKeys.forEach(function(p){
-      // resolve เคมี + ประเภท ของแต่ละ MX record
-      var enriched=mxByPlot[p].map(function(r){
+      // resolve เคมี + ประเภท + cropType ของแต่ละ MX record
+      var enriched=filteredMxByPlot[p].map(function(r){
         var ac=sanitizeAllChems(r.allChems||{});
         if(!Object.keys(ac).length&&r.tanks){var rb={};r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){var q=parseFloat(c.q);if(c.n&&q>0&&q<2000)rb[c.n]=(rb[c.n]||0)+q;});});ac=rb;}
-        return {date:normalizeDate(r.date),type:getSprayType(Object.keys(ac)),chems:ac};
+        return {date:normalizeDate(r.date),type:getSprayType(Object.keys(ac)),chems:ac,cropType:r.cropType||'Corn'};
       }).filter(function(e){return e.date;});
-      // group ตาม date+ประเภทสาร → รวมเคมี
+      // group ตาม date+ประเภทสาร → รวมเคมี (เก็บ cropType จาก record แรกของกลุ่ม)
       var groupMap={};
       enriched.forEach(function(e){
         var k=e.date+'||'+e.type.label;
-        if(!groupMap[k])groupMap[k]={date:e.date,type:e.type,chems:{}};
+        if(!groupMap[k])groupMap[k]={date:e.date,type:e.type,chems:{},cropType:e.cropType||'Corn'};
         Object.keys(e.chems).forEach(function(cn){groupMap[k].chems[cn]=(groupMap[k].chems[cn]||0)+e.chems[cn];});
       });
       var groups=Object.keys(groupMap).map(function(k){return groupMap[k];})
@@ -2356,8 +2403,10 @@ function renderRpt(v){
       html+='<div class="card">';
       html+='<div onclick="toggleRptPlot(\''+bodyUid+'\')" style="display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer">';
       html+='<div style="display:flex;align-items:center;gap:6px;min-width:0">';
+      var plotCrop=enriched.length?enriched[enriched.length-1].cropType||'Corn':'Corn';
+      var plotEmoji=CROP_EMOJI[plotCrop]||'🌱';
       html+='<span id="chev-'+bodyUid+'" class="rpt-chev" style="font-size:11px;color:var(--muted);transition:transform .15s;transform:'+(pOpen?'rotate(90deg)':'rotate(0)')+'">▶</span>';
-      html+='<span style="font-size:12px;font-weight:800;color:var(--acc)">📍 '+p+'</span>';
+      html+='<span style="font-size:12px;font-weight:800;color:var(--acc)">'+plotEmoji+' '+p+'</span>';
       html+='</div>';
       html+='<div style="display:flex;align-items:center;gap:6px;white-space:nowrap">';
       if(latestPlanting)html+='<span style="font-size:9px;font-weight:700;color:var(--muted);background:var(--dim);padding:3px 8px;border-radius:20px">🌱 '+latestPlanting+'</span>';
@@ -2390,9 +2439,13 @@ function renderRpt(v){
         var d0=d0For(g.date);
         var days=d0?daysDiff(d0,g.date):null;
         var stage=stageFromDays(days);
-        var stageBadge=stage
-          ? '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(15,122,104,0.14);color:var(--teal);white-space:nowrap">🌽 '+stage+' · D'+days+'</span>'
-          : '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(122,170,138,0.18);color:var(--faint);white-space:nowrap">🌽 —</span>';
+        var gCropType=g.cropType||'Corn';
+        var gEmoji=CROP_EMOJI[gCropType]||'🌱';
+        var stageBadge=days!==null
+          ? (gCropType==='Corn'&&stage
+            ? '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(15,122,104,0.14);color:var(--teal);white-space:nowrap">'+gEmoji+' '+stage+' · D'+days+'</span>'
+            : '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(15,122,104,0.14);color:var(--teal);white-space:nowrap">'+gEmoji+' D'+days+'</span>')
+          : '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(122,170,138,0.18);color:var(--faint);white-space:nowrap">'+gEmoji+' —</span>';
         var dayOpen=!!rptPlotOpen[uid];
         html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(26,107,54,0.07);cursor:pointer" onclick="toggleRptItem(\''+uid+'\')">';
         html+='<span style="font-size:11px;color:var(--muted);white-space:nowrap">'+g.date+'</span>';

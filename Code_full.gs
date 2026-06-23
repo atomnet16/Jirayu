@@ -10,7 +10,7 @@ var SS = SpreadsheetApp.getActiveSpreadsheet();
 var SCHEMA = {
   'CR-01': ['ID','Date','Requester','Approver','Chemicals','Note','CreatedAt','UpdatedAt'],
   'MX-01': ['ID','Date','Time','Mixer','Plot','Sprayer',
-             'WaterPerTank','TotalWater','SprayType','Note','CreatedAt','UpdatedAt'],
+             'WaterPerTank','TotalWater','SprayType','CropType','Season','Note','CreatedAt','UpdatedAt'],
   'SP-01': ['ID','Date','TStart','TEnd','Hrs','HaH','Operator',
              'Plot','Area','Weather','Wind','MxId',
              'WaterBefore','WaterAfter','WaterUsed','ChemDelivered','Note','CreatedAt','UpdatedAt'],
@@ -129,6 +129,8 @@ function getFieldValue(header, d) {
     'WaterPerTank':    d.waterPerTank  || 0,
     'TotalWater':      d.totalWater    || 0,
     'SprayType':       d.allChems ? computeSprayType(d.allChems) : (d.sprayType || ''),
+    'CropType':        d.cropType  || '',
+    'Season':          d.season    || '',
     'WaterBefore':     d.waterBefore   || 0,
     'WaterAfter':      d.waterAfter    || 0,
     'WaterUsed':       d.waterUsed     || 0,
