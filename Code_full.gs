@@ -4,7 +4,7 @@
 //  Actions: getAll | append | appendMany | update | delete
 // ═══════════════════════════════════════════════════════════════════
 
-var SS = SpreadsheetApp.getActiveSpreadsheet();
+var SS = SpreadsheetApp.openById('1j3KleOE--ZOJjK3I9PyXkyQj5_NJ3oQdJYzRmuzMKQU');
 
 // ── Sheet column definitions ────────────────────────────────────────
 var SCHEMA = {
