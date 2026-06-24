@@ -2602,6 +2602,7 @@ function buildChemDetail(r) {
   return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)">'+rows.join('')+'</div>';
 }
 
+var histPlotSel='all';
 function renderHistByPlot(el){
   var mxRecs=records.filter(function(r){return r.type==='mx'&&r.plot;});
   var plotMap={};
@@ -2613,7 +2614,11 @@ function renderHistByPlot(el){
   });
   var plots=Object.keys(plotMap).sort();
   if(!plots.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:35px 0;font-size:12px">No MX records with plot</div>';return;}
-  el.innerHTML=plots.map(function(p){
+  var opts='<option value="all">— All Plots —</option>'+plots.map(function(p){return '<option value="'+p+'"'+(histPlotSel===p?' selected':'')+'>'+p+'</option>';}).join('');
+  var dropdown='<div style="margin-bottom:10px"><label style="font-size:10px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px">เลือก Plot</label>'
+    +'<select style="width:100%;padding:8px 12px;border-radius:10px;border:1.5px solid rgba(15,122,104,0.45);background:rgba(255,255,255,0.8);color:var(--acc);font-size:12px;font-weight:700;font-family:inherit" onchange="histPlotSel=this.value;renderHistByPlot(document.getElementById(\'hist-list\'))">'+opts+'</select></div>';
+  var filtered=histPlotSel==='all'?plots:[histPlotSel].filter(function(p){return plotMap[p];});
+  el.innerHTML=dropdown+filtered.map(function(p){
     var recs=plotMap[p].slice().sort(function(a,b){
       var da=a.date||'',db=b.date||'';
       return da>db?-1:da<db?1:0;
