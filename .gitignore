@@ -3,3 +3,5 @@ dist/
 .env
 sample-images/
 *.json.key
+claude-handover.zip
+claude-handover/
