@@ -177,7 +177,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
     </div>
   </div>
   <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
-    🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 35s</span>
+    🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 60s</span>
   </button>
 </div>
 
@@ -375,10 +375,13 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v13.1.mx-only'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v13.2.mx-only'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
+// รอบ auto-sync — ยิ่งถี่ยิ่งเสี่ยงโดน Google จำกัดการส่งผลลัพธ์ (ตอบเป็นหน้า error ของ Drive)
+// 60 วิพอสำหรับงานหน้าแปลง เพราะบันทึกเสร็จมี sync ทันทีอยู่แล้ว + sync ตอนสลับกลับมาที่แอป
+var SYNC_INTERVAL = 60000;
 var curPlotTarget = '';
 var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
 function loadDeletedIds() {
@@ -543,7 +546,7 @@ window.onload = function() {
   renderAll();
   // Cloud sync: background only, never blocks
   if (USE_CLOUD) {
-    syncTimer = setInterval(cloudSync, JSONP_TIMEOUT + 10000);  // ห่างกว่า timeout เสมอ กัน request ซ้อนกัน
+    syncTimer = setInterval(cloudSync, SYNC_INTERVAL);
     setTimeout(cloudSync, 1500);
   }
 };
@@ -718,7 +721,7 @@ var _lastVisibleSync = 0;
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'visible' && USE_CLOUD) {
     var now = Date.now();
-    if (now - _lastVisibleSync > 10000) { // throttle: ไม่ sync ถี่กว่า 10s
+    if (now - _lastVisibleSync > 30000) { // throttle: ไม่ sync ถี่กว่า 30s
       _lastVisibleSync = now;
       setTimeout(cloudSync, 400);
     }
@@ -727,7 +730,7 @@ document.addEventListener('visibilitychange', function() {
 window.addEventListener('focus', function() {
   if (USE_CLOUD) {
     var now = Date.now();
-    if (now - _lastVisibleSync > 10000) {
+    if (now - _lastVisibleSync > 30000) {
       _lastVisibleSync = now;
       setTimeout(cloudSync, 400);
     }
@@ -788,9 +791,15 @@ function cloudWrite(payload) {
     });
   } catch(e) {}
 }
+// กันยิงซ้อน: ถ้ารอบก่อนยังไม่จบ (เน็ตช้า/Google ตอบช้า) ห้ามเริ่มรอบใหม่
+// ไม่มีตัวกันนี้ = request กองกันจน Google ตัดการส่งผลลัพธ์กลับ (ตอบเป็นหน้า error ของ Drive)
+var _syncBusy = false;
 function cloudSync() {
   // ข้ามถ้า offline — ข้อมูลอยู่ใน localStorage พร้อม sync ตอน online
   if (!navigator.onLine) { setSyncUI(false); return; }
+  if (_syncBusy) return;
+  _syncBusy = true;
+  setTimeout(function(){ _syncBusy = false; }, JSONP_TIMEOUT + 5000);  // กันธงค้างจนซิงก์ตายถาวร
   // 0. Flush any pending edits (from offline edit sessions)
   if (pendingEdits.length > 0) {
     var flushed = pendingEdits.slice();
@@ -799,7 +808,9 @@ function cloudSync() {
     flushed.forEach(function(p){ cloudWrite(p); });
   }
   // 1. Push local records up (fire-and-forget)
-  var mx = records.filter(function(r){return r.type==='mx';}).map(function(r){
+  //    ★ ส่งเฉพาะแถวที่คลาวด์ยังไม่ยืนยัน — appendMany เป็น INSERT-ONLY อยู่แล้ว
+  //      การส่งครบทุกแถวทุกรอบทำให้ doPost ทำงานหนักฟรี ๆ และเพิ่มจำนวน execution เท่าตัว
+  var mx = records.filter(function(r){return r.type==='mx' && !r.cloudSynced;}).map(function(r){
     // Rebuild allChems from tanks if empty/corrupted
     var ac = sanitizeAllChems(r.allChems||{});
     if (Object.keys(ac).length===0 && r.tanks) {
@@ -809,9 +820,10 @@ function cloudSync() {
     }
     return {id:r.id,date:normalizeDate(r.date)||r.date,time:r.time||'',mixer:r.mixer||'',supervisor:r.supervisor||'',plot:r.plot||'',sprayer:r.sprayer||'',waterPerTank:r.waterPerTank||0,totalWater:mxEffectiveWater(r),allChems:ac,note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
   });
-  cloudWrite({action:'appendMany',sheets:{'MX-01':mx}});
+  if (mx.length) cloudWrite({action:'appendMany',sheets:{'MX-01':mx}});   // ไม่มีของใหม่ = ไม่ยิง POST
   // 2. Read cloud data (includes deletedIds from all devices)
   cloudRead(function(resp) {
+    _syncBusy = false;
     if (!resp) { setSyncUI(false); return; }
     var data = resp.data || {};
     // Sync cloud deletedIds → merge into local deletedIds so this device also forgets them
@@ -952,6 +964,7 @@ function buildChemMap(r, data) {
 function doRefresh() {
   setSyncUI(false);
   toast('🔄 Syncing...');
+  _syncBusy = false;   // ผู้ใช้กดเอง = บังคับให้เริ่มรอบใหม่เสมอ ไม่ติดตัวกันยิงซ้อน
   cloudSync();
 }
 
