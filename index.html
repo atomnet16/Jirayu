@@ -192,11 +192,19 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 <!-- HOME PAGE -->
 <div class="pg on" id="pg-home">
   <div class="sec" id="lbl-today">ថ្ងៃនេះ (TODAY)</div>
-  <div class="g3" style="grid-template-columns:1fr">
+  <div class="g3" style="grid-template-columns:1fr 1fr">
+    <div class="stat"><div class="stat-v" id="cnt-ld" style="color:var(--blue);font-size:34px">0</div><div class="stat-l">🚚 LD · ขึ้นรถวันนี้</div></div>
     <div class="stat"><div class="stat-v" id="cnt-mx" style="color:var(--teal);font-size:34px">0</div><div class="stat-l">លាយ MX · เบิกวันนี้</div></div>
   </div>
+  <div id="truck-stock"></div>
   <div class="sec">ទម្រង់ (FORM)</div>
   <div class="gforms">
+    <div class="fcard" onclick="showForm('ld'); ldResetForm();">
+      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">🚚</div>
+      <div class="fk">ដាក់ថ្នាំលើឡាន</div>
+      <div class="fe">โหลดสารขึ้นรถ</div>
+      <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LD-01</span>
+    </div>
     <div class="fcard" onclick="showForm('mx')">
       <img src="icons/card-mx.png" alt="">
       <div class="fk">ការលាយ</div>
@@ -298,6 +306,33 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   <div id="mx-total" style="display:none"></div>
   <div class="grp"><label>Note</label><input type="text" id="mx-note" placeholder="..."></div>
   <button class="sbtn" style="background:var(--teal)" onclick="submitMX()">✓ បញ្ជាក់ (Confirm Mix)</button>
+</div>
+
+<div class="fw" id="fw-ld">
+  <div class="fhdr">
+    <button class="back" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">🚚 ដាក់ថ្នាំលើឡាន (โหลดสารขึ้นรถ)</div>
+    <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LD-01</span>
+  </div>
+  <div class="g2">
+    <div class="grp"><label>Date</label><input type="date" id="ld-date"></div>
+    <div class="grp"><label>ម៉ោង (Time)</label><input type="time" id="ld-time"></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label>អ្នកដាក់ (ผู้โหลด)</label>
+      <select id="ld-by"><option value="">— ជ្រើស —</option><option>Jirayu</option><option>Thea</option><option>Vith</option><option>Ratanak</option><option>Putdim</option><option>Chanron</option></select>
+    </div>
+    <div class="grp"><label>ឡាន/ម៉ាស៊ីន (รถ)</label>
+      <select id="ld-truck"><option value="">— รวมทุกคัน —</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="chem-hdr"><label>ថ្នាំគីមី (สารที่โหลดขึ้นรถ)</label><span class="chem-count" id="ld-chem-count">1 ชนิด</span></div>
+    <div id="ld-chem-rows"></div>
+    <button class="abtn" style="color:var(--blue)" onclick="ldAddChem()">+ បន្ថែមថ្នាំ (เพิ่มสารอีกชนิด)</button>
+  </div>
+  <div class="grp"><label>Note</label><input type="text" id="ld-note" placeholder="..."></div>
+  <button class="sbtn" style="background:var(--blue)" onclick="submitLD()">✓ រក្សាទីក (บันทึกขึ้นรถ)</button>
 </div>
 
 <div class="fw" id="fw-spraystatus">
@@ -402,7 +437,7 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 // ═══════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw-hyf7Qbz0Wsk-J8d1eY_13qVtcbAAGDLQ27RLN9dzSfY9ETxzRBtR1fUOJiL4mb0/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6Hy0z_qCqbj7s8QWfMKPSmcs-ocLJHA9p5d1BDep2G0zwIkh2Ru8JOEqq1GeCefY/exec';
 var ADMIN_PIN  = '9764';
 var USE_CLOUD  = true;
 
@@ -480,7 +515,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v13.2.mx-only'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.0.ld'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -555,18 +590,37 @@ function loadLocal() {
   for (var i=0; i<keys.length; i++) {
     try {
       var d = localStorage.getItem(keys[i]);
-      if (d) { var p = JSON.parse(d); if (Array.isArray(p) && p.length) return keepMxOnly(p); }
+      if (d) { var p = JSON.parse(d); if (Array.isArray(p) && p.length) return restoreLegacyLD(keepMxOnly(p)); }
     } catch(e) {}
   }
   return [];
 }
 // แอปนี้ใช้เฉพาะ MX-01 — record ชนิดอื่นที่ค้างจากเวอร์ชันเก่าเก็บสำรองไว้ก่อนตัดทิ้ง
 function keepMxOnly(arr) {
-  var legacy = arr.filter(function(r){ return r.type && r.type!=='mx'; });
+  // แอปนี้เก็บ 2 ชนิด: 'mx' (ผสม/เบิกหน้าแปลง) และ 'ld' (โหลดสารขึ้นรถ)
+  // ชนิดอื่นที่หลงเหลือจากเวอร์ชันเก่าถูกสำรองไว้ก่อนตัดทิ้ง — สำรองได้หลายครั้ง
+  var legacy = arr.filter(function(r){ return r.type && r.type!=='mx' && r.type!=='ld'; });
   if (legacy.length) {
-    try { if(!localStorage.getItem('mf_legacy_backup')) localStorage.setItem('mf_legacy_backup', JSON.stringify(legacy)); } catch(e) {}
+    try { localStorage.setItem('mf_legacy_backup_'+Date.now(), JSON.stringify(legacy)); } catch(e) {}
   }
-  return arr.filter(function(r){ return r.type==='mx'; });
+  return arr.filter(function(r){ return r.type==='mx' || r.type==='ld'; });
+}
+// กู้ LD ที่เคยถูกเวอร์ชันก่อนหน้าตัดทิ้งลง mf_legacy_backup — ทำครั้งเดียวตลอดชีพ
+function restoreLegacyLD(arr) {
+  try {
+    if (localStorage.getItem('mf_ld_restored')) return arr;
+    localStorage.setItem('mf_ld_restored','1');
+    var raw = localStorage.getItem('mf_legacy_backup');
+    if (!raw) return arr;
+    var old = JSON.parse(raw);
+    if (!Array.isArray(old)) return arr;
+    var have = {};
+    arr.forEach(function(r){ have[r.id] = 1; });
+    var back = old.filter(function(r){ return r && r.type==='ld' && r.id && !have[r.id]; });
+    back.forEach(function(r){ delete r.cloudSynced; arr.push(r); });   // ให้ push ขึ้นชีตใหม่
+    if (back.length) setTimeout(function(){ toast('↩️ กู้ LD ที่หายไป '+back.length+' ใบ'); }, 1800);
+  } catch(e) {}
+  return arr;
 }
 function saveLocal() {
   var d = JSON.stringify(records);
@@ -612,15 +666,20 @@ function safeJ(v) {
   try { return JSON.parse(v); } catch(e) { return null; }
 }
 // กรองค่าผิดปกติใน allChems (เช่น 2026 ที่มาจาก parseFloat ของ date string)
-function sanitizeAllChems(ac) {
+// max ปริยาย 2000 = เพดานของ MX (ปริมาณต่อถัง — กันค่าขยะอย่างปี ค.ศ. ที่หลุดมาจาก parseFloat)
+// LD โหลดขึ้นรถทีละมาก จึงส่ง LD_MAX เฉพาะเส้นทาง LD
+var LD_MAX = 200000;
+function sanitizeAllChems(ac, max) {
   if (!ac || typeof ac !== 'object') return {};
+  max = max || 2000;
   var clean = {};
   Object.keys(ac).forEach(function(k) {
     var v = parseFloat(ac[k]);
-    if (!isNaN(v) && v > 0 && v < 2000) clean[k] = v;
+    if (!isNaN(v) && v > 0 && v < max) clean[k] = v;
   });
   return clean;
 }
+function chemMaxFor(r) { return (r && r.type === 'ld') ? LD_MAX : 2000; }
 
 function renderSettings() {
   var lsEl = document.getElementById('set-last-sync');
@@ -683,7 +742,8 @@ function showForm(f) {
   });
   document.querySelector('.nav').style.display = 'none';
   if (!editMode) {  // ไม่ reset ถ้ากำลัง pre-populate สำหรับ edit
-    mxTanks=[{chems:[{n:'',q:''}]}]; renderTanks();
+    if (f==='mx') { mxTanks=[{chems:[{n:'',q:''}]}]; renderTanks(); }
+    if (f==='ld') { ldResetForm(); }
   }
   document.getElementById('fw-'+f).classList.add('on');
 }
@@ -705,6 +765,13 @@ function hideForm() {
   document.getElementById('mx-wpt').value='2000';
   document.getElementById('mx-date').value=todayISO();
   document.getElementById('mx-time').value=nowHM();
+  // ฟอร์ม LD
+  ['ld-by','ld-truck'].forEach(function(id){ var el=document.getElementById(id); if(el) el.selectedIndex=0; });
+  var ldn=document.getElementById('ld-note'); if(ldn) ldn.value='';
+  var ldd=document.getElementById('ld-date'); if(ldd) ldd.value=todayISO();
+  var ldt=document.getElementById('ld-time'); if(ldt) ldt.value=nowHM();
+  ldChems=[{n:'',q:''}];
+  if (document.getElementById('ld-chem-rows')) renderLDChems();
   renderAll();
 }
 
@@ -753,17 +820,29 @@ function editRecord(id) {
   var pin = window.prompt('Admin PIN (Edit data):','');
   if (pin===null) return;
   if (pin!==ADMIN_PIN){toast('❌ Wrong PIN');return;}
+  var f = (rec.type==='ld') ? 'ld' : 'mx';
   editId = id;
   editMode = true;
-  showForm('mx');
+  showForm(f);
   editMode = false;
   // Show edit banner
   var banner=document.getElementById('edit-banner');
   if(banner){banner.style.display='block';document.getElementById('edit-id-label').textContent=id;}
-  populateMXForm(rec);
+  if (f==='ld') populateLDForm(rec); else populateMXForm(rec);
   toast('✏️ Editing '+id);
 }
 
+function populateLDForm(rec){
+  document.getElementById('ld-date').value=rec.date||todayISO();
+  document.getElementById('ld-time').value=rec.time||nowHM();
+  var by=document.getElementById('ld-by'); if(by) by.value=rec.loadedBy||'';
+  var tk=document.getElementById('ld-truck'); if(tk) tk.value=rec.truck||'';
+  var nt=document.getElementById('ld-note'); if(nt) nt.value=rec.note||'';
+  var ac=sanitizeAllChems(rec.allChems||{}, LD_MAX);
+  ldChems=Object.keys(ac).map(function(k){ return {n:k, q:ac[k]}; });
+  if(!ldChems.length) ldChems=[{n:'',q:''}];
+  renderLDChems();
+}
 function populateMXForm(rec){
   document.getElementById('mx-date').value=rec.date||todayISO();
   document.getElementById('mx-time').value=rec.time||nowHM();
@@ -793,14 +872,18 @@ function populateMXForm(rec){
 // ═══════════════════════════════════════════════════════════
 function renderAll() {
   renderStats();
+  renderTruckStock();
   renderHist();
 }
 
 function renderStats() {
   var t = todayISO();
   var mx = records.filter(function(r){ return r.type==='mx' && normalizeDate(r.date)===t; }).length;
+  var ld = records.filter(function(r){ return r.type==='ld' && normalizeDate(r.date)===t; }).length;
   var el = document.getElementById('cnt-mx');
   if (el) el.textContent = mx;
+  var el2 = document.getElementById('cnt-ld');
+  if (el2) el2.textContent = ld;
 }
 
 function setSyncUI(ok) {
@@ -882,8 +965,8 @@ function cloudRead(cb) {
   }
   window[cbName] = function(data) { cleanup(); cb((data&&data.ok)?data:null); };
   s.onerror = function() { cleanup(); cb(null); };
-  // ★ ขอเฉพาะ MX-01 — backend ข้ามการอ่านชีตอื่นทั้งหมด ทำให้ doGet เร็วพอสำหรับ timeout 9 วิ
-  s.src = SCRIPT_URL+'?action=getAll&sheets=MX-01&callback='+cbName+'&t='+Date.now();
+  // ★ ขอเฉพาะ MX-01 + LD-01 — backend ข้ามชีตอื่นทั้งหมด ทำให้ doGet เร็วพอสำหรับ timeout
+  s.src = SCRIPT_URL+'?action=getAll&sheets=MX-01,LD-01&callback='+cbName+'&t='+Date.now();
   document.head.appendChild(s);
 }
 function cloudWrite(payload) {
@@ -925,7 +1008,18 @@ function cloudSync() {
     }
     return {id:r.id,date:normalizeDate(r.date)||r.date,time:r.time||'',mixer:r.mixer||'',supervisor:r.supervisor||'',plot:r.plot||'',sprayer:r.sprayer||'',waterPerTank:r.waterPerTank||0,totalWater:mxEffectiveWater(r),allChems:ac,note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
   });
-  if (mx.length) cloudWrite({action:'appendMany',sheets:{'MX-01':mx}});   // ไม่มีของใหม่ = ไม่ยิง POST
+  // (ยิงรวมกับ LD ด้านล่างเป็น POST เดียว)
+  // ★ LD-01 — สารที่โหลดขึ้นรถ (ส่งแยกชีต โครงสร้างเดียวกับ MX คือสารเป็นคอลัมน์)
+  var ld = records.filter(function(r){return r.type==='ld' && !r.cloudSynced;}).map(function(r){
+    return {id:r.id,date:normalizeDate(r.date)||r.date,time:r.time||'',loadedBy:r.loadedBy||'',truck:r.truck||'',
+            allChems:sanitizeAllChems(r.allChems||{}, LD_MAX),season:r.season||currentSeason,note:r.note||'',
+            createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
+  });
+  // ยิง POST เดียวทั้ง 2 ชีต — ลดจำนวน execution ครึ่งหนึ่ง และ heavy recalc ทำรอบเดียว
+  var _push={};
+  if (mx.length) _push['MX-01']=mx;
+  if (ld.length) _push['LD-01']=ld;
+  if (Object.keys(_push).length) cloudWrite({action:'appendMany',sheets:_push});
   // 2. Read cloud data (includes deletedIds from all devices)
   cloudRead(function(resp) {
     _syncBusy = false;
@@ -956,13 +1050,29 @@ function cloudSync() {
       r.createdAt=r.createdAt||r.CreatedAt||'';
       cloud.push(r);
     });
+    // ★ LD-01 จากคลาวด์ — hasLdCloud=false แปลว่า backend ยังไม่รู้จักชีตนี้ (ยังไม่ได้แก้ GAS)
+    var hasLdCloud = !!data['LD-01'];
+    (data['LD-01']||[]).forEach(function(r){
+      if (!(r.id||r.ID)) return;
+      r.id=r.id||r.ID; r.type='ld';
+      r.date=normalizeDate(r.date||r.Date);
+      r.time=r.time||r.Time||'';
+      r.loadedBy=r.loadedBy||r.LoadedBy||'';
+      r.truck=r.truck||r.Truck||'';
+      r.allChems=sanitizeAllChems(safeJ(r.allChems||r.AllChems)||buildChemMap(r,data), LD_MAX);
+      r.season=r.season||r.Season||currentSeason;
+      r.note=r.note||r.Note||'';
+      r.createdAt=r.createdAt||r.CreatedAt||'';
+      r.updatedAt=r.updatedAt||r.UpdatedAt||'';
+      cloud.push(r);
+    });
     if (cloud.length===0) { setSyncUI(false); return; }
     // Retry delete: record ที่เคยกดลบแล้วแต่ยังค้างบน Google Sheet → ส่งคำสั่งลบซ้ำ
-    // ทุก record ในแอปนี้เป็น MX-01 ชนิดเดียว
+    // เลือกชีตปลายทางตามชนิดของ record (mx → MX-01, ld → LD-01)
     cloud.filter(function(r){ return deletedIds.indexOf(r.id) >= 0 && !_delRetried[r.id]; })
       .forEach(function(r){
         _delRetried[r.id]=true;
-        cloudJSONP({action:'delete',sheet:'MX-01',id:r.id}, function(res){
+        cloudJSONP({action:'delete',sheet:(r.type==='ld'?'LD-01':'MX-01'),id:r.id}, function(res){
           if(res && res.ok) toast('🗑 '+r.id+' លុបពី Sheet (retry ok)');
         });
       });
@@ -975,21 +1085,24 @@ function cloudSync() {
     // localOnly: keep records that (1) not in cloud, (2) not deleted, (3) NEVER confirmed in cloud before
     // If cloudSynced=true but missing from cloud → was deleted on another device → drop it
     var localOnly=records.filter(function(r){
-      return !cloudIds[r.id] && deletedIds.indexOf(r.id) < 0 && !r.cloudSynced;
+      if (cloudIds[r.id] || deletedIds.indexOf(r.id) >= 0) return false;
+      // ถ้าคลาวด์ยังไม่รู้จัก LD-01 ห้ามดรอป LD ในเครื่อง (ไม่งั้นข้อมูลที่คีย์ไว้หายทันทีที่ sync)
+      if (r.type==='ld' && !hasLdCloud) return true;
+      return !r.cloudSynced;
     });
-    // For MX records: if cloud allChems is empty but local has data, preserve local allChems
+    // ถ้า cloud ส่ง allChems ว่างมาแต่ local มีข้อมูล → คงค่า local ไว้ (ใช้ทั้ง mx และ ld)
     var localMap={};
     records.forEach(function(r){ localMap[r.id]=r; });
     cloud.forEach(function(r){
       var loc = localMap[r.id];
-      var savedCloudAC = r.type==='mx' ? sanitizeAllChems(r.allChems||{}) : null;
+      var savedCloudAC = sanitizeAllChems(r.allChems||{}, chemMaxFor(r));
       // ── Edit ledger: ถ้ามี snapshot ที่แก้ไว้และ cloud ยังไม่ตรง → เชื่อ snapshot + retry push ──
       var ledger = ledgerLive(r.id) ? editLedger[r.id] : null;
       if (ledger) {
         var snap = ledger.snap;
-        var cloudMatches = (r.type==='mx')
-          ? chemsEqual(savedCloudAC, snap.allChems)
-          : (r.updatedAt && snap.updatedAt && r.updatedAt >= snap.updatedAt);
+        var cloudMatches = (r.updatedAt && snap.updatedAt)
+          ? (r.updatedAt >= snap.updatedAt)
+          : chemsEqual(savedCloudAC, snap.allChems);
         if (cloudMatches) {
           clearLedger(r.id);   // cloud ยืนยันแล้ว → ปล่อยให้ cloud เป็นเจ้าของข้อมูลต่อไป
           ledger = null;
@@ -1010,16 +1123,18 @@ function cloudSync() {
         fields.forEach(function(k){ r[k] = loc[k]; });
         r.cloudSynced = true;
       }
+      // สารเคมี: ใช้ร่วมทั้ง mx และ ld — กัน LD โดนล้างสารตอน sync
+      var _max = chemMaxFor(r);
+      var localAC = loc ? sanitizeAllChems(loc.allChems||{}, _max) : {};
+      var cloudAC = savedCloudAC;
+      if (ledger) {
+        r.allChems = sanitizeAllChems(ledger.snap.allChems||{}, _max);
+      } else if (localIsNewer) {
+        r.allChems = Object.keys(localAC).length > 0 ? localAC : cloudAC;
+      } else {
+        r.allChems = Object.keys(cloudAC).length > 0 ? cloudAC : localAC;
+      }
       if(r.type==='mx'){
-        var localAC = loc ? sanitizeAllChems(loc.allChems||{}) : {};
-        var cloudAC = savedCloudAC;
-        if (ledger) {
-          r.allChems = sanitizeAllChems(ledger.snap.allChems||{});
-        } else if (localIsNewer) {
-          r.allChems = Object.keys(localAC).length > 0 ? localAC : cloudAC;
-        } else {
-          r.allChems = Object.keys(cloudAC).length > 0 ? cloudAC : localAC;
-        }
         // ถ้า cloud ไม่มีข้อมูลน้ำ (sheet เก่าไม่มีคอลัมน์ TotalWater) → ใช้ค่าจาก local
         if(loc){
           if(!(parseFloat(r.totalWater)>0) && parseFloat(loc.totalWater)>0) r.totalWater=parseFloat(loc.totalWater);
@@ -1131,7 +1246,121 @@ function calcTotal(){
     box.innerHTML=h;
   } else {box.style.display='none';}
 }
+// ═══════════════════════════════════════════════════════════
+// LD-01 — โหลดสารขึ้นรถ (สต๊อกบนรถ)
+// คงเหลือบนรถ = Σ LD − Σ MX  นับตั้งแต่วันที่ LD แรกเท่านั้น
+// (ถ้านับ MX ย้อนหลัง 660 แถวก่อนเริ่มใช้ระบบ ยอดจะติดลบทั้งหมด)
+// ═══════════════════════════════════════════════════════════
+var ldChems = [{n:'',q:''}];
+
+function ldResetForm(){
+  ldChems = [{n:'',q:''}];
+  var d=document.getElementById('ld-date'); if(d) d.value=todayISO();
+  var t=document.getElementById('ld-time'); if(t) t.value=nowHM();
+  var nt=document.getElementById('ld-note'); if(nt) nt.value='';
+  renderLDChems();
+}
+function ldAddChem(){ ldChems.push({n:'',q:''}); renderLDChems(); }
+function ldRemChem(i){ ldChems.splice(i,1); if(!ldChems.length) ldChems=[{n:'',q:''}]; renderLDChems(); }
+
+function renderLDChems(){
+  var el=document.getElementById('ld-chem-rows'); if(!el) return;
+  var st=truckStock().stock;
+  var html='';
+  ldChems.forEach(function(c,i){
+    var u=(CHEMS.find(function(x){return x.n===c.n;})||{u:'—'}).u;
+    var have=c.n?(st[c.n]||0):null;
+    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:10px;color:var(--muted)">Chemical #'+(i+1)+'</span>'
+      +(ldChems.length>1?'<button class="rm" onclick="ldRemChem('+i+')">✕</button>':'')+'</div>';
+    html+='<div onclick="openChem('+i+',\'ld\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:4px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
+    html+='<div class="g2"><div><label>Qty ('+u+')</label><input type="number" step=".001" placeholder="0" value="'+(c.q||'')+'" oninput="ldChems['+i+'].q=this.value" onchange="ldChems['+i+'].q=this.value"></div>';
+    html+='<div><label>លើឡានឥឡូវ (บนรถตอนนี้)</label><input type="text" value="'+(have===null?'—':have.toFixed(2)+' '+u)+'" readonly style="color:var(--muted)"></div></div></div>';
+  });
+  el.innerHTML=html;
+  var cnt=document.getElementById('ld-chem-count');
+  if(cnt) cnt.textContent=ldChems.filter(function(c){return c.n;}).length+' ชนิด';
+}
+
+function submitLD(){
+  // กัน editId ของ record ชนิดอื่นค้างอยู่ → ไม่งั้น handleSave จะเขียนทับ record MX ที่ id เดิม
+  if (editId) { var _c=records.find(function(r){return r.id===editId;}); if(!_c||_c.type!=='ld'){ editId=null; editMode=false; } }
+  var chems={};
+  ldChems.forEach(function(c){ var q=parseFloat(c.q); if(c.n&&q>0) chems[c.n]=(chems[c.n]||0)+q; });
+  if(!Object.keys(chems).length){ toast('❌ ใส่สารเคมีและปริมาณอย่างน้อย 1 ชนิด'); return; }
+  var isEdit=!!editId;
+  var rec={id:uid('LD'),type:'ld',
+    date:document.getElementById('ld-date').value||todayISO(),
+    time:document.getElementById('ld-time').value||nowHM(),
+    loadedBy:document.getElementById('ld-by').value||'',
+    truck:document.getElementById('ld-truck').value||'',
+    allChems:chems,
+    note:document.getElementById('ld-note').value||'',
+    season:currentSeason,createdAt:new Date().toISOString()};
+  handleSave(rec,'LD-01',{id:rec.id,date:rec.date,time:rec.time,loadedBy:rec.loadedBy,truck:rec.truck,allChems:rec.allChems,note:rec.note,createdAt:rec.createdAt});
+  toast('✅ LD-01 '+(isEdit?'Updated!':'បានរក្សាទុក!')+' ('+rec.id+')');
+}
+
+// คงเหลือบนรถ — {start, stock, loaded, used}
+// เวลาที่ใช้จัดลำดับ: ยึดเวลาที่คีย์จริง (createdAt) เพราะสต๊อกบนรถเป็นเรื่องของลำดับก่อนหลัง
+// ถ้าไม่มี createdAt ค่อยถอยไปใช้วันที่ของรายการ
+function recTs(r){
+  var c=String(r.createdAt||'').trim();
+  if(c) return c;
+  var d=normalizeDate(r.date)||'';
+  return d ? d+'T00:00:00.000Z' : '';
+}
+function truckStock(){
+  var lds=records.filter(function(r){return r.type==='ld';});
+  if(!lds.length) return {start:null, startTs:null, stock:{}, loaded:{}, used:{}};
+  var startTs=lds.map(recTs).filter(Boolean).sort()[0]||'';
+  var start=lds.map(function(r){return normalizeDate(r.date)||'';}).filter(Boolean).sort()[0]||'';
+  var loaded={}, used={};
+  lds.forEach(function(r){
+    var ac=sanitizeAllChems(r.allChems||{}, LD_MAX);
+    Object.keys(ac).forEach(function(n){ loaded[n]=(loaded[n]||0)+(parseFloat(ac[n])||0); });
+  });
+  records.forEach(function(r){
+    if(r.type!=='mx') return;
+    // ถังที่ผสมก่อนจะมีใบ LD ใบแรก ไม่ใช่สารจากรถคันนี้ จึงไม่นับ
+    // (เทียบเวลาที่คีย์ ไม่ใช่แค่วันที่ ไม่งั้นงานที่คีย์ไว้ก่อนหน้าในวันเดียวกันจะทำให้ยอดติดลบ)
+    if(startTs && recTs(r) && recTs(r) < startTs) return;
+    var ac=sanitizeAllChems(r.allChems||{});
+    Object.keys(ac).forEach(function(n){ used[n]=(used[n]||0)+(parseFloat(ac[n])||0); });
+  });
+  var stock={};
+  Object.keys(loaded).forEach(function(n){ stock[n]=loaded[n]-(used[n]||0); });
+  Object.keys(used).forEach(function(n){ if(!(n in stock)) stock[n]=-used[n]; });
+  return {start:start, startTs:startTs, stock:stock, loaded:loaded, used:used};
+}
+
+function renderTruckStock(){
+  var el=document.getElementById('truck-stock'); if(!el) return;
+  var ts=truckStock();
+  var names=Object.keys(ts.stock).filter(function(n){ return Math.abs(ts.stock[n])>0.001; });
+  if(!names.length){ el.innerHTML=''; return; }
+  names.sort(function(a,b){ return ts.stock[b]-ts.stock[a]; });
+  var html='<div class="sec">🚚 ថ្នាំលើឡាន (สารคงเหลือบนรถ)</div>'
+    +'<div class="card" style="margin-bottom:13px;padding:11px 13px">'
+    +'<div style="font-size:10px;color:var(--muted);margin-bottom:7px">นับตั้งแต่ '+ts.start+' · โหลดขึ้น − เบิกใช้หน้าแปลง</div>';
+  names.forEach(function(n){
+    var u=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u;
+    var v=ts.stock[n];
+    var col=v<-0.001?'var(--danger)':(v<0.001?'var(--muted)':'var(--acc)');
+    html+='<div style="display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;border-bottom:1px dotted var(--bdr);font-size:12px">'
+      +'<span style="color:var(--text)">'+n+'</span>'
+      +'<span style="font-weight:800;color:'+col+'">'+v.toFixed(2)+' '+u
+      +'<span style="font-size:9px;color:var(--muted);font-weight:400"> (ขึ้น '+(ts.loaded[n]||0).toFixed(2)+' · ใช้ '+(ts.used[n]||0).toFixed(2)+')</span></span>'
+      +'</div>';
+  });
+  var neg=names.filter(function(n){return ts.stock[n]<-0.001;});
+  if(neg.length) html+='<div style="font-size:10px;color:var(--danger);margin-top:7px">⚠️ ติดลบ '+neg.length+' ชนิด — ใช้มากกว่าที่คีย์ขึ้นรถ ตรวจว่าลืมคีย์ LD หรือไม่</div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function submitMX(){
+  if (editId) { var _c=records.find(function(r){return r.id===editId;}); if(!_c||_c.type!=='mx'){ editId=null; editMode=false; } }
   if(!document.getElementById('mx-plot').value.trim()){toast('❌ Please select ចំការ (Plot) first');document.getElementById('mx-plot').focus();return;}
   if(!document.getElementById('mx-sprayer').value){toast('❌ Please select Sprayer first');document.getElementById('mx-sprayer').focus();return;}
   var wpt=parseFloat(document.getElementById('mx-wpt').value)||0;
@@ -1248,7 +1477,8 @@ function closeChem(){document.getElementById('chem-modal').classList.remove('on'
 function filterChems(){buildChemList(document.getElementById('chem-search').value.toLowerCase().trim());}
 function buildChemList(q){
   var cur='';
-  if(mxTanks[curTankIdx]&&mxTanks[curTankIdx].chems[curChemIdx]) cur=mxTanks[curTankIdx].chems[curChemIdx].n;
+  if(curChemForm==='ld'){ if(ldChems[curChemIdx]) cur=ldChems[curChemIdx].n; }
+  else if(mxTanks[curTankIdx]&&mxTanks[curTankIdx].chems[curChemIdx]) cur=mxTanks[curTankIdx].chems[curChemIdx].n;
   var list=q?CHEMS.filter(function(c){return c.n.toLowerCase().indexOf(q)>=0||c.t.toLowerCase().indexOf(q)>=0;}):CHEMS;
   var html=list.map(function(c){
     var sel=cur===c.n?' sel':'';
@@ -1258,6 +1488,12 @@ function buildChemList(q){
   document.getElementById('chem-list').innerHTML=html;
 }
 function selectChem(name){
+  if(curChemForm==='ld'){
+    if(ldChems[curChemIdx]) ldChems[curChemIdx].n=name;
+    renderLDChems();
+    closeChem();
+    return;
+  }
   if(mxTanks[curTankIdx]&&mxTanks[curTankIdx].chems[curChemIdx])mxTanks[curTankIdx].chems[curChemIdx].n=name;
   renderTanks();
   closeChem();
@@ -1307,7 +1543,7 @@ function toggleExpand(id) {
 
 function buildChemDetail(r) {
   var rows = [];
-  var ac = sanitizeAllChems(r.allChems || {});
+  var ac = sanitizeAllChems(r.allChems || {}, chemMaxFor(r));
   // Fallback: rebuild from tanks if allChems is empty
   if (Object.keys(ac).length === 0 && r.tanks) {
     var rebuilt = {};
@@ -1325,7 +1561,11 @@ function buildChemDetail(r) {
   });
   if (r.totalWater) rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDCA7 Total Water</span><span class="cval" style="color:var(--blue)">'+r.totalWater+' L</span></div>');
   if (r.sprayer)    rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDE81 Sprayer</span><span class="cval">'+r.sprayer+'</span></div>');
-  if (Object.keys(ac).length === 0 && !r.tanks) rows.push('<div style="font-size:10px;color:var(--warn)">\u26A0\uFE0F Chemical data lost \u2014 delete and re-enter</div>');
+  if (r.type==='ld') {
+    if (r.truck)    rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDE9A Truck</span><span class="cval">'+r.truck+'</span></div>');
+    if (r.loadedBy) rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDC64 \u0e1c\u0e39\u0e49\u0e42\u0e2b\u0e25\u0e14</span><span class="cval">'+r.loadedBy+'</span></div>');
+  }
+  if (r.type==='mx' && Object.keys(ac).length === 0 && !r.tanks) rows.push('<div style="font-size:10px;color:var(--warn)">\u26A0\uFE0F Chemical data lost \u2014 delete and re-enter</div>');
   if (!rows.length) rows.push('<div style="font-size:10px;color:var(--faint)">\u2014 No chemical details \u2014</div>');
   return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)">'+rows.join('')+'</div>';
 }
@@ -1333,7 +1573,7 @@ function buildChemDetail(r) {
 function renderHist(){
   var el=document.getElementById('hist-list');
   if(!el)return;
-  var list=records.filter(function(r){return r.type==='mx';});
+  var list=records.filter(function(r){return r.type==='mx'||r.type==='ld';});
   if(!list.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:35px 0;font-size:12px">No records yet</div>';return;}
   el.innerHTML=list.slice().sort(function(a,b){
     var da=a.createdAt||a.date||'';
@@ -1343,11 +1583,12 @@ function renderHist(){
     var expanded = expandedIds[r.id];
     var detail   = expanded ? buildChemDetail(r) : '';
     var arrow    = expanded ? '\u25B2' : '\u25BC';
+    var isLd     = r.type==='ld';
     return '<div class="card" id="hc-'+r.id+'">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
-        + '<span style="font-size:12px;font-weight:700">\u2697\uFE0F '+r.id+'</span>'
+        + '<span style="font-size:12px;font-weight:700">'+(isLd?'\uD83D\uDE9A':'\u2697\uFE0F')+' '+r.id+'</span>'
         + '<div style="display:flex;gap:6px;align-items:center">'
-          + '<span class="badge" style="background:rgba(0,0,0,.08);color:var(--teal)">MX</span>'
+          + '<span class="badge" style="background:rgba(0,0,0,.08);color:'+(isLd?'var(--blue)':'var(--teal)')+'">'+(isLd?'LD':'MX')+'</span>'
           + '<button onclick="event.stopPropagation();editRecord(\''+r.id+'\')" style="font-size:10px;background:var(--blue);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer">\u270F\uFE0F</button>'
           + '<button class="delbtn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')" style="font-size:10px">\uD83D\uDD10</button>'
         + '</div>'
@@ -1357,6 +1598,8 @@ function renderHist(){
         + normalizeDate(r.date)
         + (function(){var c=r.createdAt?new Date(r.createdAt):null;return (c&&!isNaN(c))?' \u00b7 \uD83D\uDD50 '+pad(c.getHours())+':'+pad(c.getMinutes()):'';})()
         + (r.mixer?' \u00b7 \uD83D\uDC64 '+r.mixer:'')
+        + (r.loadedBy?' \u00b7 \uD83D\uDC64 '+r.loadedBy:'')
+        + (r.truck?' \u00b7 \uD83D\uDE9A '+r.truck:'')
         + (r.sprayer?' \u00b7 \uD83D\uDE81 '+r.sprayer:'')
         + (r.tanks?' \u00b7 '+r.tanks.length+'\u1790\u1784':'')
       + '</div>'
@@ -1372,7 +1615,7 @@ function renderHist(){
 function deleteRecord(id){
   var rec=records.find(function(r){return r.id===id;});
   if(!rec)return;
-  var sheetName='MX-01';
+  var sheetName=(rec.type==='ld')?'LD-01':'MX-01';
   var pin=window.prompt('Admin PIN required\nបញ្ចូល PIN (Enter PIN):','');
   if(pin===null)return;
   if(pin!==ADMIN_PIN){toast('❌ PIN មិនត្រូវ (Wrong PIN)');return;}
@@ -1415,6 +1658,21 @@ function doExport(){
   var mx=records.filter(function(r){return r.type==='mx';});
   var lines=['=== MX-01 Mixing ==='];
   mx.forEach(function(r){lines.push([r.id,r.date,r.time,r.mixer,r.plot,r.sprayer,(r.tanks?r.tanks.length:0)+'tanks',(r.totalWater||0).toFixed(0)+'L',Object.entries(r.allChems||{}).map(function(e){return e[0]+':'+parseFloat(e[1]).toFixed(2);}).join('|')].join('\t'));});
+  var ldRecs=records.filter(function(r){return r.type==='ld';});
+  if(ldRecs.length){
+    lines.push('');
+    lines.push('=== LD-01 Truck Loading ===');
+    ldRecs.forEach(function(r){
+      lines.push([r.id,r.date,r.time||'',r.loadedBy||'',r.truck||'',
+        Object.entries(sanitizeAllChems(r.allChems||{}, LD_MAX)).map(function(e){return e[0]+':'+parseFloat(e[1]).toFixed(2);}).join('|')].join('\t'));
+    });
+    var ts=truckStock();
+    lines.push('');
+    lines.push('=== Truck Stock (นับตั้งแต่ '+(ts.start||'-')+') ===');
+    Object.keys(ts.stock).forEach(function(n){
+      lines.push([n, ts.stock[n].toFixed(3), 'ขึ้น '+(ts.loaded[n]||0).toFixed(3), 'ใช้ '+(ts.used[n]||0).toFixed(3)].join('\t'));
+    });
+  }
   var txt=lines.join('\n');
   function copied(){var el=document.getElementById('exp-ok');el.style.display='block';setTimeout(function(){el.style.display='none';},3000);}
   if(navigator.clipboard){navigator.clipboard.writeText(txt).then(copied).catch(function(){fallback(txt,copied);});}
@@ -1434,7 +1692,13 @@ function doImport(input){
     try{
       var imp=JSON.parse(e.target.result);if(!Array.isArray(imp))throw new Error('Invalid');
       var added=0;
-      imp.forEach(function(r){if(!records.find(function(x){return x.id===r.id;})){records.push(r);added++;}});
+      imp.forEach(function(r){
+        if(!r||!r.id) return;
+        if(r.type!=='mx'&&r.type!=='ld') return;
+        if(records.find(function(x){return x.id===r.id;})) return;
+        delete r.cloudSynced;   // ต้อง push ขึ้นชีตใหม่ ไม่งั้นถูกดรอปตอน sync รอบถัดไป
+        records.push(r); added++;
+      });
       saveLocal();renderAll();
       var el=document.getElementById('import-status');el.textContent='✅ '+added+' records imported';el.style.display='block';
       toast('✅ Imported '+added+' records');
