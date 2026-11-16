@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="km">
 <head>
 <meta charset="UTF-8">
@@ -377,15 +377,10 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   </div>
 
   <div id="sr-new">
-    <div class="g2">
-      <div class="grp"><label>วันที่ขอ (Date)</label><input type="date" id="sr-date"></div>
-      <div class="grp"><label>ผู้ขอ (Requester)</label>
-        <select id="sr-who"><option value="">— ជ្រើស —</option></select>
-      </div>
-    </div>
-    <div class="grp"><label>ចំការ (Plot)</label>
-      <input type="text" id="sr-plot" placeholder="ជ្រើស..." onclick="openMapPicker()" readonly style="cursor:pointer">
-      <div style="text-align:right;margin-top:5px"><span style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer" onclick="openPlot('sr-plot')">พิมพ์ค้นหาแปลงอื่น (นอกแผนที่)</span></div>
+    <div class="grp"><label>วันที่ขอ (Date)</label><input type="date" id="sr-date"></div>
+    <div class="grp"><label>ចំការ (Farm / Plot) — พิมพ์เอง</label>
+      <input type="text" id="sr-plot" list="sr-plot-list" placeholder="พิมพ์ชื่อแปลง เช่น P2, A3, M2B1" autocomplete="off" autocapitalize="characters" oninput="srPlotChanged()">
+      <datalist id="sr-plot-list"></datalist>
     </div>
     <div class="g2">
       <div class="grp"><label>พื้นที่ที่จะพ่น (Ha)</label><input type="number" inputmode="decimal" id="sr-area" placeholder="เช่น 20" oninput="srRenderInfos()"></div>
@@ -572,7 +567,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.1.sr'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.2.sr'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -1734,6 +1729,21 @@ var SR_WEATHER = ['แดดจัด','มีเมฆ','ลมแรง','ฝ�
 var SR_PHYTO = ['ไม่มี','เล็กน้อย','ปานกลาง','รุนแรง'];
 // อัตรามาตรฐาน ต่อ Ha (หน่วยตาม CHEMS: L หรือ Kg) — มาจากไฟล์ Sprayer APP Now ชีต Stock คอลัมน์ Rate / Ha
 var SR_STD = {'Emamecthrin':0.3,'Belt':0.1,'Lufenuron':0.5,'Fipronil':0.8,'Altacor':0.12,'Profenofos':0.5,'Actara (Thiamethoxam)':0.15,'Eforia':0.25,'Amrarar':0.12,'Spirotetramat':0.3,'Chlorfenapyr':0.6,'Bifentrin (Talstar)':2,'Methomyl':0.6,'Glyphosate':3,'Dual Gold':1.6,'2,4-D':1.5,'Clio Pro':0.11,'Atrazine':1,'Nicosulfuron (Green)':1,'Nicosulfuron (Yellow)':1,'Sumisoya':0.5,'Glufosinate':4,'Pendimethalin':3,'Acetochlor':3,'Imazetapyr (Pursuit)':2.5,'Indaziflam (Becano)':0.12,'Metribuzin (Sencor)':1,'Quizalofop (Clifton)':1,'Fomesafen (Flex)':1.25,'Fomesafen (Farma)':1.25,'Ametryn 80':3,'Fluazifop':1,'Carbendazim':0.5,'Nativo':0.3,'Atemis':0.25,'Mammoth Zinc':0.1,'Mammoth Ca+B':0.1,'Surfactant':0.1,'K30':0.1};
+// รายชื่อสารเคมี = หัวคอลัมน์ในชีต DATA AN (ไฟล์ Sprayer APP Now) · u = หน่วย · h = อัตราต่อ Ha ที่ใช้จริงในอดีต (มัธยฐาน, มีข้อมูล ≥5 ครั้ง)
+// Bifentrin (Talstar) และ Becano ไม่มีหน่วยในหัวคอลัมน์ — สมมติเป็น L
+var SR_CHEMS = [
+{n:'Emamecthrin',u:'Kg',h:0.3},{n:'Belt',u:'Kg',h:0.1},{n:'Lufenuron',u:'L',h:0.3},{n:'Fipronil',u:'L',h:0.25},{n:'Acefate',u:'Kg'},{n:'Altacor',u:'Kg',h:0.05},
+{n:'Profenofos',u:'L',h:0.5},{n:'Actara (Thiamethoxam)',u:'Kg'},{n:'Cruiser',u:'L'},{n:'Methomyl',u:'Kg'},{n:'Eforia',u:'L',h:0.25},{n:'Amrarar',u:'Kg',h:0.12},
+{n:'Chlorfenapyr',u:'L',h:0.6},{n:'Bifentrin (Talstar)',u:'L'},{n:'Glyphosate',u:'L',h:3.13},{n:'Dual Gold',u:'L',h:1.44},{n:'2,4-D',u:'L',h:0.8},{n:'Clio Pro',u:'L',h:0.11},
+{n:'Fluazipob',u:'L'},{n:'Atrazine',u:'Kg',h:0.9},{n:'Nicosulfuron',u:'L',h:0.8},{n:'Laudis',u:'L',h:0.1},{n:'Sumisoya',u:'Kg',h:0.05},{n:'Acetochlor',u:'L',h:2.07},
+{n:'Glufosinate',u:'L',h:3},{n:'Pendimethalin',u:'L',h:2.86},{n:'Ametryn',u:'Kg',h:2},{n:'Becano (Indaziflam)',u:'L'},{n:'Carboxin',u:'Kg',h:0.11},{n:'Metalaxyl',u:'Kg'},
+{n:'Ortiva',u:'L'},{n:'Nativo',u:'Kg',h:0.25},{n:'Atemis',u:'L',h:0.3},{n:'Mammoth Zinc',u:'L',h:0.1},{n:'Mammoth Ca+B',u:'L',h:0.1},{n:'K30',u:'L',h:0.11},
+{n:'Euro seed',u:'L',h:0.1},{n:'Virtus',u:'Kg'},{n:'MgSO4',u:'Kg'},{n:'Fergan',u:'L',h:0.1},{n:'Vetget oil',u:'L',h:0.1},{n:'Surfactant',u:'L',h:0.1}];
+// ชื่อแปลงในชีต DATA AN (ใช้เป็นคำแนะนำตอนพิมพ์ — พิมพ์ชื่ออื่นได้)
+var SR_PLOTS = ['A1','A2','A2E','A2E-Hose','A2E-Pond','A2Exp','A2P','A2W','A3','A3/P11','A3Curve','A4','C2','CN-A','CN-B','CN-C','CN-D','CN-SM','CO2','Co3','JF1','JF2','JF3','M2','M2B1','M2B2','M2B3','M2Curve','M2D','M2M','M2WH','M3','M3Tri','M4','Office','P1','P10','P10/1','P10/2','P11','P2','P3','P4','P5','P5-1','P5-2','P5/1','P5/2','P6','P6/1','P6/2','P7','P8','P9','Plot A','Plot B','Plot C','Plot D','Silo','T2','T2N','T2V','T3N1','T3N2','T3N3','T3N4','T3S (P7)','T3SE','T3SW','T4N','T4N/P2','T4S/P1','T4SD'];
+var SR_STD_SRC = {};
+Object.keys(SR_STD).forEach(function(k){ SR_STD_SRC[k]='stock'; });
+SR_CHEMS.forEach(function(c){ if(SR_STD[c.n]==null && c.h!=null){ SR_STD[c.n]=c.h; SR_STD_SRC[c.n]='hist'; } });
 var SR_CHK_LBL = {ok:'ตามมาตรฐาน',high:'เกินมาตรฐาน',low:'ต่ำกว่ามาตรฐาน',nostd:'ไม่มีอัตรามาตรฐาน'};
 var SR_CHK_CLS = {ok:'ok',high:'bad',low:'warn',nostd:'info'};
 var SR_ST_LBL = {pending:'รออนุมัติ',approved:'อนุมัติ',rejected:'ไม่อนุมัติ'};
@@ -1749,7 +1759,13 @@ function srE(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ ret
 function srV(id){ var el=document.getElementById(id); return el?el.value:''; }
 function srSet(id,v){ var el=document.getElementById(id); if(el) el.value=v; }
 function srFind(id){ for(var i=0;i<srRecs.length;i++) if(srRecs[i].id===id) return srRecs[i]; return null; }
-function srChem(n){ for(var i=0;i<CHEMS.length;i++) if(CHEMS[i].n===n) return CHEMS[i]; return null; }
+function srChem(n){
+  for(var i=0;i<SR_CHEMS.length;i++) if(SR_CHEMS[i].n===n){
+    var st=null; for(var j=0;j<CHEMS.length;j++) if(CHEMS[j].n===n){ st=CHEMS[j].s; break; }
+    return {n:n,u:SR_CHEMS[i].u,s:(st==null?null:st)};
+  }
+  return null;
+}
 function srTag(t,c){ return '<span class="sr-tag '+c+'">'+srE(t)+'</span>'; }
 function srNum(x,d){ x=parseFloat(x); if(isNaN(x)) return '–'; var f=Math.pow(10,d==null?2:d); return String(Math.round(x*f)/f); }
 function srFmtDate(s){ if(!s) return '–'; var p=String(s).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):s; }
@@ -1793,7 +1809,7 @@ function srOpen(){
   srCloudPull(function(){ if(srCurView==='list') srRenderList(); srUpdateBadges(); });
 }
 function srRefreshStaticOptions(){
-  document.getElementById('sr-who').innerHTML = srOptions(SR_PEOPLE,'','— ជ្រើស —');
+  document.getElementById('sr-plot-list').innerHTML = SR_PLOTS.map(function(p){ return '<option value="'+srE(p)+'">'; }).join('');
   document.getElementById('sr-crop').innerHTML = srOptions(SR_CROPS,'','— Select —');
   document.getElementById('sr-pest').innerHTML = srOptions(SR_PESTS,'','— เลือก —');
 }
@@ -1808,7 +1824,7 @@ function srView(v){
 }
 function srResetForm(){
   var t=todayISO();
-  srSet('sr-date',t); srSet('sr-pdate',t); srSet('sr-who',''); srSet('sr-plot',''); srSet('sr-area','');
+  srSet('sr-date',t); srSet('sr-pdate',t); srSet('sr-plot',''); srSet('sr-area','');
   srSet('sr-crop',''); srSet('sr-pest',''); srSet('sr-before',''); srSet('sr-sprayer',''); srSet('sr-reason','');
   srRows=[{id:srRowSeq++,chem:'',rate:''}];
   srRenderRows(); srRenderPlotInfo();
@@ -1819,7 +1835,7 @@ function srRowOf(id){ for(var i=0;i<srRows.length;i++) if(srRows[i].id===id) ret
 function srRenderRows(){
   var wrap=document.getElementById('sr-chem-rows');
   wrap.innerHTML = srRows.map(function(r){
-    var opts='<option value="">— ជ្រើសថ្នាំ —</option>'+CHEMS.map(function(c){ return '<option'+(r.chem===c.n?' selected':'')+' value="'+srE(c.n)+'">'+srE(c.n)+' ('+c.t+')</option>'; }).join('');
+    var opts='<option value="">— ជ្រើសថ្នាំ —</option>'+SR_CHEMS.map(function(c){ return '<option'+(r.chem===c.n?' selected':'')+' value="'+srE(c.n)+'">'+srE(c.n)+' ('+c.u+')</option>'; }).join('');
     var c=srChem(r.chem), u=c?c.u:'';
     return '<div class="chem-card"><div class="cc-top">'
       +'<select onchange="srPickChem('+r.id+',this.value)">'+opts+'</select>'
@@ -1846,7 +1862,7 @@ function srRemoveRow(id){
 function srRowInfoHtml(r){
   var c=srChem(r.chem); if(!c) return '';
   var std=SR_STD[c.n], area=parseFloat(srV('sr-area'))||0, rate=parseFloat(r.rate)||0, k=srCheck(c.n,r.rate), out=[];
-  out.push(std!=null ? 'อัตรามาตรฐาน: <b>'+srNum(std)+' '+c.u+'/Ha</b> (±'+Math.round(SR_TOL*100)+'%)' : 'ไม่มีอัตรามาตรฐานในไฟล์ Stock');
+  out.push(std!=null ? (SR_STD_SRC[c.n]==='hist' ? 'อัตราที่ใช้จริงในอดีต (DATA AN): ' : 'อัตรามาตรฐาน: ')+'<b>'+srNum(std)+' '+c.u+'/Ha</b> (±'+Math.round(SR_TOL*100)+'%)' : 'ยังไม่มีอัตรามาตรฐาน/ประวัติการใช้ — ตรวจอัตราเอง');
   if(k) out.push(srTag(SR_CHK_LBL[k],SR_CHK_CLS[k]));
   if(rate>0 && area>0){
     var q=rate*area;
@@ -1886,10 +1902,9 @@ function srRenderPlotInfo(){
 
 // ---------- บันทึกคำขอ ----------
 function srSave(){
-  var who=srV('sr-who'), plot=srV('sr-plot').trim(), area=parseFloat(srV('sr-area')), pest=srV('sr-pest'), before=parseFloat(srV('sr-before'));
+  var plot=srV('sr-plot').trim(), area=parseFloat(srV('sr-area')), pest=srV('sr-pest'), before=parseFloat(srV('sr-before'));
   if(!srV('sr-date')){ toast('❌ เลือกวันที่'); return; }
-  if(!who){ toast('❌ เลือกผู้ขอ'); return; }
-  if(!plot){ toast('❌ សូមជ្រើសចំការ (เลือกแปลงก่อน)'); return; }
+  if(!plot){ toast('❌ พิมพ์ชื่อแปลง (Farm / Plot)'); return; }
   if(!(area>0)){ toast('❌ ใส่พื้นที่ที่จะพ่น (Ha)'); return; }
   if(!pest){ toast('❌ เลือกศัตรูพืช/ปัญหา'); return; }
   if(isNaN(before) || before<0 || before>100){ toast('❌ ระดับระบาดก่อนพ่น ต้องเป็น 0–100 %'); return; }
@@ -1909,7 +1924,7 @@ function srSave(){
   });
   if(warn.length && !window.confirm('⚠️ '+warn.join('\n')+'\n\nส่งคำขอต่อหรือไม่?')) return;
   var now=new Date().toISOString();
-  var rec={id:uid('SR'),rdate:srV('sr-date'),who:who,plot:plot,area:area,crop:srV('sr-crop'),pest:pest,before:before,
+  var rec={id:uid('SR'),rdate:srV('sr-date'),plot:plot,area:area,crop:srV('sr-crop'),pest:pest,before:before,
     sprayer:srV('sr-sprayer'),pdate:srV('sr-pdate'),chems:chems,reason:srV('sr-reason'),season:currentSeason,
     status:'pending',apv:'',adate:'',acom:'',sdate:'',weather:'',sprayerUsed:'',snote:'',evals:[],createdAt:now,updatedAt:now};
   srRecs.push(rec); srPersist(); srCloudPush(rec); srUpdateBadges();
@@ -1933,7 +1948,7 @@ function srRenderList(){
 }
 function srSetFilter(f){ srFilter=f; srRenderList(); }
 function srCardHtml(r){
-  var h='<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.rdate)+' · '+srE(r.who)+'</span></div>';
+  var h='<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.rdate)+''+(r.who?' · '+srE(r.who):'')+'</span></div>';
   h+='<div>📍 <b>'+srE(r.plot)+'</b> · '+srNum(r.area)+' Ha'+(r.crop?' · '+srE(r.crop):'')+'<br>🐛 '+srE(r.pest)+' · ระบาดก่อนพ่น <b>'+srNum(r.before,1)+'%</b>'
     +(r.pdate?'<br>📅 แผนพ่น '+srFmtDate(r.pdate)+(r.sprayer?' · '+srE(r.sprayer):''):'')+'</div>';
   h+=(r.chems||[]).map(function(c){
