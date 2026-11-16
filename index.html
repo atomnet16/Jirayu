@@ -169,6 +169,35 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 .ebox{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-top:12px}
 .etxt{width:100%;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.8);border-radius:8px;color:var(--text);padding:9px;font-size:10px;font-family:monospace;margin-top:6px;resize:none;height:55px}
 
+/* SR-01 · SPRAY REQUEST */
+input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px solid rgba(255,255,255,0.8);border-radius:9px;color:var(--text);padding:14px 13px;font-size:15px;font-weight:600;outline:none}
+.sr-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:13px}
+.sr-seg button{border:1.5px solid var(--bdr);background:var(--card);color:var(--muted);border-radius:10px;padding:12px 6px;font-size:13px;font-weight:800;cursor:pointer}
+.sr-seg button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sr-tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:20px;margin:2px 4px 2px 0}
+.sr-tag.ok{background:rgba(26,107,54,.15);color:var(--acc)}
+.sr-tag.warn{background:rgba(176,106,0,.16);color:var(--warn)}
+.sr-tag.bad{background:rgba(192,48,42,.14);color:var(--danger)}
+.sr-tag.info{background:rgba(26,92,181,.12);color:var(--blue)}
+.sr-tag.none{background:rgba(0,0,0,.06);color:var(--muted)}
+.sr-info{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.6}
+.sr-box{background:rgba(255,255,255,0.45);border:1px dashed rgba(26,107,54,0.35);border-radius:10px;padding:9px 11px;margin-bottom:11px;font-size:12px;line-height:1.6;display:none}
+.sr-box.on{display:block}
+.sr-card{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:12px;padding:12px 13px;margin-bottom:9px;box-shadow:0 2px 8px rgba(26,107,54,0.08);font-size:12.5px;line-height:1.6}
+.sr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.sr-top b{font-size:14px}
+.sr-sub{color:var(--muted);font-size:11.5px}
+.sr-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.sr-btn{flex:1;min-width:110px;border:none;border-radius:9px;padding:12px 8px;font-size:13px;font-weight:800;color:#fff;cursor:pointer}
+.sr-btn.ghost{background:rgba(255,255,255,.5);color:var(--danger);border:1.5px solid rgba(192,48,42,.35)}
+.sr-filter{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}
+.sr-filter button{flex:none;border:1.5px solid var(--bdr);background:var(--card);color:var(--muted);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer}
+.sr-filter button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sr-mh{padding:12px 14px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:800;flex-shrink:0}
+.sr-mh button{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.sr-mb{padding:12px 14px 14px;overflow-y:auto}
+.sr-ev{border-top:1px dashed rgba(26,107,54,.25);margin-top:6px;padding-top:5px}
+
 /* TOAST */
 #toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--acc);color:#FFFFFF;border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 </style>
@@ -211,11 +240,11 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
       <div class="fe">Mixing · เบิกหน้าแปลง</div>
       <span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
     </div>
-    <div class="fcard" onclick="showForm('spraystatus'); ssResetForm();">
-      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">🗺️</div>
-      <div class="fk">ផែនការបាញ់</div>
-      <div class="fe">แผนพ่นสารรายแปลงวันนี้</div>
-      <span class="badge" style="background:rgba(176,106,0,.18);color:var(--warn)">PLAN</span>
+    <div class="fcard" onclick="showForm('sr'); srOpen();">
+      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">📝</div>
+      <div class="fk">ស្នើសុំបាញ់</div>
+      <div class="fe">ขออนุมัติการฉีดพ่น</div>
+      <span class="badge" id="sr-home-badge" style="background:rgba(91,61,191,.15);color:var(--purple)">SR-01</span>
     </div>
   </div>
   <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
@@ -335,36 +364,64 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
   <button class="sbtn" style="background:var(--blue)" onclick="submitLD()">✓ រក្សាទីក (บันทึกขึ้นรถ)</button>
 </div>
 
-<div class="fw" id="fw-spraystatus">
+<!-- SR-01 · SPRAY REQUEST FORM -->
+<div class="fw" id="fw-sr">
   <div class="fhdr">
     <button class="back" onclick="hideForm()">← ត្រឡប់</button>
-    <div class="ftitle">🗺️ ផែនការបាញ់ (แผนพ่นสารวันนี้)</div>
-    <span class="badge" style="background:rgba(176,106,0,.18);color:var(--warn)">PLAN</span>
+    <div class="ftitle">📝 ស្នើសុំបាញ់ (ขออนุมัติการฉีดพ่น)</div>
+    <span class="badge" style="background:rgba(91,61,191,.15);color:var(--purple)">SR-01</span>
+  </div>
+  <div class="sr-seg">
+    <button id="sr-seg-new" class="on" onclick="srView('new')">＋ คำขอใหม่</button>
+    <button id="sr-seg-list" onclick="srView('list')">📋 รายการ / อนุมัติ <span id="sr-pend"></span></button>
   </div>
 
-  <div class="grp">
-    <label>ចំការ (Plot)</label>
-    <input type="text" id="ss-plot" placeholder="ជ្រើស..." onclick="openMapPicker()" readonly style="cursor:pointer">
-    <div style="text-align:right;margin-top:5px"><span style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer" onclick="openPlot('ss-plot')">พิมพ์ค้นหาแปลงอื่น (นอกแผนที่)</span></div>
+  <div id="sr-new">
+    <div class="g2">
+      <div class="grp"><label>วันที่ขอ (Date)</label><input type="date" id="sr-date"></div>
+      <div class="grp"><label>ผู้ขอ (Requester)</label>
+        <select id="sr-who"><option value="">— ជ្រើស —</option></select>
+      </div>
+    </div>
+    <div class="grp"><label>ចំការ (Plot)</label>
+      <input type="text" id="sr-plot" placeholder="ជ្រើស..." onclick="openMapPicker()" readonly style="cursor:pointer">
+      <div style="text-align:right;margin-top:5px"><span style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer" onclick="openPlot('sr-plot')">พิมพ์ค้นหาแปลงอื่น (นอกแผนที่)</span></div>
+    </div>
+    <div class="g2">
+      <div class="grp"><label>พื้นที่ที่จะพ่น (Ha)</label><input type="number" inputmode="decimal" id="sr-area" placeholder="เช่น 20" oninput="srRenderInfos()"></div>
+      <div class="grp"><label>Crop</label><select id="sr-crop"></select></div>
+    </div>
+    <div id="sr-plotinfo" class="sr-box"></div>
+    <div class="grp"><label>ศัตรูพืช / ปัญหา (Pest / Problem)</label><select id="sr-pest"></select></div>
+    <div class="g2">
+      <div class="grp"><label>ระดับระบาด ก่อนพ่น (%)</label><input type="number" inputmode="decimal" id="sr-before" placeholder="0–100"></div>
+      <div class="grp"><label>วันที่วางแผนพ่น</label><input type="date" id="sr-pdate"></div>
+    </div>
+    <div class="grp"><label>ម៉ាស៊ីនបាញ់ (Sprayer)</label>
+      <select id="sr-sprayer"><option value="">ជ្រើស...</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
+    </div>
+    <div class="grp">
+      <div class="chem-hdr"><label>ថ្នាំគីមី (สารเคมี · อัตราต่อ Ha)</label><span class="chem-count" id="sr-chem-count">1 ชนิด</span></div>
+      <div id="sr-chem-rows"></div>
+      <button class="abtn" style="color:var(--purple)" onclick="srAddRow()">+ បន្ថែមថ្នាំ (เพิ่มสารอีกชนิด)</button>
+    </div>
+    <div class="grp"><label>เหตุผล / ความจำเป็น (Reason)</label><input type="text" id="sr-reason" placeholder="..."></div>
+    <button class="sbtn" style="background:var(--purple)" onclick="srSave()">✓ ส่งคำขออนุมัติ</button>
   </div>
 
-  <div class="grp"><label>ម៉ាស៊ីនបាញ់ (อุปกรณ์ฉีดพ่น)</label>
-    <select id="ss-sprayer"><option value="">ជ្រើស...</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
+  <div id="sr-list" style="display:none">
+    <div class="sr-filter" id="sr-filter"></div>
+    <div id="sr-cards"></div>
+    <button class="sbtn" style="background:var(--teal);margin-top:6px" onclick="srExport()">⬇️ Export Excel (CSV)</button>
   </div>
+</div>
 
-  <div class="grp">
-    <div class="chem-hdr"><label>ថ្នាំគីមី (สารเคมีที่ใช้)</label><span class="chem-count" id="ss-chem-count">1 ชนิด</span></div>
-    <div id="ss-chem-rows"></div>
-    <button class="abtn" style="color:var(--acc)" onclick="ssAddChemRow()">+ បន្ថែមថ្នាំ (เพิ่มสารเคมีอีกชนิด)</button>
+<!-- SR-01 MODAL -->
+<div class="pmo" id="sr-modal" onclick="if(event.target===this)srCloseModal()">
+  <div class="pmb">
+    <div class="sr-mh"><span id="sr-mt"></span><button onclick="srCloseModal()">✕</button></div>
+    <div class="sr-mb" id="sr-mbody"></div>
   </div>
-
-  <div class="grp"><label>អ្នករាយការណ៍ (ผู้บันทึก)</label>
-    <select id="ss-reporter"><option value="">— ជ្រើស —</option><option>Jirayu</option><option>Thea</option><option>Vith</option><option>Ratanak</option><option>Putdim</option><option>Chanron</option></select>
-  </div>
-
-  <div class="grp"><label>ចំណាំ (Note — ไม่บังคับ)</label><input type="text" id="ss-note" placeholder="..."></div>
-
-  <button class="sbtn" style="background:var(--warn)" onclick="submitSprayStatus()">✓ រក្សាទុក (บันทึกรายงาน)</button>
 </div>
 
 <!-- CHEM MODAL -->
@@ -515,7 +572,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.0.ld'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.1.sr'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -772,6 +829,7 @@ function hideForm() {
   var ldt=document.getElementById('ld-time'); if(ldt) ldt.value=nowHM();
   ldChems=[{n:'',q:''}];
   if (document.getElementById('ld-chem-rows')) renderLDChems();
+  if (typeof srUpdateBadges==='function') srUpdateBadges();
   renderAll();
 }
 
@@ -1386,75 +1444,16 @@ function submitMX(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// SPRAY STATUS — เพิ่มใหม่ ไม่ใช้ shared records/handleSave (เป็น log แยก ไม่กระทบ MX-01)
+// MAP PICKER — เลือกแปลงจากแผนที่ ใช้กับฟอร์มขออนุมัติการฉีดพ่น (SR-01) ที่มาแทนฟอร์ม PLAN เดิม
 // ═══════════════════════════════════════════════════════════
-var ssChemRows = [];
-var ssChemRowSeq = 0;
-var SS_UNIT_OPTIONS = ['มล./Ha','ล./Ha','กก./Ha','มล./ถัง'];
-
 function openMapPicker(){ document.getElementById('map-modal').classList.add('on'); }
 function closeMapPicker(){ document.getElementById('map-modal').classList.remove('on'); }
 function pickMapPlot(name){
-  document.getElementById('ss-plot').value = name;
+  document.getElementById('sr-plot').value = name;
   closeMapPicker();
+  if (typeof srPlotChanged==='function') srPlotChanged();
 }
 function mapInactive(){ toast('⚠️ ចំការនេះមិនទាន់ប្រើ (แปลงนี้ยังไม่เปิดใช้งาน)'); }
-
-function ssResetForm(){
-  document.getElementById('ss-plot').value = '';
-  document.getElementById('ss-sprayer').selectedIndex = 0;
-  document.getElementById('ss-reporter').selectedIndex = 0;
-  document.getElementById('ss-note').value = '';
-  ssChemRows = [{id:ssChemRowSeq++, chem:'', rate:'', unit:SS_UNIT_OPTIONS[0]}];
-  ssRenderChemRows();
-}
-function ssRenderChemRows(){
-  var wrap = document.getElementById('ss-chem-rows');
-  wrap.innerHTML = ssChemRows.map(function(r){
-    var chemOpts = '<option value="">— ជ្រើសថ្នាំ —</option>' + CHEMS.map(function(c){
-      return '<option'+(r.chem===c.n?' selected':'')+'>'+c.n+'</option>';
-    }).join('');
-    var unitOpts = SS_UNIT_OPTIONS.map(function(u){
-      return '<option'+(r.unit===u?' selected':'')+'>'+u+'</option>';
-    }).join('');
-    return '<div class="chem-card">'
-      + '<div class="cc-top">'
-      + '<select onchange="ssChemRows.find(function(x){return x.id==='+r.id+';}).chem=this.value;">'+chemOpts+'</select>'
-      + '<button type="button" class="cc-rm" onclick="ssRemoveChemRow('+r.id+')"'+(ssChemRows.length<=1?' style="visibility:hidden"':'')+'>✕</button>'
-      + '</div>'
-      + '<div class="rate-row">'
-      + '<input type="number" inputmode="decimal" placeholder="อัตรา เช่น 400" value="'+r.rate+'" oninput="ssChemRows.find(function(x){return x.id==='+r.id+';}).rate=this.value;">'
-      + '<select onchange="ssChemRows.find(function(x){return x.id==='+r.id+';}).unit=this.value;">'+unitOpts+'</select>'
-      + '</div></div>';
-  }).join('');
-  document.getElementById('ss-chem-count').textContent = ssChemRows.length + ' ชนิด';
-}
-function ssAddChemRow(){
-  ssChemRows.push({id:ssChemRowSeq++, chem:'', rate:'', unit:SS_UNIT_OPTIONS[0]});
-  ssRenderChemRows();
-}
-function ssRemoveChemRow(id){
-  ssChemRows = ssChemRows.filter(function(r){return r.id!==id;});
-  if (ssChemRows.length===0) ssChemRows.push({id:ssChemRowSeq++, chem:'', rate:'', unit:SS_UNIT_OPTIONS[0]});
-  ssRenderChemRows();
-}
-function submitSprayStatus(){
-  var plot = document.getElementById('ss-plot').value.trim();
-  if (!plot){ toast('❌ សូមជ្រើសចំការ (เลือกแปลงก่อน)'); return; }
-  var sprayer = document.getElementById('ss-sprayer').value;
-  var reporter = document.getElementById('ss-reporter').value;
-  var note = document.getElementById('ss-note').value;
-  var chems = ssChemRows.filter(function(r){return r.chem;}).map(function(r){
-    return {name:r.chem, rate:r.rate, unit:r.unit};
-  });
-  cloudWrite({
-    action:'appendSprayStatus',
-    plot:plot, sprayer:sprayer, reporter:reporter, note:note,
-    chemicals:chems
-  });
-  toast('✅ រក្សាទុករាយការណ៍ (บันทึกรายงานแล้ว)');
-  hideForm();
-}
 
 function mxEffectiveWater(mx){
   // Return totalWater from record; fallback: waterPerTank × number of tanks
@@ -1529,6 +1528,7 @@ function selectPlot(p,isNew){
   if(isNew) extraPlots.push(p);
   if(curPlotTarget) document.getElementById(curPlotTarget).value=p;
   closePlot();
+  if(curPlotTarget==='sr-plot' && typeof srPlotChanged==='function') srPlotChanged();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1714,6 +1714,383 @@ function toast(msg){
   var el=document.getElementById('toast');
   el.textContent=msg;el.style.opacity='1';
   clearTimeout(toastT);toastT=setTimeout(function(){el.style.opacity='0';},2500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SR-01 · SPRAY REQUEST (ขออนุมัติพ่นสาร) — เพิ่มใหม่
+// เก็บแยกจาก records (MX/LD) เหมือนฟอร์ม PLAN จึงไม่กระทบระบบเดิม
+// ขั้นตอน: ขอ → อนุมัติ (PIN) → บันทึกพ่นจริง → ประเมิน ก่อน–หลัง → Export
+// ═══════════════════════════════════════════════════════════
+// true = ซิงก์ข้ามเครื่องผ่าน Apps Script (ต้องวางโค้ด SR-GAS-snippet.gs และ Deploy เวอร์ชันใหม่ก่อน)
+// ถ้ายังไม่ได้ Deploy: backend เดิมจะตอบ "unknown action" เฉย ๆ ไม่มีอะไรเสียหาย ข้อมูลยังอยู่ในเครื่อง
+var SR_CLOUD = true;
+var SR_KEY = 'mf_sr', SR_DEL_KEY = 'mf_sr_deleted';
+var SR_TOL = 0.10;                 // ยอมให้อัตราที่ขอคลาดจากมาตรฐาน ±10% (ค่าสมมติ ปรับได้)
+var SR_GOOD = 0.8, SR_MID = 0.5;   // ได้ผลดี ≥80% | ปานกลาง ≥50% (ค่าสมมติ ปรับได้)
+var SR_PEOPLE = ['Jirayu','Thea','Vith','Ratanak','Putdim','Chanron'];
+var SR_CROPS = ['Corn','Cassava','Soy Bean','Mung Bean','Avocado','Mango','Cashew Nut','Coconut','Jackfruit','Tamarind','Durian','Other'];
+var SR_PESTS = ['Fall armyworm (หนอนกระทู้ข้าวโพด)','Stem borer (หนอนเจาะ)','Aphid (เพลี้ย)','Mite (ไร)','Whitefly / Thrips (แมลงหวี่ขาว/เพลี้ยไฟ)','Weed - grass (วัชพืชใบแคบ)','Weed - broadleaf (วัชพืชใบกว้าง)','Weed - mixed (วัชพืชผสม)','Disease (โรคพืช)','Burn down (ก่อนปลูก)','Other (อื่น ๆ)'];
+var SR_WEATHER = ['แดดจัด','มีเมฆ','ลมแรง','ฝนตกหลังพ่น'];
+var SR_PHYTO = ['ไม่มี','เล็กน้อย','ปานกลาง','รุนแรง'];
+// อัตรามาตรฐาน ต่อ Ha (หน่วยตาม CHEMS: L หรือ Kg) — มาจากไฟล์ Sprayer APP Now ชีต Stock คอลัมน์ Rate / Ha
+var SR_STD = {'Emamecthrin':0.3,'Belt':0.1,'Lufenuron':0.5,'Fipronil':0.8,'Altacor':0.12,'Profenofos':0.5,'Actara (Thiamethoxam)':0.15,'Eforia':0.25,'Amrarar':0.12,'Spirotetramat':0.3,'Chlorfenapyr':0.6,'Bifentrin (Talstar)':2,'Methomyl':0.6,'Glyphosate':3,'Dual Gold':1.6,'2,4-D':1.5,'Clio Pro':0.11,'Atrazine':1,'Nicosulfuron (Green)':1,'Nicosulfuron (Yellow)':1,'Sumisoya':0.5,'Glufosinate':4,'Pendimethalin':3,'Acetochlor':3,'Imazetapyr (Pursuit)':2.5,'Indaziflam (Becano)':0.12,'Metribuzin (Sencor)':1,'Quizalofop (Clifton)':1,'Fomesafen (Flex)':1.25,'Fomesafen (Farma)':1.25,'Ametryn 80':3,'Fluazifop':1,'Carbendazim':0.5,'Nativo':0.3,'Atemis':0.25,'Mammoth Zinc':0.1,'Mammoth Ca+B':0.1,'Surfactant':0.1,'K30':0.1};
+var SR_CHK_LBL = {ok:'ตามมาตรฐาน',high:'เกินมาตรฐาน',low:'ต่ำกว่ามาตรฐาน',nostd:'ไม่มีอัตรามาตรฐาน'};
+var SR_CHK_CLS = {ok:'ok',high:'bad',low:'warn',nostd:'info'};
+var SR_ST_LBL = {pending:'รออนุมัติ',approved:'อนุมัติ',rejected:'ไม่อนุมัติ'};
+var SR_ST_CLS = {pending:'warn',approved:'ok',rejected:'bad'};
+
+function srLoad(){ try{ var a=JSON.parse(localStorage.getItem(SR_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function srLoadDel(){ try{ var a=JSON.parse(localStorage.getItem(SR_DEL_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+var srRecs = srLoad(), srDeleted = srLoadDel();
+var srRows = [], srRowSeq = 0, srFilter = 'all', srCurView = 'new';
+function srPersist(){ try{ localStorage.setItem(SR_KEY, JSON.stringify(srRecs)); localStorage.setItem(SR_DEL_KEY, JSON.stringify(srDeleted)); }catch(e){ toast('⚠️ เก็บข้อมูลในเครื่องไม่ได้'); } }
+
+function srE(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function srV(id){ var el=document.getElementById(id); return el?el.value:''; }
+function srSet(id,v){ var el=document.getElementById(id); if(el) el.value=v; }
+function srFind(id){ for(var i=0;i<srRecs.length;i++) if(srRecs[i].id===id) return srRecs[i]; return null; }
+function srChem(n){ for(var i=0;i<CHEMS.length;i++) if(CHEMS[i].n===n) return CHEMS[i]; return null; }
+function srTag(t,c){ return '<span class="sr-tag '+c+'">'+srE(t)+'</span>'; }
+function srNum(x,d){ x=parseFloat(x); if(isNaN(x)) return '–'; var f=Math.pow(10,d==null?2:d); return String(Math.round(x*f)/f); }
+function srFmtDate(s){ if(!s) return '–'; var p=String(s).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):s; }
+function srOptions(arr,sel,ph){ return (ph!==undefined?'<option value="">'+ph+'</option>':'')+arr.map(function(x){ return '<option'+(x===sel?' selected':'')+'>'+srE(x)+'</option>'; }).join(''); }
+
+function srCheck(name, rate){
+  var std=SR_STD[name]; if(std==null) return 'nostd';
+  rate=parseFloat(rate); if(!(rate>0)) return '';
+  if(rate>std*(1+SR_TOL)+1e-9) return 'high';
+  if(rate<std*(1-SR_TOL)-1e-9) return 'low';
+  return 'ok';
+}
+function srEvalList(r){
+  var b=parseFloat(r.before);
+  return (r.evals||[]).map(function(e){ var a=parseFloat(e.after); return {date:e.date,after:a,phyto:e.phyto,by:e.by,note:e.note,eff:(b>0&&!isNaN(a))?(b-a)/b:null}; });
+}
+function srEff(r){
+  var l=srEvalList(r).filter(function(e){ return e.eff!=null; });
+  return l.length ? l.reduce(function(s,e){ return s+e.eff; },0)/l.length : null;
+}
+function srEffTag(eff){
+  if(eff==null) return '';
+  var c=eff>=SR_GOOD?'ok':(eff>=SR_MID?'warn':'bad'), t=eff>=SR_GOOD?'ได้ผลดี':(eff>=SR_MID?'ปานกลาง':'ไม่ได้ผล');
+  return srTag(t+' '+Math.round(eff*100)+'%', c);
+}
+// ประสิทธิภาพเฉลี่ยในอดีตของสารนี้ (จากคำขอ SR ที่ใช้สารนี้และมีผลประเมิน)
+function srHist(chem){
+  var effs=[];
+  srRecs.forEach(function(r){
+    if((r.chems||[]).some(function(c){ return c.name===chem; })) srEvalList(r).forEach(function(e){ if(e.eff!=null) effs.push(e.eff); });
+  });
+  return effs.length ? {avg:effs.reduce(function(a,b){ return a+b; },0)/effs.length, n:effs.length} : null;
+}
+
+// ---------- เปิดฟอร์ม / สลับหน้า ----------
+function srOpen(){
+  srRefreshStaticOptions();
+  srResetForm();
+  srView('new');
+  srUpdateBadges();
+  srCloudPull(function(){ if(srCurView==='list') srRenderList(); srUpdateBadges(); });
+}
+function srRefreshStaticOptions(){
+  document.getElementById('sr-who').innerHTML = srOptions(SR_PEOPLE,'','— ជ្រើស —');
+  document.getElementById('sr-crop').innerHTML = srOptions(SR_CROPS,'','— Select —');
+  document.getElementById('sr-pest').innerHTML = srOptions(SR_PESTS,'','— เลือก —');
+}
+function srView(v){
+  srCurView=v;
+  document.getElementById('sr-new').style.display = v==='new'?'':'none';
+  document.getElementById('sr-list').style.display = v==='list'?'':'none';
+  document.getElementById('sr-seg-new').classList.toggle('on', v==='new');
+  document.getElementById('sr-seg-list').classList.toggle('on', v==='list');
+  if(v==='list'){ srRenderList(); srCloudPull(function(){ if(srCurView==='list') srRenderList(); srUpdateBadges(); }); }
+  window.scrollTo(0,0);
+}
+function srResetForm(){
+  var t=todayISO();
+  srSet('sr-date',t); srSet('sr-pdate',t); srSet('sr-who',''); srSet('sr-plot',''); srSet('sr-area','');
+  srSet('sr-crop',''); srSet('sr-pest',''); srSet('sr-before',''); srSet('sr-sprayer',''); srSet('sr-reason','');
+  srRows=[{id:srRowSeq++,chem:'',rate:''}];
+  srRenderRows(); srRenderPlotInfo();
+}
+
+// ---------- แถวสารเคมี ----------
+function srRowOf(id){ for(var i=0;i<srRows.length;i++) if(srRows[i].id===id) return srRows[i]; return null; }
+function srRenderRows(){
+  var wrap=document.getElementById('sr-chem-rows');
+  wrap.innerHTML = srRows.map(function(r){
+    var opts='<option value="">— ជ្រើសថ្នាំ —</option>'+CHEMS.map(function(c){ return '<option'+(r.chem===c.n?' selected':'')+' value="'+srE(c.n)+'">'+srE(c.n)+' ('+c.t+')</option>'; }).join('');
+    var c=srChem(r.chem), u=c?c.u:'';
+    return '<div class="chem-card"><div class="cc-top">'
+      +'<select onchange="srPickChem('+r.id+',this.value)">'+opts+'</select>'
+      +'<button type="button" class="cc-rm" onclick="srRemoveRow('+r.id+')"'+(srRows.length<=1?' style="visibility:hidden"':'')+'>✕</button></div>'
+      +'<div class="rate-row"><input type="number" inputmode="decimal" placeholder="อัตราต่อ Ha" value="'+srE(r.rate)+'" oninput="srRowOf('+r.id+').rate=this.value;srRenderInfos()">'
+      +'<div style="display:flex;align-items:center;font-size:13px;font-weight:800;color:var(--muted)">'+(u?u+' / Ha':'/ Ha')+'</div></div>'
+      +'<div class="sr-info" id="sr-ri-'+r.id+'"></div></div>';
+  }).join('');
+  document.getElementById('sr-chem-count').textContent = srRows.length+' ชนิด';
+  srRenderInfos();
+}
+function srPickChem(id,name){
+  var r=srRowOf(id); if(!r) return;
+  r.chem=name;
+  if(name && SR_STD[name]!=null && !r.rate) r.rate=String(SR_STD[name]);   // เติมอัตรามาตรฐานให้ แก้ได้
+  srRenderRows();
+}
+function srAddRow(){ srRows.push({id:srRowSeq++,chem:'',rate:''}); srRenderRows(); }
+function srRemoveRow(id){
+  srRows=srRows.filter(function(r){ return r.id!==id; });
+  if(!srRows.length) srRows.push({id:srRowSeq++,chem:'',rate:''});
+  srRenderRows();
+}
+function srRowInfoHtml(r){
+  var c=srChem(r.chem); if(!c) return '';
+  var std=SR_STD[c.n], area=parseFloat(srV('sr-area'))||0, rate=parseFloat(r.rate)||0, k=srCheck(c.n,r.rate), out=[];
+  out.push(std!=null ? 'อัตรามาตรฐาน: <b>'+srNum(std)+' '+c.u+'/Ha</b> (±'+Math.round(SR_TOL*100)+'%)' : 'ไม่มีอัตรามาตรฐานในไฟล์ Stock');
+  if(k) out.push(srTag(SR_CHK_LBL[k],SR_CHK_CLS[k]));
+  if(rate>0 && area>0){
+    var q=rate*area;
+    out.push('ปริมาณรวม: <b>'+srNum(q)+' '+c.u+'</b>');
+    if(c.s!=null){ out.push('สต็อก (snapshot 14/6/26): '+srNum(c.s)+' '+c.u+(q>c.s?' '+srTag('ขอเกินสต็อก','bad'):'')); }
+  }
+  var h=srHist(c.n);
+  out.push(h ? 'ประสิทธิภาพเฉลี่ยในอดีต: <b>'+Math.round(h.avg*100)+'%</b> ('+h.n+' ครั้ง)' : 'ยังไม่มีผลประเมินในอดีต');
+  return out.join('<br>');
+}
+function srRenderInfos(){
+  srRows.forEach(function(r){ var el=document.getElementById('sr-ri-'+r.id); if(el) el.innerHTML=srRowInfoHtml(r); });
+}
+
+// ---------- ข้อมูลแปลง (ประวัติจากระบบเดิม MX-01 + SR) ----------
+function srPlotChanged(){
+  var p=srV('sr-plot');
+  var m=p.match(/^(Avocado|Mango|Cashew Nut|Coconut|Jackfruit|Tamarind)/);
+  if(m && !srV('sr-crop')) srSet('sr-crop', m[1]);
+  srRenderPlotInfo();
+}
+function srRenderPlotInfo(){
+  var box=document.getElementById('sr-plotinfo'), p=srV('sr-plot');
+  if(!p){ box.className='sr-box'; box.innerHTML=''; return; }
+  var lines=[];
+  var mx=records.filter(function(r){ return r.type==='mx' && r.plot===p; }).sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+  if(mx.length){
+    var names=Object.keys(sanitizeAllChems(mx[0].allChems||{})).slice(0,4).join(', ');
+    lines.push('🧪 ผสม/เบิกล่าสุดของแปลงนี้ (MX-01): <b>'+srFmtDate(mx[0].date)+'</b>'+(names?' — '+srE(names):''));
+  } else lines.push('🧪 ยังไม่มีบันทึกผสม (MX-01) ของแปลงนี้ในเครื่องนี้');
+  var sp=srRecs.filter(function(r){ return r.plot===p && r.sdate; }).sort(function(a,b){ return String(b.sdate).localeCompare(String(a.sdate)); });
+  lines.push(sp.length ? '📝 พ่นตามคำขอ SR ล่าสุด: <b>'+srFmtDate(sp[0].sdate)+'</b> '+srEffTag(srEff(sp[0])) : '📝 ยังไม่มีการพ่นตามคำขอ SR ของแปลงนี้');
+  var pend=srRecs.filter(function(r){ return r.plot===p && r.status==='pending'; });
+  if(pend.length) lines.push(srTag('มีคำขอรออนุมัติของแปลงนี้ '+pend.length+' รายการ','warn'));
+  box.className='sr-box on'; box.innerHTML=lines.join('<br>');
+}
+
+// ---------- บันทึกคำขอ ----------
+function srSave(){
+  var who=srV('sr-who'), plot=srV('sr-plot').trim(), area=parseFloat(srV('sr-area')), pest=srV('sr-pest'), before=parseFloat(srV('sr-before'));
+  if(!srV('sr-date')){ toast('❌ เลือกวันที่'); return; }
+  if(!who){ toast('❌ เลือกผู้ขอ'); return; }
+  if(!plot){ toast('❌ សូមជ្រើសចំការ (เลือกแปลงก่อน)'); return; }
+  if(!(area>0)){ toast('❌ ใส่พื้นที่ที่จะพ่น (Ha)'); return; }
+  if(!pest){ toast('❌ เลือกศัตรูพืช/ปัญหา'); return; }
+  if(isNaN(before) || before<0 || before>100){ toast('❌ ระดับระบาดก่อนพ่น ต้องเป็น 0–100 %'); return; }
+  var chems=[], i;
+  for(i=0;i<srRows.length;i++){
+    var r=srRows[i]; if(!r.chem) continue;
+    var rate=parseFloat(r.rate);
+    if(!(rate>0)){ toast('❌ ใส่อัตราของ '+r.chem); return; }
+    var c=srChem(r.chem);
+    chems.push({name:r.chem,unit:c?c.u:'',rate:rate,std:(SR_STD[r.chem]!=null?SR_STD[r.chem]:null)});
+  }
+  if(!chems.length){ toast('❌ เลือกสารเคมีอย่างน้อย 1 ชนิด'); return; }
+  var warn=[];
+  chems.forEach(function(c){
+    if(srCheck(c.name,c.rate)==='high') warn.push(c.name+' เกินอัตรามาตรฐาน');
+    var cc=srChem(c.name); if(cc && cc.s!=null && c.rate*area>cc.s) warn.push(c.name+' ขอเกินสต็อก');
+  });
+  if(warn.length && !window.confirm('⚠️ '+warn.join('\n')+'\n\nส่งคำขอต่อหรือไม่?')) return;
+  var now=new Date().toISOString();
+  var rec={id:uid('SR'),rdate:srV('sr-date'),who:who,plot:plot,area:area,crop:srV('sr-crop'),pest:pest,before:before,
+    sprayer:srV('sr-sprayer'),pdate:srV('sr-pdate'),chems:chems,reason:srV('sr-reason'),season:currentSeason,
+    status:'pending',apv:'',adate:'',acom:'',sdate:'',weather:'',sprayerUsed:'',snote:'',evals:[],createdAt:now,updatedAt:now};
+  srRecs.push(rec); srPersist(); srCloudPush(rec); srUpdateBadges();
+  toast('✅ ส่งคำขอแล้ว ('+rec.id+')');
+  srResetForm(); srView('list');
+}
+
+// ---------- รายการ ----------
+function srStage(r){ return r.status==='approved' ? (!r.sdate?'tospray':((r.evals||[]).length?'done':'toeval')) : r.status; }
+function srRenderList(){
+  var counts={all:srRecs.length,pending:0,tospray:0,toeval:0,done:0,rejected:0};
+  srRecs.forEach(function(r){ var s=srStage(r); if(counts[s]!=null) counts[s]++; });
+  var f=[['all','ทั้งหมด'],['pending','รออนุมัติ'],['tospray','รอพ่น'],['toeval','รอประเมิน'],['done','ประเมินแล้ว'],['rejected','ไม่อนุมัติ']];
+  document.getElementById('sr-filter').innerHTML = f.map(function(x){
+    return '<button class="'+(srFilter===x[0]?'on':'')+'" onclick="srSetFilter(\''+x[0]+'\')">'+x[1]+' ('+counts[x[0]]+')</button>';
+  }).join('');
+  var list=srRecs.filter(function(r){ return srFilter==='all' || srStage(r)===srFilter; })
+    .sort(function(a,b){ return String(b.createdAt).localeCompare(String(a.createdAt)); });
+  document.getElementById('sr-cards').innerHTML = list.length ? list.map(srCardHtml).join('') :
+    '<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีรายการ</div>';
+}
+function srSetFilter(f){ srFilter=f; srRenderList(); }
+function srCardHtml(r){
+  var h='<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.rdate)+' · '+srE(r.who)+'</span></div>';
+  h+='<div>📍 <b>'+srE(r.plot)+'</b> · '+srNum(r.area)+' Ha'+(r.crop?' · '+srE(r.crop):'')+'<br>🐛 '+srE(r.pest)+' · ระบาดก่อนพ่น <b>'+srNum(r.before,1)+'%</b>'
+    +(r.pdate?'<br>📅 แผนพ่น '+srFmtDate(r.pdate)+(r.sprayer?' · '+srE(r.sprayer):''):'')+'</div>';
+  h+=(r.chems||[]).map(function(c){
+    var k=srCheck(c.name,c.rate), q=c.rate*r.area;
+    return '<div class="sr-ev">🧪 <b>'+srE(c.name)+'</b> '+srNum(c.rate)+' '+srE(c.unit)+'/Ha → รวม '+srNum(q)+' '+srE(c.unit)+(k?' '+srTag(SR_CHK_LBL[k],SR_CHK_CLS[k]):'')
+      +(c.actual!=null?'<br><span class="sr-sub">ใช้จริง '+srNum(c.actual)+' '+srE(c.unit)+'/Ha</span>':'')+'</div>';
+  }).join('');
+  if(r.reason) h+='<div class="sr-sub" style="margin-top:4px">เหตุผล: '+srE(r.reason)+'</div>';
+  h+='<div style="margin-top:6px">'+srTag(SR_ST_LBL[r.status]||r.status, SR_ST_CLS[r.status]||'none')+srEffTag(srEff(r))
+    +(srStage(r)==='tospray'?srTag('รอพ่น','warn'):'')+(srStage(r)==='toeval'?srTag('รอประเมิน','warn'):'')+'</div>';
+  if(r.adate) h+='<div class="sr-sub">'+(r.status==='rejected'?'ไม่อนุมัติ':'อนุมัติ')+'โดย '+srE(r.apv)+' · '+srFmtDate(r.adate)+(r.acom?' · “'+srE(r.acom)+'”':'')+'</div>';
+  if(r.sdate) h+='<div class="sr-sub">🚜 พ่นจริง '+srFmtDate(r.sdate)+(r.sprayerUsed?' · '+srE(r.sprayerUsed):'')+(r.weather?' · '+srE(r.weather):'')+(r.snote?' · '+srE(r.snote):'')+'</div>';
+  srEvalList(r).forEach(function(e){
+    h+='<div class="sr-ev">📊 '+srFmtDate(e.date)+' · หลังพ่น '+srNum(e.after,1)+'% → ประสิทธิภาพ <b>'+(e.eff==null?'–':Math.round(e.eff*100)+'%')+'</b>'
+      +(e.phyto?' · พิษต่อพืช: '+srE(e.phyto):'')+(e.by?' · '+srE(e.by):'')+(e.note?'<br><span class="sr-sub">'+srE(e.note)+'</span>':'')+'</div>';
+  });
+  var b='';
+  if(r.status==='pending') b+='<button class="sr-btn" style="background:var(--acc)" onclick="srAct(\'approve\',\''+r.id+'\')">✅ พิจารณาอนุมัติ</button>';
+  if(r.status==='approved' && !r.sdate) b+='<button class="sr-btn" style="background:var(--warn)" onclick="srAct(\'spray\',\''+r.id+'\')">🚜 บันทึกพ่นจริง</button>';
+  if(r.status==='approved' && r.sdate) b+='<button class="sr-btn" style="background:var(--blue)" onclick="srAct(\'eval\',\''+r.id+'\')">📊 ประเมินผล</button>';
+  b+='<button class="sr-btn ghost" onclick="srAct(\'delete\',\''+r.id+'\')">🗑 ลบ</button>';
+  return h+'<div class="sr-btns">'+b+'</div></div>';
+}
+
+// ---------- Modal: อนุมัติ / พ่นจริง / ประเมิน / ลบ ----------
+function srOpenModal(title,html){
+  document.getElementById('sr-mt').textContent=title;
+  document.getElementById('sr-mbody').innerHTML=html;
+  document.getElementById('sr-modal').classList.add('on');
+}
+function srCloseModal(){ document.getElementById('sr-modal').classList.remove('on'); }
+function srAct(kind,id){
+  var r=srFind(id); if(!r) return;
+  if(kind==='approve'){
+    srOpenModal('พิจารณาอนุมัติ · '+r.id,
+      '<div class="sr-sub" style="margin-bottom:8px">'+srE(r.plot)+' · '+srNum(r.area)+' Ha · '+srE(r.pest)+'</div>'
+      +'<div class="grp"><label>ผู้อนุมัติ</label><select id="sm-by">'+srOptions(SR_PEOPLE,'','— ជ្រើស —')+'</select></div>'
+      +'<div class="grp"><label>ความเห็น (ถ้ามี)</label><input type="text" id="sm-com" placeholder="..."></div>'
+      +'<div class="grp"><label>PIN ผู้อนุมัติ</label><input type="password" id="sm-pin" inputmode="numeric" autocomplete="off"></div>'
+      +'<div class="sr-btns"><button class="sr-btn" style="background:var(--acc)" onclick="srDecide(\''+id+'\',\'approved\')">✅ อนุมัติ</button>'
+      +'<button class="sr-btn" style="background:var(--danger)" onclick="srDecide(\''+id+'\',\'rejected\')">❌ ไม่อนุมัติ</button></div>');
+  } else if(kind==='spray'){
+    var rows=(r.chems||[]).map(function(c,i){
+      return '<div class="grp"><label>'+srE(c.name)+' — อัตราที่ใช้จริง ('+srE(c.unit)+'/Ha) · ขอไว้ '+srNum(c.rate)+'</label><input type="number" inputmode="decimal" id="sm-ar-'+i+'" value="'+srE(c.actual!=null?c.actual:c.rate)+'"></div>';
+    }).join('');
+    srOpenModal('บันทึกพ่นจริง · '+r.id,
+      '<div class="g2"><div class="grp"><label>วันที่พ่นจริง</label><input type="date" id="sm-date" value="'+todayISO()+'"></div>'
+      +'<div class="grp"><label>ผู้พ่น / เครื่อง</label><select id="sm-spr">'+srOptions(['P-Mantis','Cricket','DJIT50','DJI Rent'],r.sprayer,'ជ្រើស...')+'</select></div></div>'
+      +'<div class="grp"><label>สภาพอากาศขณะพ่น</label><select id="sm-wx">'+srOptions(SR_WEATHER,'','— เลือก —')+'</select></div>'
+      +rows+'<div class="grp"><label>หมายเหตุ</label><input type="text" id="sm-note" placeholder="..."></div>'
+      +'<div class="sr-btns"><button class="sr-btn" style="background:var(--warn)" onclick="srSaveSpray(\''+id+'\')">✓ บันทึกพ่นจริง</button></div>');
+  } else if(kind==='eval'){
+    srOpenModal('ประเมินผลหลังพ่น · '+r.id,
+      '<div class="sr-sub" style="margin-bottom:8px">ระดับระบาดก่อนพ่น: <b>'+srNum(r.before,1)+'%</b> · พ่นเมื่อ '+srFmtDate(r.sdate)+' (ใช้วิธีสำรวจเดียวกับก่อนพ่น)</div>'
+      +'<div class="g2"><div class="grp"><label>วันที่ประเมิน</label><input type="date" id="sm-date" value="'+todayISO()+'"></div>'
+      +'<div class="grp"><label>ระดับระบาด หลังพ่น (%)</label><input type="number" inputmode="decimal" id="sm-after" placeholder="0–100"></div></div>'
+      +'<div class="g2"><div class="grp"><label>อาการเป็นพิษต่อพืช</label><select id="sm-phy">'+srOptions(SR_PHYTO,'ไม่มี')+'</select></div>'
+      +'<div class="grp"><label>ผู้ประเมิน</label><select id="sm-by">'+srOptions(SR_PEOPLE,'','— ជ្រើស —')+'</select></div></div>'
+      +'<div class="grp"><label>ข้อสังเกต</label><input type="text" id="sm-note" placeholder="..."></div>'
+      +'<div class="sr-btns"><button class="sr-btn" style="background:var(--blue)" onclick="srSaveEval(\''+id+'\')">✓ บันทึกผลประเมิน</button></div>');
+  } else if(kind==='delete'){
+    var pin=window.prompt('Admin PIN (ลบคำขอ '+r.id+'):','');
+    if(pin===null) return;
+    if(pin!==ADMIN_PIN){ toast('❌ Wrong PIN'); return; }
+    if(!window.confirm('ลบคำขอ '+r.id+' ?\nลบแล้วกู้คืนไม่ได้')) return;
+    srRecs=srRecs.filter(function(x){ return x.id!==id; });
+    if(srDeleted.indexOf(id)<0) srDeleted.push(id);
+    srPersist(); srCloudDelete(id); srUpdateBadges(); srRenderList(); toast('🗑 ลบแล้ว ('+id+')');
+  }
+}
+function srTouch(r){ r.updatedAt=new Date().toISOString(); srPersist(); srCloudPush(r); srUpdateBadges(); srCloseModal(); srRenderList(); }
+function srDecide(id,st){
+  var r=srFind(id); if(!r) return;
+  var by=srV('sm-by'); if(!by){ toast('❌ เลือกผู้อนุมัติ'); return; }
+  if(srV('sm-pin')!==ADMIN_PIN){ toast('❌ PIN ไม่ถูกต้อง'); return; }
+  r.status=st; r.apv=by; r.adate=todayISO(); r.acom=srV('sm-com');
+  srTouch(r); toast(st==='approved'?'✅ อนุมัติแล้ว':'❌ ไม่อนุมัติ');
+}
+function srSaveSpray(id){
+  var r=srFind(id); if(!r) return;
+  var d=srV('sm-date'); if(!d){ toast('❌ เลือกวันที่พ่นจริง'); return; }
+  if(d<r.rdate){ toast('❌ วันที่พ่นต้องไม่ก่อนวันที่ขอ'); return; }
+  var acts=[], i;
+  for(i=0;i<(r.chems||[]).length;i++){
+    var a=parseFloat(srV('sm-ar-'+i)); if(!(a>0)){ toast('❌ ใส่อัตราที่ใช้จริงของ '+r.chems[i].name); return; }
+    acts.push(a);
+  }
+  r.chems.forEach(function(c,j){ c.actual=acts[j]; });
+  r.sdate=d; r.sprayerUsed=srV('sm-spr'); r.weather=srV('sm-wx'); r.snote=srV('sm-note');
+  srTouch(r); toast('✅ บันทึกการพ่นจริงแล้ว');
+}
+function srSaveEval(id){
+  var r=srFind(id); if(!r) return;
+  var d=srV('sm-date'), a=parseFloat(srV('sm-after'));
+  if(!d){ toast('❌ เลือกวันที่ประเมิน'); return; }
+  if(r.sdate && d<r.sdate){ toast('❌ วันที่ประเมินต้องไม่ก่อนวันที่พ่นจริง'); return; }
+  if(isNaN(a) || a<0 || a>100){ toast('❌ ระดับระบาดหลังพ่น ต้องเป็น 0–100 %'); return; }
+  r.evals=r.evals||[]; r.evals.push({date:d,after:a,phyto:srV('sm-phy'),by:srV('sm-by'),note:srV('sm-note')});
+  srTouch(r); toast('✅ บันทึกผลประเมินแล้ว');
+}
+
+// ---------- Export Excel (CSV) ----------
+function srCsvCell(v){
+  var s=String(v==null?'':v);
+  if(/^[=+\-@]/.test(s)) s="'"+s;               // กัน formula injection เมื่อเปิดใน Excel
+  return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function srExport(){
+  if(!srRecs.length){ toast('ยังไม่มีข้อมูลให้ Export'); return; }
+  var head=['ID','Season','RequestDate','Requester','Plot','Area(Ha)','Crop','Pest','Before(%)','Sprayer','PlannedDate','Chemical','Unit','Rate/Ha(requested)','Rate/Ha(standard)','Check','TotalQty(requested)','Reason','Status','Approver','ApprovedDate','ApproverComment','SprayDate','SprayerUsed','Weather','Rate/Ha(actual)','EvalCount','LatestEvalDate','LatestAfter(%)','Efficiency(avg %)','Phytotoxicity(latest)'];
+  var rows=[head];
+  srRecs.slice().sort(function(a,b){ return String(a.rdate).localeCompare(String(b.rdate)); }).forEach(function(r){
+    var ev=srEvalList(r), last=ev.length?ev[ev.length-1]:null, eff=srEff(r);
+    (r.chems||[{}]).forEach(function(c){
+      var k=c.name?srCheck(c.name,c.rate):'';
+      rows.push([r.id,r.season||'',r.rdate,r.who,r.plot,r.area,r.crop,r.pest,r.before,r.sprayer,r.pdate,c.name,c.unit,c.rate,c.std==null?'':c.std,k?SR_CHK_LBL[k]:'',c.rate>0?c.rate*r.area:'',r.reason,SR_ST_LBL[r.status]||r.status,r.apv,r.adate,r.acom,r.sdate,r.sprayerUsed,r.weather,c.actual==null?'':c.actual,ev.length,last?last.date:'',last?last.after:'',eff==null?'':Math.round(eff*1000)/10,last?last.phyto:'']);
+    });
+  });
+  var csv='﻿'+rows.map(function(row){ return row.map(srCsvCell).join(','); }).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}), url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='MegaFarm_SR_'+todayISO()+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+  toast('⬇️ Export แล้ว ('+srRecs.length+' คำขอ)');
+}
+
+// ---------- Badge หน้าแรก ----------
+function srUpdateBadges(){
+  var n=srRecs.filter(function(r){ return r.status==='pending'; }).length;
+  var b=document.getElementById('sr-home-badge'); if(b) b.textContent = n ? 'SR-01 · รออนุมัติ '+n : 'SR-01';
+  var p=document.getElementById('sr-pend'); if(p) p.textContent = n ? '('+n+')' : '';
+}
+window.addEventListener('load', function(){ srUpdateBadges(); });
+
+// ---------- Cloud (ใช้เมื่อ SR_CLOUD = true และวาง SR-GAS-snippet.gs แล้วเท่านั้น) ----------
+function srCloudPush(rec){ if(SR_CLOUD && USE_CLOUD && navigator.onLine) cloudWrite({action:'upsertSprayRequest', record:rec}); }
+function srCloudDelete(id){ if(SR_CLOUD && USE_CLOUD && navigator.onLine) cloudWrite({action:'deleteSprayRequest', id:id}); }
+function srCloudPull(cb){
+  if(!(SR_CLOUD && USE_CLOUD && navigator.onLine)){ if(cb) cb(); return; }
+  cloudJSONP({action:'getSprayRequests'}, function(res){
+    if(res && res.ok && Array.isArray(res.data)){
+      // รายการที่ถูกลบจากเครื่องอื่น → ลบออกจากเครื่องนี้ด้วย (กันถูกส่งกลับขึ้นไปซ้ำ)
+      (res.deletedIds||[]).forEach(function(id){ if(srDeleted.indexOf(id)<0) srDeleted.push(id); });
+      srRecs=srRecs.filter(function(r){ return srDeleted.indexOf(r.id)<0; });
+      var byId={}; srRecs.forEach(function(r){ byId[r.id]=r; });
+      res.data.forEach(function(c){
+        if(!c || !c.id || srDeleted.indexOf(c.id)>=0) return;
+        var l=byId[c.id];
+        if(!l){ srRecs.push(c); }
+        else if(String(c.updatedAt||'')>String(l.updatedAt||'')){ srRecs[srRecs.indexOf(l)]=c; }
+        else if(String(c.updatedAt||'')<String(l.updatedAt||'')){ srCloudPush(l); }
+      });
+      var cloudIds={}; res.data.forEach(function(c){ if(c&&c.id) cloudIds[c.id]=1; });
+      srRecs.forEach(function(l){ if(!cloudIds[l.id]) srCloudPush(l); });   // ส่งขึ้นคลาวด์ถ้ายังไม่มี
+      srPersist();
+    }
+    if(cb) cb();
+  });
 }
 </script>
 </body>
