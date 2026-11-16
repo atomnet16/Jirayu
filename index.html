@@ -435,7 +435,8 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   <div id="sr-list" style="display:none">
     <div class="sr-filter" id="sr-filter"></div>
     <div id="sr-cards"></div>
-    <button class="sbtn" style="background:var(--teal);margin-top:6px" onclick="srExport()">⬇️ Export Excel (CSV)</button>
+    <button class="sbtn" style="background:var(--teal);margin-top:6px" onclick="srExportXlsx()">⬇️ Export Excel (.xlsx) · Chemical Control Records</button>
+    <div style="text-align:center;margin-top:6px"><span style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer" onclick="srExport()">ดาวน์โหลดแบบ CSV (เฉพาะคำขอ)</span></div>
   </div>
 </div>
 
@@ -606,7 +607,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.3.sr'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.4.sr'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -2353,6 +2354,60 @@ function evSaveMx(mxId){
     chems:Object.keys(all).map(function(n){ var c=CHEMS.filter(function(x){ return x.n===n; })[0]; return {name:n,unit:c?c.u:'',rate:0,qty:all[n]}; }),
     evals:[{date:d,after:a,phyto:srV('sm-phy'),by:srV('sm-by'),note:srV('sm-note')}],rounds:[],season:m.season||currentSeason,createdAt:now,updatedAt:now};
   srRecs.push(rec); srPersist(); srCloudPush(rec); srCloseModal(); srUpdateBadges(); evRender(); toast('✅ บันทึกผลประเมินแล้ว');
+}
+
+// ---------- Export Excel (.xlsx) หลายชีต ----------
+var SR_XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+function srLoadXlsx(cb){
+  if(window.XLSX){ cb(true); return; }
+  var s=document.createElement('script'); s.src=SR_XLSX_URL;
+  s.onload=function(){ cb(!!window.XLSX); }; s.onerror=function(){ cb(false); };
+  document.head.appendChild(s);
+}
+function srBuildSheets(){
+  var recs=srRecs.slice().sort(function(a,b){ return String(a.rdate).localeCompare(String(b.rdate)); });
+  var sr=[['ID','Kind','Season','Requester','RequestDate','Plot','Area(Ha)','Crop','Pest','Before(%)','PlannedDate','Status','Approver','ApprovedDate','ApproverComment','MixRounds','FinishDate','FinishHa','ShortReason','ClosedBy','EvalDue','Efficiency(avg %)','Reason']];
+  var ch=[['ID','Plot','Chemical','Unit','Rate/Ha(requested)','Rate/Ha(reference)','TotalQty(requested)','MixedQty(cumulative)','Rate/Ha(actual)']];
+  var rd=[['ID','Plot','Round','MX ID','Date','Ha','Status after round','Reason','Chemicals mixed']];
+  var ev=[['ID','Plot','Kind','Before(%)','EvalDate','After(%)','Efficiency(%)','Phytotoxicity','By','Note']];
+  var cr=[['CR No.','SR ID','RequestDate','Plot','Area(Ha)','Chemical','Unit','Rate/Ha','Qty to withdraw','Approver','ApprovedDate']];
+  recs.forEach(function(r){
+    var eff=srEff(r), used=srUsed(r);
+    sr.push([r.id,r.kind==='ev'?'EV (Mixing only)':'SR',r.season||'',r.who||'',r.rdate||'',r.plot||'',r.area||'',r.crop||'',r.pest||'',r.before,r.pdate||'',SR_ST_LBL[r.status]||r.status,r.apv||'',r.adate||'',r.acom||'',srRounds(r).length,r.kind==='ev'?'':(r.sdate||''),r.farea||'',r.fshort||'',r.fby||'',r.sdate&&r.kind!=='ev'?srDue(r):'',eff==null?'':Math.round(eff*1000)/10,r.reason||'']);
+    (r.chems||[]).forEach(function(c){
+      ch.push([r.id,r.plot||'',c.name,c.unit,c.rate,SR_STD[c.name]==null?'':SR_STD[c.name],c.rate>0&&r.area>0?Math.round(c.rate*r.area*1000)/1000:(c.qty||''),used[c.name]||'',c.actual==null?'':c.actual]);
+      if(r.status==='approved' && r.kind!=='ev' && c.rate>0) cr.push(['CR-'+String(r.id).replace(/^SR-/,''),r.id,r.rdate||'',r.plot||'',r.area||'',c.name,c.unit,c.rate,Math.round(c.rate*r.area*1000)/1000,r.apv||'',r.adate||'']);
+    });
+    srRounds(r).forEach(function(x){
+      rd.push([r.id,r.plot||'',x.id,x.mxId,x.date||'',x.area||'',x.fin==='final'?'จบแปลง':'ยังพ่นไม่จบ',x.why||'',Object.keys(x.used||{}).map(function(k){ return k+' '+x.used[k]; }).join(' | ')]);
+    });
+    srEvalList(r).forEach(function(e){
+      ev.push([r.id,r.plot||'',r.kind==='ev'?'Mixing only':'SR',r.before,e.date||'',e.after,e.eff==null?'':Math.round(e.eff*1000)/10,e.phyto||'',e.by||'',e.note||'']);
+    });
+  });
+  var link={}; srRecs.forEach(function(r){ srRounds(r).forEach(function(x){ link[x.mxId]=r.id; }); });
+  var mx=[['ID','Date','Time','Mixer','Plot','Sprayer','Crop','Season','Chemicals','Note','Linked SR']];
+  records.filter(function(m){ return m.type==='mx'; }).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(m){
+    var all=sanitizeAllChems(m.allChems||{});
+    mx.push([m.id,m.date||'',m.time||'',m.mixer||'',m.plot||'',m.sprayer||'',m.cropType||'',m.season||'',Object.keys(all).map(function(k){ return k+' '+all[k]; }).join(' | '),m.note||'',link[m.id]||'']);
+  });
+  return [['SR คำขอ',sr],['สารเคมี',ch],['Mixing รอบ',rd],['ประเมินผล',ev],['ใบเบิก CR',cr],['MX-01',mx]];
+}
+function srExportXlsx(){
+  toast('⏳ กำลังสร้างไฟล์ Excel…');
+  srLoadXlsx(function(ok){
+    if(!ok){ toast('⚠️ โหลดตัวสร้าง Excel ไม่ได้ (ออฟไลน์?) — ใช้ CSV แทน'); srExport(); return; }
+    try{
+      var wb=XLSX.utils.book_new();
+      srBuildSheets().forEach(function(s){
+        var ws=XLSX.utils.aoa_to_sheet(s[1]);
+        ws['!cols']=s[1][0].map(function(h){ return {wch:Math.max(10,String(h).length+2)}; });
+        XLSX.utils.book_append_sheet(wb,ws,s[0]);
+      });
+      XLSX.writeFile(wb,'Chemical Control Records - Mega Farm.xlsx');
+      toast('⬇️ ดาวน์โหลดแล้ว');
+    }catch(e){ console.warn(e); toast('❌ สร้างไฟล์ไม่สำเร็จ — ใช้ CSV แทน'); srExport(); }
+  });
 }
 
 // ---------- Badge หน้าแรก ----------
