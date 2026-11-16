@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chem Control">
+<meta name="theme-color" content="#d4edd8">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>🌱 Chem Control · Mega Farm</title>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .catch(e => console.warn('SW:', e));
+  });
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+:root{
+  --bg:#d4edd8;
+  --surf:rgba(255,255,255,0.45);--card:rgba(255,255,255,0.55);--bdr:rgba(255,255,255,0.75);
+  --acc:#1A6B36;--dim:rgba(26,107,54,0.12);--adim:rgba(26,107,54,0.10);
+  --teal:#0F7A68;--blue:#1A5CB5;--warn:#B06A00;--danger:#C0302A;
+  --purple:#5B3DBF;--orange:#B5530A;
+  --text:#1a3d28;--muted:#4a7a5a;--faint:#7aaa8a;
+  --glass-blur:14px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Hanuman','Noto Sans Khmer',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:122px}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:linear-gradient(160deg,#d4edd8 0%,#eaf5ec 40%,#c8e8d4 100%);pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 15% 10%,rgba(255,255,255,0.7) 0%,transparent 55%),radial-gradient(ellipse at 85% 80%,rgba(46,180,100,0.18) 0%,transparent 55%);pointer-events:none}
+input,select,button,textarea{font-family:inherit}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+select option{background:#e8f5ec}
+input[type=date]::-webkit-calendar-picker-indicator,
+input[type=time]::-webkit-calendar-picker-indicator{filter:opacity(.6)}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,0.55);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-top:1px solid rgba(255,255,255,0.75);display:flex;padding:12px 0 24px;z-index:100}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--faint);font-size:20px;font-weight:700;font-family:inherit}
+.nb.on{color:var(--acc)}
+.nb span:first-child{font-size:32px}
+
+/* HEADER */
+.hdr{background:rgba(255,255,255,0.45);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-bottom:1px solid rgba(255,255,255,0.6);padding:12px 16px;position:sticky;top:0;z-index:50}
+.hdr-r{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:13px;letter-spacing:2px;color:var(--acc);font-weight:700}
+.logo-s{font-size:11px;color:var(--muted)}
+.chips{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.chip-d{font-size:12px;background:rgba(26,107,54,0.15);color:var(--acc);padding:3px 10px;border-radius:20px;font-weight:700;border:1px solid rgba(26,107,54,0.3)}
+.chip-s{font-size:11px;color:var(--muted)}
+
+/* PAGES */
+.pg{display:none;padding:14px 14px 0}
+.pg.on{display:block}
+
+/* CARDS */
+.card{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:11px;padding:11px 13px;margin-bottom:7px;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
+.fcard{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1.5px solid var(--bdr);border-radius:18px;padding:16px 10px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;transition:transform .12s,border-color .2s;box-shadow:0 4px 14px rgba(26,107,54,0.1)}
+.fcard:active{border-color:var(--acc);transform:scale(.97)}
+.gforms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px}
+.fcard img{width:78px;height:78px;object-fit:contain;display:block;margin-bottom:2px}
+.fcard .fk{font-size:17px;font-weight:700}
+.fcard .fe{font-size:12px;color:var(--muted)}
+.fcard .badge{display:block;width:100%;text-align:center;margin-top:5px}
+.fcard.ctr{grid-column:1 / 3;justify-self:center;width:calc(50% - 6px)}
+.nb img{width:45px;height:45px;object-fit:contain;display:block}
+
+/* STATS */
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:13px}
+.stat{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:12px;padding:14px 6px;text-align:center;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
+.stat-v{font-size:42px;font-weight:900}
+.stat-l{font-size:13px;color:var(--muted);margin-top:4px;font-weight:700}
+
+/* FORMS */
+.fw{display:none;padding:13px 14px}
+.fw.on{display:block}
+.fhdr{display:flex;align-items:center;gap:8px;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid rgba(26,107,54,0.2)}
+.ftitle{font-size:17px;font-weight:900;flex:1}
+.back{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1.5px solid var(--bdr);color:var(--text);border-radius:8px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer}
+.grp{margin-bottom:11px}
+label{font-size:12px;color:var(--text);font-weight:700;display:block;margin-bottom:6px}
+input[type=text],input[type=number],input[type=date],input[type=time]{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.8);border-radius:9px;color:var(--text);padding:14px 13px;font-size:15px;font-weight:600;outline:none}
+input[type=text]:focus,input[type=number]:focus,input[type=date]:focus,input[type=time]:focus{border-color:var(--acc);background:rgba(255,255,255,0.8)}
+select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.8);border-radius:9px;color:var(--text);padding:14px 13px;font-size:14px;font-weight:600;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath fill='%231A6B36' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbtn{width:100%;border:none;border-radius:12px;color:#FFFFFF;padding:19px;font-size:16px;font-weight:900;cursor:pointer;margin-top:14px;letter-spacing:.2px}
+.abtn{width:100%;background:rgba(255,255,255,0.4);border:2px dashed rgba(26,107,54,0.35);border-radius:9px;padding:13px;font-size:13px;cursor:pointer;font-weight:700;margin-top:6px;color:var(--text)}
+.rm{background:none;border:none;color:var(--danger);cursor:pointer;padding:0 4px;font-size:14px}
+.cr{background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.75);border-radius:8px;padding:8px 10px;margin-bottom:6px}
+.tc{background:rgba(255,255,255,0.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1.5px solid rgba(15,122,104,0.35);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.calc{border-radius:9px;padding:10px 12px;margin-bottom:10px}
+.crow{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
+.cval{font-weight:800;font-size:12px}
+.badge{font-size:12px;padding:5px 12px;border-radius:20px;font-weight:800;letter-spacing:.3px}
+
+/* SPRAY PLAN FORM */
+.chem-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.chem-hdr label{margin-bottom:0}
+.chem-count{font-size:10.5px;background:rgba(26,107,54,0.14);color:var(--acc);padding:2px 8px;border-radius:20px;font-weight:700}
+.chem-card{background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.8);border-radius:9px;padding:9px 9px 8px;margin-bottom:7px;position:relative}
+.chem-card .cc-top{display:flex;gap:6px;margin-bottom:6px}
+.chem-card .cc-top select{flex:1}
+.chem-card .cc-rm{flex:none;width:32px;background:rgba(192,48,42,0.1);border:1.5px solid var(--danger);color:var(--danger);border-radius:7px;font-size:14px;font-weight:700;cursor:pointer}
+.rate-row{display:grid;grid-template-columns:1fr 100px;gap:6px}
+
+/* MAP PICKER */
+.map-modal{display:none;position:fixed;inset:0;background:rgba(10,30,15,0.55);z-index:400;align-items:center;justify-content:center}
+.map-modal.on{display:flex}
+.map-box{background:rgba(232,245,236,0.97);border-radius:16px;width:calc(100% - 24px);max-width:460px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.map-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(26,107,54,0.2)}
+.map-hdr .mt{font-size:14px;font-weight:900}
+.map-hdr button{background:var(--card);border:1.5px solid var(--bdr);color:var(--text);border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer}
+.map-scroll{overflow:auto;padding:10px}
+.map-wrap{position:relative;width:100%}
+.map-wrap img{display:block;width:100%;border-radius:8px}
+.map-hotspot{position:absolute;border-radius:50%;border:2px solid rgba(26,107,54,0.85);background:rgba(26,107,54,0.18);cursor:pointer}
+.map-hotspot:active{background:rgba(26,107,54,0.4)}
+.map-hotspot.inactive{border-color:rgba(122,170,138,0.7);background:rgba(255,255,255,0.15)}
+.map-legend{display:flex;gap:12px;padding:8px 14px 12px;font-size:11px;color:var(--muted)}
+.map-legend .li{display:flex;align-items:center;gap:5px}
+.map-legend .ld{width:10px;height:10px;border-radius:50%;border:2px solid rgba(26,107,54,0.85);background:rgba(26,107,54,0.18)}
+.map-legend .ld.inactive{border-color:rgba(122,170,138,0.7);background:rgba(255,255,255,0.15)}
+
+.subnav{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:13px}
+.snb{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 3px;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.snb.on{background:rgba(26,107,54,0.18);border-color:rgba(26,107,54,0.5);color:var(--acc)}
+.sec{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:800}
+.bar-bg{height:5px;background:rgba(26,107,54,0.15);border-radius:3px;overflow:hidden;margin-top:5px}
+.bar-f{height:100%;background:var(--acc);border-radius:3px}
+
+/* HISTORY */
+.ftabs{display:flex;gap:6px;margin-bottom:11px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+.ftabs::-webkit-scrollbar{display:none}
+.ft{flex:0 0 auto;min-width:48px;background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);color:var(--muted);border-radius:8px;padding:11px 6px;font-size:11px;font-weight:700;cursor:pointer}
+.ft.on{background:rgba(26,107,54,0.18);border-color:rgba(26,107,54,0.5);color:var(--acc)}
+.delbtn{background:rgba(192,48,42,0.1);border:1.5px solid var(--danger);color:var(--danger);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:700}
+
+/* ALERTS */
+.aout{background:rgba(192,48,42,0.08);border:1.5px solid rgba(192,48,42,0.4);border-radius:8px;padding:7px 11px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.alow{background:rgba(176,106,0,0.08);border:1.5px solid rgba(176,106,0,0.35);border-radius:8px;padding:7px 11px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+
+/* CHEM MODAL */
+.cmo{display:none;position:fixed;inset:0;background:rgba(10,30,15,0.45);z-index:300;align-items:flex-end}
+.cmo.on{display:flex}
+.cmb{background:rgba(232,245,236,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px 16px 0 0;width:100%;max-height:78vh;display:flex;flex-direction:column}
+.cmh{padding:13px 14px 9px;border-bottom:1px solid rgba(26,107,54,0.2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cms{width:100%;background:rgba(255,255,255,0.7);border:1.5px solid rgba(255,255,255,0.85);border-radius:9px;color:var(--text);padding:9px 12px;font-size:13px;outline:none;font-family:inherit}
+.cml{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.cmi{padding:10px 14px;border-bottom:1px solid rgba(26,107,54,0.12);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.cmi:active,.cmi.sel{background:rgba(26,107,54,0.1)}
+.cmi.sel{border-left:3px solid var(--acc)}
+.cmi.sel .cn{color:var(--acc);font-weight:700}
+.cn{font-size:13px;font-weight:600}
+.ct{font-size:10px;color:var(--muted)}
+
+/* PLOT MODAL */
+.pmo{display:none;position:fixed;inset:0;background:rgba(10,30,15,0.4);z-index:200;align-items:center;justify-content:center}
+.pmo.on{display:flex}
+.pmb{background:rgba(232,245,236,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:14px;width:calc(100% - 30px);max-height:70vh;display:flex;flex-direction:column;overflow:hidden}
+.pml{overflow-y:auto}
+.pmi{padding:9px 13px;border-bottom:1px solid rgba(26,107,54,0.12);cursor:pointer;font-size:12px}
+.pmi:active{background:var(--adim)}
+
+/* EXPORT BOX */
+.ebox{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-top:12px}
+.etxt{width:100%;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.8);border-radius:8px;color:var(--text);padding:9px;font-size:10px;font-family:monospace;margin-top:6px;resize:none;height:55px}
+
+/* TOAST */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--acc);color:#FFFFFF;border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-r">
+    <div>
+      <div class="logo">🌱 CHEM CONTROL · MEGA FARM</div>
+      <div class="logo-s">ប្រព័ន្ធគ្រប់គ្រងសារធាតុ (Pesticide Mgmt)</div>
+    </div>
+    <div class="chips">
+      <div class="chip-d" id="chip-date"></div>
+      <div class="chip-s" id="chip-sync">⏳</div>
+    </div>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="pg on" id="pg-home">
+  <div class="sec" id="lbl-today">ថ្ងៃនេះ (TODAY)</div>
+  <div class="g3" style="grid-template-columns:1fr 1fr">
+    <div class="stat"><div class="stat-v" id="cnt-ld" style="color:var(--blue);font-size:34px">0</div><div class="stat-l">🚚 LD · ขึ้นรถวันนี้</div></div>
+    <div class="stat"><div class="stat-v" id="cnt-mx" style="color:var(--teal);font-size:34px">0</div><div class="stat-l">លាយ MX · เบิกวันนี้</div></div>
+  </div>
+  <div id="truck-stock"></div>
+  <div class="sec">ទម្រង់ (FORM)</div>
+  <div class="gforms">
+    <div class="fcard" onclick="showForm('ld'); ldResetForm();">
+      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">🚚</div>
+      <div class="fk">ដាក់ថ្នាំលើឡាន</div>
+      <div class="fe">โหลดสารขึ้นรถ</div>
+      <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LD-01</span>
+    </div>
+    <div class="fcard" onclick="showForm('mx')">
+      <img src="icons/card-mx.png" alt="">
+      <div class="fk">ការលាយ</div>
+      <div class="fe">Mixing · เบิกหน้าแปลง</div>
+      <span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
+    </div>
+    <div class="fcard" onclick="showForm('spraystatus'); ssResetForm();">
+      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">🗺️</div>
+      <div class="fk">ផែនការបាញ់</div>
+      <div class="fe">แผนพ่นสารรายแปลงวันนี้</div>
+      <span class="badge" style="background:rgba(176,106,0,.18);color:var(--warn)">PLAN</span>
+    </div>
+  </div>
+  <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
+    🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 60s</span>
+  </button>
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="pg" id="pg-hist">
+  <div class="sec">ប្រវត្តិ (HISTORY)</div>
+  <div id="hist-list"></div>
+  <div class="ebox">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:7px">💾 ទិន្នន័យ (Data)</div>
+    <button class="sbtn" style="background:var(--warn);margin-top:0" onclick="doExport()">📋 Export & Copy</button>
+    <div id="exp-ok" style="font-size:10px;color:var(--acc);margin-top:5px;display:none">✅ Copied!</div>
+    <button class="sbtn" style="background:var(--teal);margin-top:7px" onclick="doBkp()">💾 Download Backup</button>
+    <input type="file" id="import-file" accept=".json" onchange="doImport(this)" style="display:none">
+    <button class="sbtn" style="background:var(--blue);margin-top:7px" onclick="document.getElementById('import-file').click()">📂 Import Backup</button>
+    <div id="import-status" style="font-size:10px;color:var(--acc);margin-top:5px;display:none"></div>
+  </div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="pg" id="pg-settings">
+  <div class="sec">⚙️ SETTINGS</div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">📡 Sync Status</div>
+    <div class="crow"><span style="color:var(--muted)">Last Sync</span><span class="cval" id="set-last-sync">—</span></div>
+    <div class="crow"><span style="color:var(--muted)">Script URL</span><span class="cval" id="set-script-status">checking...</span></div>
+    <div class="crow"><span style="color:var(--muted)">Records (Local)</span><span class="cval" id="set-rec-count">0</span></div>
+  </div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">ℹ️ About</div>
+    <div class="crow"><span style="color:var(--muted)">App</span><span class="cval">Chem Control · Mega Farm</span></div>
+    <div class="crow"><span style="color:var(--muted)">Version</span><span class="cval">v12</span></div>
+  </div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">🌾 Production Season</div>
+    <div class="crow" style="margin-bottom:9px"><span style="color:var(--muted)">Current Season</span><span class="cval" id="set-season-lbl">—</span></div>
+    <button onclick="changeSeason()" style="width:100%;background:rgba(15,122,104,0.1);border:1px solid rgba(15,122,104,0.35);color:var(--teal);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔄 Change Season (PIN)</button>
+  </div>
+  <button onclick="doRefresh()" style="width:100%;background:var(--dim);border:1px solid var(--bdr);color:var(--acc);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">
+    🔄 Force Sync Now
+  </button>
+  <button onclick="forceUpdateApp()" style="width:100%;background:rgba(91,61,191,0.10);border:1px solid rgba(91,61,191,0.35);color:var(--purple);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+    🔃 Update App (Clear Cache)
+  </button>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nb on" onclick="showTab('home')" id="nb-home"><img src="icons/nav-home.png" alt="">Home</button>
+  <button class="nb" onclick="showTab('hist')" id="nb-hist"><img src="icons/nav-history.png" alt="">History</button>
+  <button class="nb" onclick="showTab('settings')" id="nb-settings"><img src="icons/nav-settings.png" alt="">Settings</button>
+</nav>
+
+<!-- EDIT BANNER (shown when editing an existing record) -->
+<div id="edit-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:8px 12px;letter-spacing:.3px">
+  ✏️ Editing: <span id="edit-id-label"></span> &nbsp;|&nbsp; press ← Back to cancel
+</div>
+
+<!-- MX FORM -->
+<div class="fw" id="fw-mx">
+  <div class="fhdr">
+    <button class="back" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">⚗️ ការលាយ (Mixing)</div>
+    <span class="badge" style="background:rgba(46,204,154,.2);color:var(--teal)">MX-01</span>
+  </div>
+  <div class="g2">
+    <div class="grp"><label>Date</label><input type="date" id="mx-date"></div>
+    <div class="grp"><label>ម៉ោង (Time)</label><input type="time" id="mx-time"></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label>អ្នកលាយ (Mixer)</label><select id="mx-mixer"><option value="">— ជ្រើស —</option><option>Jirayu</option><option>Thea</option><option>Vith</option><option>Ratanak</option><option>Putdim</option><option>Chanron</option></select></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label>ចំការ (Plot)</label><input type="text" id="mx-plot" placeholder="ជ្រើស..." onclick="openPlot('mx-plot')" readonly style="cursor:pointer"></div>
+    <div class="grp"><label>ម៉ាស៊ីន (Sprayer)</label>
+      <select id="mx-sprayer"><option value="">ជ្រើស...</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
+    </div>
+  </div>
+  <div class="grp"><label>Crop Type</label>
+    <select id="mx-crop"><option value="">— Select —</option><option>Corn</option><option>Cassava</option><option>Soy Bean</option><option>Mung Bean</option></select>
+  </div>
+  <div class="grp"><label>ទឹក/ថង L (Water/Tank)</label><input type="number" id="mx-wpt" value="2000" oninput="renderTanks()"></div>
+  <div id="mx-tanks"></div>
+  <button class="abtn" style="color:var(--orange);margin-bottom:8px" onclick="addTank()">+ ថងថ្មី (Add Tank)</button>
+  <div id="mx-total" style="display:none"></div>
+  <div class="grp"><label>Note</label><input type="text" id="mx-note" placeholder="..."></div>
+  <button class="sbtn" style="background:var(--teal)" onclick="submitMX()">✓ បញ្ជាក់ (Confirm Mix)</button>
+</div>
+
+<div class="fw" id="fw-ld">
+  <div class="fhdr">
+    <button class="back" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">🚚 ដាក់ថ្នាំលើឡាន (โหลดสารขึ้นรถ)</div>
+    <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LD-01</span>
+  </div>
+  <div class="g2">
+    <div class="grp"><label>Date</label><input type="date" id="ld-date"></div>
+    <div class="grp"><label>ម៉ោង (Time)</label><input type="time" id="ld-time"></div>
+  </div>
+  <div class="g2">
+    <div class="grp"><label>អ្នកដាក់ (ผู้โหลด)</label>
+      <select id="ld-by"><option value="">— ជ្រើស —</option><option>Jirayu</option><option>Thea</option><option>Vith</option><option>Ratanak</option><option>Putdim</option><option>Chanron</option></select>
+    </div>
+    <div class="grp"><label>ឡាន/ម៉ាស៊ីន (รถ)</label>
+      <select id="ld-truck"><option value="">— รวมทุกคัน —</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="chem-hdr"><label>ថ្នាំគីមី (สารที่โหลดขึ้นรถ)</label><span class="chem-count" id="ld-chem-count">1 ชนิด</span></div>
+    <div id="ld-chem-rows"></div>
+    <button class="abtn" style="color:var(--blue)" onclick="ldAddChem()">+ បន្ថែមថ្នាំ (เพิ่มสารอีกชนิด)</button>
+  </div>
+  <div class="grp"><label>Note</label><input type="text" id="ld-note" placeholder="..."></div>
+  <button class="sbtn" style="background:var(--blue)" onclick="submitLD()">✓ រក្សាទីក (บันทึกขึ้นรถ)</button>
+</div>
+
+<div class="fw" id="fw-spraystatus">
+  <div class="fhdr">
+    <button class="back" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">🗺️ ផែនការបាញ់ (แผนพ่นสารวันนี้)</div>
+    <span class="badge" style="background:rgba(176,106,0,.18);color:var(--warn)">PLAN</span>
+  </div>
+
+  <div class="grp">
+    <label>ចំការ (Plot)</label>
+    <input type="text" id="ss-plot" placeholder="ជ្រើស..." onclick="openMapPicker()" readonly style="cursor:pointer">
+    <div style="text-align:right;margin-top:5px"><span style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer" onclick="openPlot('ss-plot')">พิมพ์ค้นหาแปลงอื่น (นอกแผนที่)</span></div>
+  </div>
+
+  <div class="grp"><label>ម៉ាស៊ីនបាញ់ (อุปกรณ์ฉีดพ่น)</label>
+    <select id="ss-sprayer"><option value="">ជ្រើស...</option><option>P-Mantis</option><option>Cricket</option><option>DJIT50</option><option>DJI Rent</option></select>
+  </div>
+
+  <div class="grp">
+    <div class="chem-hdr"><label>ថ្នាំគីមី (สารเคมีที่ใช้)</label><span class="chem-count" id="ss-chem-count">1 ชนิด</span></div>
+    <div id="ss-chem-rows"></div>
+    <button class="abtn" style="color:var(--acc)" onclick="ssAddChemRow()">+ បន្ថែមថ្នាំ (เพิ่มสารเคมีอีกชนิด)</button>
+  </div>
+
+  <div class="grp"><label>អ្នករាយការណ៍ (ผู้บันทึก)</label>
+    <select id="ss-reporter"><option value="">— ជ្រើស —</option><option>Jirayu</option><option>Thea</option><option>Vith</option><option>Ratanak</option><option>Putdim</option><option>Chanron</option></select>
+  </div>
+
+  <div class="grp"><label>ចំណាំ (Note — ไม่บังคับ)</label><input type="text" id="ss-note" placeholder="..."></div>
+
+  <button class="sbtn" style="background:var(--warn)" onclick="submitSprayStatus()">✓ រក្សាទុក (บันทึกรายงาน)</button>
+</div>
+
+<!-- CHEM MODAL -->
+<div class="cmo" id="chem-modal" onclick="if(event.target===this)closeChem()">
+  <div class="cmb">
+    <div class="cmh">
+      <span style="font-size:13px;font-weight:700">ជ្រើសសារធាតុ (Chemical)</span>
+      <button onclick="closeChem()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="padding:9px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0">
+      <input class="cms" id="chem-search" type="text" placeholder="ស្វែងរក (Search)..." oninput="filterChems()" autocomplete="off">
+    </div>
+    <div class="cml" id="chem-list"></div>
+  </div>
+</div>
+
+<!-- PLOT MODAL -->
+<div class="pmo" id="plot-modal" onclick="if(event.target===this)closePlot()">
+  <div class="pmb">
+    <div style="padding:10px 13px;border-bottom:1px solid var(--bdr);flex-shrink:0;display:flex;gap:8px;align-items:center">
+      <input class="cms" id="plot-search" type="text" placeholder="ស្វែងរក..." oninput="filterPlots()" autocomplete="off" style="flex:1">
+      <button onclick="closePlot()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div class="pml" id="plot-list"></div>
+  </div>
+</div>
+
+<!-- MAP PICKER — คลิกเลือกแปลง Pivot จากแผนที่จริง (MAP2026) -->
+<div class="map-modal" id="map-modal" onclick="if(event.target===this)closeMapPicker()">
+  <div class="map-box">
+    <div class="map-hdr">
+      <span class="mt">ជ្រើសចំការ (เลือกแปลงจากแผนที่)</span>
+      <button onclick="closeMapPicker()">✕</button>
+    </div>
+    <div class="map-scroll">
+      <div class="map-wrap">
+        <img src="icons/farm-map.jpg" alt="Farm map">
+        <!-- active pivots (มีในระบบจริง) -->
+        <div class="map-hotspot" style="left:22.33%;top:23.43%;width:7.28%;height:5.15%" onclick="pickMapPlot('Pivot 1')"></div>
+        <div class="map-hotspot" style="left:23.44%;top:17.40%;width:7.73%;height:5.46%" onclick="pickMapPlot('Pivot 2')"></div>
+        <div class="map-hotspot" style="left:33.87%;top:15.16%;width:9.52%;height:6.73%" onclick="pickMapPlot('Pivot 3')"></div>
+        <div class="map-hotspot" style="left:34.43%;top:9.30%;width:9.52%;height:6.73%" onclick="pickMapPlot('Pivot 4')"></div>
+        <div class="map-hotspot" style="left:43.11%;top:12.07%;width:13.44%;height:4.75%" onclick="pickMapPlot('Pivot 5/2')"></div>
+        <div class="map-hotspot" style="left:43.11%;top:16.83%;width:13.44%;height:4.75%" onclick="pickMapPlot('Pivot 5/1')"></div>
+        <div class="map-hotspot" style="left:55.64%;top:14.58%;width:8.40%;height:5.94%" onclick="pickMapPlot('Pivot 6')"></div>
+        <div class="map-hotspot" style="left:55.53%;top:22.74%;width:10.64%;height:7.52%" onclick="pickMapPlot('Pivot 7')"></div>
+        <div class="map-hotspot" style="left:38.95%;top:22.94%;width:10.64%;height:7.52%" onclick="pickMapPlot('Pivot 8')"></div>
+        <div class="map-hotspot" style="left:46.99%;top:29.06%;width:10.64%;height:7.52%" onclick="pickMapPlot('Pivot 9')"></div>
+        <div class="map-hotspot" style="left:50.76%;top:36.33%;width:12.09%;height:8.55%" onclick="pickMapPlot('Pivot 10')"></div>
+        <div class="map-hotspot" style="left:54.89%;top:44.82%;width:11.87%;height:8.39%" onclick="pickMapPlot('Pivot 11')"></div>
+        <!-- Pivot 12–17 ยังไม่เปิดใช้ — แสดงผังเดิมไว้ แต่แตะแล้วไม่เลือก -->
+        <div class="map-hotspot inactive" style="left:67.31%;top:22.32%;width:7.95%;height:5.62%" onclick="mapInactive()"></div>
+        <div class="map-hotspot inactive" style="left:75.90%;top:21.40%;width:8.06%;height:5.70%" onclick="mapInactive()"></div>
+        <div class="map-hotspot inactive" style="left:68.26%;top:51.89%;width:11.65%;height:8.23%" onclick="mapInactive()"></div>
+        <div class="map-hotspot inactive" style="left:68.33%;top:60.41%;width:11.65%;height:8.23%" onclick="mapInactive()"></div>
+        <div class="map-hotspot inactive" style="left:68.74%;top:68.78%;width:11.65%;height:8.23%" onclick="mapInactive()"></div>
+        <div class="map-hotspot inactive" style="left:37.38%;top:32.84%;width:11.20%;height:7.92%" onclick="mapInactive()"></div>
+      </div>
+    </div>
+    <div class="map-legend">
+      <span class="li"><span class="ld"></span>แตะเพื่อเลือก</span>
+      <span class="li"><span class="ld inactive"></span>ยังไม่เปิดใช้</span>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6Hy0z_qCqbj7s8QWfMKPSmcs-ocLJHA9p5d1BDep2G0zwIkh2Ru8JOEqq1GeCefY/exec';
+var ADMIN_PIN  = '9764';
+var USE_CLOUD  = true;
+
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+// s: = คลังRemaining ณ 2026-06-14 (snapshot จาก Initial − CR + RT ถึงวันนี้)
+var CHEMS = [
+  {n:'Emamecthrin',u:'Kg',t:'Insecticide',s:216.5},
+  {n:'Belt',u:'Kg',t:'Insecticide',s:280.7},
+  {n:'Lufenuron',u:'L',t:'Insecticide',s:944},
+  {n:'Fipronil',u:'L',t:'Insecticide',s:0},
+  {n:'Altacor',u:'Kg',t:'Insecticide',s:0},
+  {n:'Profenofos',u:'L',t:'Insecticide',s:783.5},
+  {n:'Actara (Thiamethoxam)',u:'Kg',t:'Insecticide',s:7.5},
+  {n:'Eforia',u:'L',t:'Insecticide',s:1745.5},
+  {n:'Amrarar',u:'Kg',t:'Insecticide',s:0},
+  {n:'Spirotetramat',u:'L',t:'Insecticide',s:94.3},
+  {n:'Chlorfenapyr',u:'L',t:'Insecticide',s:1774},
+  {n:'Bifentrin (Talstar)',u:'L',t:'Insecticide',s:258},
+  {n:'Methomyl',u:'Kg',t:'Insecticide',s:13},
+  {n:'Glyphosate',u:'L',t:'Herbicide',s:0},
+  {n:'Dual Gold',u:'L',t:'Herbicide',s:3639.5},
+  {n:'2,4-D',u:'L',t:'Herbicide',s:750},
+  {n:'Clio Pro',u:'L',t:'Herbicide',s:124.4},
+  {n:'Atrazine',u:'Kg',t:'Herbicide',s:1797.9},
+  {n:'Nicosulfuron (Green)',u:'L',t:'Herbicide',s:113.65},
+  {n:'Nicosulfuron (Yellow)',u:'L',t:'Herbicide',s:37},
+  {n:'Sumisoya',u:'Kg',t:'Herbicide',s:53.7},
+  {n:'Glufosinate',u:'L',t:'Herbicide',s:3873},
+  {n:'Pendimethalin',u:'L',t:'Herbicide',s:3879},
+  {n:'Acetochlor',u:'L',t:'Herbicide',s:640},
+  {n:'Imazetapyr (Pursuit)',u:'L',t:'Herbicide',s:874.6},
+  {n:'Indaziflam (Becano)',u:'L',t:'Herbicide',s:19.3},
+  {n:'Metribuzin (Sencor)',u:'Kg',t:'Herbicide',s:162.25},
+  {n:'Quizalofop (Clifton)',u:'L',t:'Herbicide',s:714},
+  {n:'Fomesafen (Flex)',u:'L',t:'Herbicide',s:112.75},
+  {n:'Fomesafen (Farma)',u:'L',t:'Herbicide',s:1912},
+  {n:'Ametryn 80',u:'Kg',t:'Herbicide',s:145},
+  {n:'Fluazifop',u:'L',t:'Herbicide',s:2160},
+  {n:'Carbendazim',u:'L',t:'Fungicide',s:0.5},
+  {n:'Nativo',u:'Kg',t:'Fungicide',s:0.3},
+  {n:'Atemis',u:'L',t:'Fungicide',s:1021},
+  {n:'Mammoth Zinc',u:'L',t:'Fertilizer',s:35},
+  {n:'Mammoth Ca+B',u:'L',t:'Fertilizer',s:100},
+  {n:'Surfactant',u:'L',t:'Fertilizer',s:1123.15},
+  {n:'K30',u:'L',t:'Fertilizer',s:2461.8},
+  {n:'CoMo',u:'L',t:'Fertilizer',s:200},
+  {n:'Levos',u:'Kg',t:'Herbicide',s:1145},
+  {n:'MgSO4',u:'Kg',t:'Fertilizer',s:0},
+  {n:'Euro seed',u:'L',t:'Fertilizer',s:0},
+  {n:'Fergan',u:'L',t:'Fertilizer',s:0},
+  {n:'Vetget oil',u:'L',t:'Fertilizer',s:0},
+  {n:'Virtus',u:'Kg',t:'Fertilizer',s:0},
+  {n:'NEWGREEN',u:'Kg',t:'Fertilizer',s:16},
+  {n:'Urea',u:'Kg',t:'Fertilizer',s:0},
+  {n:'Aquacon',u:'L',t:'Fertilizer',s:0},
+  {n:'Reflect',u:'L',t:'Fungicide',s:0},
+  {n:'Eysan',u:'L',t:'Fungicide',s:0},
+  {n:'Vayego',u:'L',t:'Insecticide',s:0},
+  {n:'Antracol',u:'Kg',t:'Fungicide',s:0}
+];
+
+
+var PLOTS = ['Pivot 1','Pivot 2','Pivot 3','Pivot 4','Pivot 5/1','Pivot 5/2','Pivot 6','Pivot 7','Pivot 8','Pivot 9','Pivot 10','Pivot 11','Avocado 1','Avocado 2E','Avocado 2E-1','Avocado 2E-2','Avocado 2W2','Avocado 2W','Avocado 3Curve','Avocado 3P11','Avocado 4','Coconut 2','Coconut 3','Cashew Nut A','Cashew Nut B','Cashew Nut C','Cashew Nut D','Cashew Nut SM','Jackfruit 1','Jackfruit 2','Jackfruit 3','Mango 2','Mango 2B1','Mango 2B2','Mango 2B3','Mango 2D','Mango 2M','Mango 2Curve','Mango 2WH','Mango 3','Mango 3Tri','Mango 4','Tamarind 2','Tamarind 2N','Tamarind 2V','Tamarind 3N1','Tamarind 3N2','Tamarind 3N3','Tamarind 3N4','Tamarind 3SE','Tamarind 3SW','Tamarind 4N','Tamarind 4NP2','Tamarind 4S','Tamarind 4SD','Tamarind 4SP1'];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+var records = loadLocal();
+// STOCK_INIT: ปริมาณตั้งต้นจาก Google Sheet [{chemical,unit,snapQty,snapDate}]
+// ว่าง = fallback ใช้ CHEMS[].s + WAREHOUSE_START (hardcode) เหมือนเดิม
+var mxTanks = [{chems:[{n:'',q:''}]}];
+var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน session เดียว
+var curTankIdx = 0;
+var curChemIdx = 0;
+var curChemForm = '';
+var APP_VERSION = 'v14.0.ld'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+// timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
+// ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
+var JSONP_TIMEOUT = 25000;
+// รอบ auto-sync — ยิ่งถี่ยิ่งเสี่ยงโดน Google จำกัดการส่งผลลัพธ์ (ตอบเป็นหน้า error ของ Drive)
+// 60 วิพอสำหรับงานหน้าแปลง เพราะบันทึกเสร็จมี sync ทันทีอยู่แล้ว + sync ตอนสลับกลับมาที่แอป
+var SYNC_INTERVAL = 60000;
+var curPlotTarget = '';
+var deletedIds = loadDeletedIds();  // IDs permanently deleted by admin
+function loadDeletedIds() {
+  try { return JSON.parse(localStorage.getItem('mf_deleted')||'[]'); } catch(e) { return []; }
+}
+function saveDeletedIds() {
+  try { localStorage.setItem('mf_deleted', JSON.stringify(deletedIds)); } catch(e) {} 
+}
+var currentSeason = (function(){ try{return localStorage.getItem('mf_current_season')||'Rain Season / 26';}catch(e){return 'Rain Season / 26';} })();
+function saveSeason(s){ try{localStorage.setItem('mf_current_season',s);}catch(e){} }
+function nextSeason(s){
+  var m=s.match(/^(Rain|Dry) Season \/ (\d+)$/);
+  if(!m) return s;
+  return m[1]==='Rain' ? 'Dry Season / '+m[2] : 'Rain Season / '+(parseInt(m[2])+1);
+}
+function changeSeason(){
+  var pin=window.prompt('Admin PIN (Change Season):','');
+  if(pin===null)return;
+  if(pin!==ADMIN_PIN){toast('❌ Wrong PIN');return;}
+  var nxt=nextSeason(currentSeason);
+  if(!window.confirm('Change season to:\n'+nxt+'\n\nConfirm?'))return;
+  currentSeason=nxt; saveSeason(currentSeason);
+  var el=document.getElementById('set-season-lbl'); if(el)el.textContent=currentSeason;
+  toast('✅ Season: '+currentSeason);
+}
+var syncTimer = null;
+var lastCloudN = 0;
+// ── Edit mode ────────────────────────────────────────────────
+var editId = null;
+var editMode = false;
+var pendingEdits = loadPendingEdits();
+function loadPendingEdits(){ try{return JSON.parse(localStorage.getItem('mf_edits')||'[]');}catch(e){return[];} }
+function savePendingEdits(){ try{localStorage.setItem('mf_edits',JSON.stringify(pendingEdits));}catch(e){} }
+// Edit ledger: หลังแก้ไข record จะเชื่อ snapshot ของ local เสมอ จนกว่า cloud จะตรงกันจริง
+// (กัน cloud/Sheet ที่ยังเขียนไม่สำเร็จเด้งทับค่าที่แก้) + retry push อัตโนมัติ
+var EDIT_LEDGER_MAX_MS = 1800000; // ยกเลิก ledger หลัง 30 นาที (กันค้างตลอดไป)
+var EDIT_RETRY_MS = 25000;        // re-push ห่างกันอย่างน้อย 25 วิ
+var editLedger = loadEditLedger();
+function loadEditLedger(){ try{return JSON.parse(localStorage.getItem('mf_edit_ledger')||'{}');}catch(e){return{};} }
+function saveEditLedger(){ try{localStorage.setItem('mf_edit_ledger',JSON.stringify(editLedger));}catch(e){} }
+// บันทึก snapshot ของ record ที่เพิ่งแก้ + cloudPayload ไว้ retry
+function markEdited(id, rec, cloudPayload){
+  editLedger[id] = { ts: Date.now(), lastPush: Date.now(), snap: JSON.parse(JSON.stringify(rec)), payload: JSON.parse(JSON.stringify(cloudPayload)) };
+  saveEditLedger();
+}
+function clearLedger(id){ if(editLedger[id]){ delete editLedger[id]; saveEditLedger(); } }
+function ledgerLive(id){ var e=editLedger[id]; return e && (Date.now()-e.ts) < EDIT_LEDGER_MAX_MS; }
+// เทียบ allChems สอง object ว่าตรงกันไหม (ปัดทศนิยม 2 ตำแหน่ง)
+function chemsEqual(a, b){
+  a = sanitizeAllChems(a||{}); b = sanitizeAllChems(b||{});
+  var ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (var i=0;i<ka.length;i++){
+    var k = ka[i];
+    if (!(k in b)) return false;
+    if (Math.round(a[k]*100) !== Math.round(b[k]*100)) return false;
+  }
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOCAL STORAGE
+// ═══════════════════════════════════════════════════════════
+function loadLocal() {
+  var keys = ['mf_records','chemRecords','chem_records','megafarm_records'];
+  for (var i=0; i<keys.length; i++) {
+    try {
+      var d = localStorage.getItem(keys[i]);
+      if (d) { var p = JSON.parse(d); if (Array.isArray(p) && p.length) return restoreLegacyLD(keepMxOnly(p)); }
+    } catch(e) {}
+  }
+  return [];
+}
+// แอปนี้ใช้เฉพาะ MX-01 — record ชนิดอื่นที่ค้างจากเวอร์ชันเก่าเก็บสำรองไว้ก่อนตัดทิ้ง
+function keepMxOnly(arr) {
+  // แอปนี้เก็บ 2 ชนิด: 'mx' (ผสม/เบิกหน้าแปลง) และ 'ld' (โหลดสารขึ้นรถ)
+  // ชนิดอื่นที่หลงเหลือจากเวอร์ชันเก่าถูกสำรองไว้ก่อนตัดทิ้ง — สำรองได้หลายครั้ง
+  var legacy = arr.filter(function(r){ return r.type && r.type!=='mx' && r.type!=='ld'; });
+  if (legacy.length) {
+    try { localStorage.setItem('mf_legacy_backup_'+Date.now(), JSON.stringify(legacy)); } catch(e) {}
+  }
+  return arr.filter(function(r){ return r.type==='mx' || r.type==='ld'; });
+}
+// กู้ LD ที่เคยถูกเวอร์ชันก่อนหน้าตัดทิ้งลง mf_legacy_backup — ทำครั้งเดียวตลอดชีพ
+function restoreLegacyLD(arr) {
+  try {
+    if (localStorage.getItem('mf_ld_restored')) return arr;
+    localStorage.setItem('mf_ld_restored','1');
+    var raw = localStorage.getItem('mf_legacy_backup');
+    if (!raw) return arr;
+    var old = JSON.parse(raw);
+    if (!Array.isArray(old)) return arr;
+    var have = {};
+    arr.forEach(function(r){ have[r.id] = 1; });
+    var back = old.filter(function(r){ return r && r.type==='ld' && r.id && !have[r.id]; });
+    back.forEach(function(r){ delete r.cloudSynced; arr.push(r); });   // ให้ push ขึ้นชีตใหม่
+    if (back.length) setTimeout(function(){ toast('↩️ กู้ LD ที่หายไป '+back.length+' ใบ'); }, 1800);
+  } catch(e) {}
+  return arr;
+}
+function saveLocal() {
+  var d = JSON.stringify(records);
+  ['mf_records','chemRecords','chem_records','megafarm_records'].forEach(function(k){
+    try { localStorage.setItem(k,d); } catch(e) {}
+  });
+}
+function uid(p) { return p+'-'+Math.random().toString(36).slice(2,7).toUpperCase(); }
+function todayISO() {
+  var d = new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function pad(n) { return n<10?'0'+n:String(n); }
+function nowHM() { var d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function normalizeDate(d) {
+  if (!d) return '';
+  var s = String(d).trim();
+  // Already YYYY-MM-DD — return as-is (most common path after Code.gs fix)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // YYYY/MM/DD
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(s)) return s.replace(/\//g,'-');
+  // ISO string with T — extract date portion ONLY (no timezone math)
+  // "2026-06-09T17:00:00.000Z" → take first 10 chars as UTC date string
+  // then rebuild using UTC methods to avoid timezone shift
+  if (s.indexOf('T') >= 0) {
+    var datePart = s.slice(0, 10); // "2026-06-09"
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return datePart;
+    var dt = new Date(s);
+    if (!isNaN(dt) && dt.getUTCFullYear() !== 1899)
+      return dt.getUTCFullYear()+'-'+pad(dt.getUTCMonth()+1)+'-'+pad(dt.getUTCDate());
+    return '';
+  }
+  if (d instanceof Date && d.getFullYear() !== 1899)
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  var p = new Date(s);
+  if (!isNaN(p) && p.getFullYear() !== 1899)
+    return p.getFullYear()+'-'+pad(p.getMonth()+1)+'-'+pad(p.getDate());
+  return s.slice(0,10);
+}
+function safeJ(v) {
+  if (!v || v === '{}' || v === '[]') return null;
+  if (typeof v === 'object') return v;
+  try { return JSON.parse(v); } catch(e) { return null; }
+}
+// กรองค่าผิดปกติใน allChems (เช่น 2026 ที่มาจาก parseFloat ของ date string)
+// max ปริยาย 2000 = เพดานของ MX (ปริมาณต่อถัง — กันค่าขยะอย่างปี ค.ศ. ที่หลุดมาจาก parseFloat)
+// LD โหลดขึ้นรถทีละมาก จึงส่ง LD_MAX เฉพาะเส้นทาง LD
+var LD_MAX = 200000;
+function sanitizeAllChems(ac, max) {
+  if (!ac || typeof ac !== 'object') return {};
+  max = max || 2000;
+  var clean = {};
+  Object.keys(ac).forEach(function(k) {
+    var v = parseFloat(ac[k]);
+    if (!isNaN(v) && v > 0 && v < max) clean[k] = v;
+  });
+  return clean;
+}
+function chemMaxFor(r) { return (r && r.type === 'ld') ? LD_MAX : 2000; }
+
+function renderSettings() {
+  var lsEl = document.getElementById('set-last-sync');
+  if (lsEl) {
+    var el = document.getElementById('chip-sync');
+    lsEl.textContent = el ? el.textContent : '—';
+  }
+  var ssEl = document.getElementById('set-script-status');
+  if (ssEl) ssEl.innerHTML = USE_CLOUD
+    ? '<span style="color:var(--acc)">● Connected</span>'
+    : '<span style="color:var(--danger)">● Disabled</span>';
+  var rcEl = document.getElementById('set-rec-count');
+  if (rcEl) rcEl.textContent = records.length;
+  var slEl = document.getElementById('set-season-lbl');
+  if (slEl) slEl.textContent = currentSeason;
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT — synchronous, never awaits anything
+// ═══════════════════════════════════════════════════════════
+window.onload = function() {
+  var t = todayISO();
+  document.getElementById('chip-date').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' · ' + APP_VERSION;
+  document.getElementById('lbl-today').textContent = 'ថ្ងៃនេះ (TODAY) — '+t;
+  document.getElementById('mx-date').value = t;
+  document.getElementById('mx-time').value = nowHM();
+  renderTanks();
+  renderAll();
+  // Cloud sync: background only, never blocks
+  if (USE_CLOUD) {
+    syncTimer = setInterval(cloudSync, SYNC_INTERVAL);
+    setTimeout(cloudSync, 1500);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showTab(tab) {
+  ['home','hist','settings'].forEach(function(t) {
+    var pg = document.getElementById('pg-'+t);
+    if (pg) { pg.style.display = ''; pg.classList.toggle('on', t===tab); }
+    var nb = document.getElementById('nb-'+t);
+    if (nb) nb.classList.toggle('on', t===tab);
+  });
+  if (tab === 'settings') renderSettings();
+  else renderAll();
+}
+var _prevTab = 'home'; // track which tab was open before form
+function showForm(f) {
+  // Remember active tab so hideForm can return to it
+  _prevTab = 'home';
+  ['home','hist','settings'].forEach(function(t){
+    var nb=document.getElementById('nb-'+t);
+    if(nb&&nb.classList.contains('on')) _prevTab=t;
+  });
+  // Hide ALL pages so form appears regardless of which tab is active
+  ['pg-home','pg-hist','pg-settings'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  document.querySelector('.nav').style.display = 'none';
+  if (!editMode) {  // ไม่ reset ถ้ากำลัง pre-populate สำหรับ edit
+    if (f==='mx') { mxTanks=[{chems:[{n:'',q:''}]}]; renderTanks(); }
+    if (f==='ld') { ldResetForm(); }
+  }
+  document.getElementById('fw-'+f).classList.add('on');
+}
+function hideForm() {
+  editId = null; editMode = false;
+  var banner = document.getElementById('edit-banner');
+  if (banner) banner.style.display = 'none';
+  document.querySelectorAll('.fw').forEach(function(el){ el.classList.remove('on'); });
+  // Restore whichever tab was active before the form opened
+  showTab(_prevTab);
+  document.querySelector('.nav').style.display = '';
+  // Reset form fields
+  ['mx-mixer','mx-crop','mx-note'].forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+  });
+  document.getElementById('mx-plot').value='';
+  document.getElementById('mx-sprayer').selectedIndex=0;
+  document.getElementById('mx-wpt').value='2000';
+  document.getElementById('mx-date').value=todayISO();
+  document.getElementById('mx-time').value=nowHM();
+  // ฟอร์ม LD
+  ['ld-by','ld-truck'].forEach(function(id){ var el=document.getElementById(id); if(el) el.selectedIndex=0; });
+  var ldn=document.getElementById('ld-note'); if(ldn) ldn.value='';
+  var ldd=document.getElementById('ld-date'); if(ldd) ldd.value=todayISO();
+  var ldt=document.getElementById('ld-time'); if(ldt) ldt.value=nowHM();
+  ldChems=[{n:'',q:''}];
+  if (document.getElementById('ld-chem-rows')) renderLDChems();
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════
+// EDIT RECORD
+// ═══════════════════════════════════════════════════════════
+function handleSave(rec, sheetName, cloudPayload) {
+  var isEdit = !!editId;
+  if (isEdit) {
+    var idx = -1;
+    for (var i=0;i<records.length;i++){if(records[i].id===editId){idx=i;break;}}
+    if (idx >= 0) {
+      rec.id = editId;
+      rec.createdAt = records[idx].createdAt;
+      rec.cloudSynced = records[idx].cloudSynced;
+      rec.updatedAt = new Date().toISOString();
+      records[idx] = rec;
+      cloudPayload.id = editId;
+      cloudPayload.action = 'update';
+      cloudPayload.sheet = sheetName;
+      cloudPayload.updatedAt = rec.updatedAt;
+      markEdited(editId, rec, cloudPayload);
+      // Queue for offline resilience
+      pendingEdits = pendingEdits.filter(function(p){return p.id!==editId;});
+      pendingEdits.push(JSON.parse(JSON.stringify(cloudPayload)));
+      savePendingEdits();
+      if (navigator.onLine) { cloudWrite(cloudPayload); pendingEdits=pendingEdits.filter(function(p){return p.id!==editId;}); savePendingEdits(); setTimeout(cloudSync, 4000); }
+    }
+    editId = null;
+  } else {
+    rec.updatedAt = new Date().toISOString();
+    records.push(rec);
+    cloudPayload.action = 'append';
+    cloudPayload.sheet = sheetName;
+    cloudPayload.updatedAt = rec.updatedAt;
+    cloudWrite(cloudPayload);
+    if (navigator.onLine) setTimeout(cloudSync, 4000);
+  }
+  saveLocal();
+  hideForm();
+}
+
+function editRecord(id) {
+  var rec = records.find(function(r){return r.id===id;});
+  if (!rec) return;
+  var pin = window.prompt('Admin PIN (Edit data):','');
+  if (pin===null) return;
+  if (pin!==ADMIN_PIN){toast('❌ Wrong PIN');return;}
+  var f = (rec.type==='ld') ? 'ld' : 'mx';
+  editId = id;
+  editMode = true;
+  showForm(f);
+  editMode = false;
+  // Show edit banner
+  var banner=document.getElementById('edit-banner');
+  if(banner){banner.style.display='block';document.getElementById('edit-id-label').textContent=id;}
+  if (f==='ld') populateLDForm(rec); else populateMXForm(rec);
+  toast('✏️ Editing '+id);
+}
+
+function populateLDForm(rec){
+  document.getElementById('ld-date').value=rec.date||todayISO();
+  document.getElementById('ld-time').value=rec.time||nowHM();
+  var by=document.getElementById('ld-by'); if(by) by.value=rec.loadedBy||'';
+  var tk=document.getElementById('ld-truck'); if(tk) tk.value=rec.truck||'';
+  var nt=document.getElementById('ld-note'); if(nt) nt.value=rec.note||'';
+  var ac=sanitizeAllChems(rec.allChems||{}, LD_MAX);
+  ldChems=Object.keys(ac).map(function(k){ return {n:k, q:ac[k]}; });
+  if(!ldChems.length) ldChems=[{n:'',q:''}];
+  renderLDChems();
+}
+function populateMXForm(rec){
+  document.getElementById('mx-date').value=rec.date||todayISO();
+  document.getElementById('mx-time').value=rec.time||nowHM();
+  var el=document.getElementById('mx-mixer'); if(el) el.value=rec.mixer||'';
+  document.getElementById('mx-plot').value=rec.plot||'';
+  var sp=document.getElementById('mx-sprayer'); if(sp) sp.value=rec.sprayer||'';
+  var cr2=document.getElementById('mx-crop'); if(cr2) cr2.value=rec.cropType||'';
+  document.getElementById('mx-wpt').value=rec.waterPerTank||2000;
+  document.getElementById('mx-note').value=rec.note||'';
+  var ac=rec.allChems||{};
+  var chemList=Object.keys(ac).filter(function(k){return parseFloat(ac[k])>0;}).map(function(k){return{n:k,q:ac[k]};});
+  if(!chemList.length) chemList=[{n:'',q:''}];
+  // รักษาจำนวนถังเดิมไว้ — ไม่ให้ totalWater หายตอนกด save หลัง edit
+  if(rec.tanks && rec.tanks.length && rec.tanks[0] && rec.tanks[0].chems){
+    mxTanks=JSON.parse(JSON.stringify(rec.tanks));
+  } else {
+    var nT=1, tw=parseFloat(rec.totalWater)||0, wpt2=parseFloat(rec.waterPerTank)||0;
+    if(tw>0&&wpt2>0) nT=Math.max(1,Math.round(tw/wpt2));
+    mxTanks=[{chems:chemList}];
+    for(var ti=1;ti<nT;ti++) mxTanks.push({chems:[{n:'',q:''}]});
+  }
+  renderTanks();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════════
+function renderAll() {
+  renderStats();
+  renderTruckStock();
+  renderHist();
+}
+
+function renderStats() {
+  var t = todayISO();
+  var mx = records.filter(function(r){ return r.type==='mx' && normalizeDate(r.date)===t; }).length;
+  var ld = records.filter(function(r){ return r.type==='ld' && normalizeDate(r.date)===t; }).length;
+  var el = document.getElementById('cnt-mx');
+  if (el) el.textContent = mx;
+  var el2 = document.getElementById('cnt-ld');
+  if (el2) el2.textContent = ld;
+}
+
+function setSyncUI(ok) {
+  var el = document.getElementById('chip-sync');
+  var now = pad(new Date().getHours())+':'+pad(new Date().getMinutes());
+  if (!navigator.onLine) {
+    el.textContent = '📵 Offline';
+    el.style.color = 'var(--warn)';
+  } else {
+    el.textContent = ok ? '🟢 '+now : '🔴 sync fail';
+    el.style.color = ok ? 'var(--acc)' : 'var(--danger)';
+  }
+}
+
+// ── Online/Offline detection ────────────────────────────────
+window.addEventListener('offline', function() {
+  setSyncUI(false);
+  toast('📵 Offline — data saved locally');
+});
+// ─── RULE: ทุกเครื่องเห็นข้อมูลเหมือนกัน ───────────────────
+// sync ทันทีเมื่อผู้ใช้กลับมาที่หน้าแอพ (จาก background / tab อื่น)
+var _lastVisibleSync = 0;
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && USE_CLOUD) {
+    var now = Date.now();
+    if (now - _lastVisibleSync > 30000) { // throttle: ไม่ sync ถี่กว่า 30s
+      _lastVisibleSync = now;
+      setTimeout(cloudSync, 400);
+    }
+  }
+});
+window.addEventListener('focus', function() {
+  if (USE_CLOUD) {
+    var now = Date.now();
+    if (now - _lastVisibleSync > 30000) {
+      _lastVisibleSync = now;
+      setTimeout(cloudSync, 400);
+    }
+  }
+});
+window.addEventListener('online', function() {
+  toast('🌐 Back Online — syncing...');
+  setSyncUI(false);
+  setTimeout(cloudSync, 500);  // sync ทันทีที่กลับมา online
+});
+
+// ═══════════════════════════════════════════════════════════
+// CLOUD — JSONP read, no-cors write
+// ═══════════════════════════════════════════════════════════
+function cloudJSONP(params, cb) {
+  // Send any action via JSONP GET (bypasses CORS)
+  var cbName = 'gjp'+Date.now();
+  var s = document.createElement('script');
+  var done = false;
+  var qs = Object.keys(params).map(function(k){
+    return encodeURIComponent(k)+'='+encodeURIComponent(typeof params[k]==='object'?JSON.stringify(params[k]):params[k]);
+  }).join('&');
+  var timer = setTimeout(function(){ cleanup(); if(cb) cb(null); }, JSONP_TIMEOUT);
+  function cleanup() {
+    if(done) return; done=true;
+    clearTimeout(timer); delete window[cbName];
+    try { document.head.removeChild(s); } catch(e) {}
+  }
+  window[cbName] = function(data) { cleanup(); if(cb) cb(data); };
+  s.onerror = function() { cleanup(); if(cb) cb(null); };
+  s.src = SCRIPT_URL+'?'+qs+'&callback='+cbName+'&t='+Date.now();
+  document.head.appendChild(s);
+}
+
+function cloudRead(cb) {
+  var cbName = 'gcb'+Date.now();
+  var s = document.createElement('script');
+  var done = false;
+  var timer = setTimeout(function(){ cleanup(); cb(null); }, JSONP_TIMEOUT);
+  function cleanup() {
+    if (done) return; done=true;
+    clearTimeout(timer); delete window[cbName];
+    try { document.head.removeChild(s); } catch(e) {}
+  }
+  window[cbName] = function(data) { cleanup(); cb((data&&data.ok)?data:null); };
+  s.onerror = function() { cleanup(); cb(null); };
+  // ★ ขอเฉพาะ MX-01 + LD-01 — backend ข้ามชีตอื่นทั้งหมด ทำให้ doGet เร็วพอสำหรับ timeout
+  s.src = SCRIPT_URL+'?action=getAll&sheets=MX-01,LD-01&callback='+cbName+'&t='+Date.now();
+  document.head.appendChild(s);
+}
+function cloudWrite(payload) {
+  // Fire-and-forget, no-cors
+  try {
+    fetch(SCRIPT_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+}
+// กันยิงซ้อน: ถ้ารอบก่อนยังไม่จบ (เน็ตช้า/Google ตอบช้า) ห้ามเริ่มรอบใหม่
+// ไม่มีตัวกันนี้ = request กองกันจน Google ตัดการส่งผลลัพธ์กลับ (ตอบเป็นหน้า error ของ Drive)
+var _syncBusy = false;
+function cloudSync() {
+  // ข้ามถ้า offline — ข้อมูลอยู่ใน localStorage พร้อม sync ตอน online
+  if (!navigator.onLine) { setSyncUI(false); return; }
+  if (_syncBusy) return;
+  _syncBusy = true;
+  setTimeout(function(){ _syncBusy = false; }, JSONP_TIMEOUT + 5000);  // กันธงค้างจนซิงก์ตายถาวร
+  // 0. Flush any pending edits (from offline edit sessions)
+  if (pendingEdits.length > 0) {
+    var flushed = pendingEdits.slice();
+    pendingEdits = [];
+    savePendingEdits();
+    flushed.forEach(function(p){ cloudWrite(p); });
+  }
+  // 1. Push local records up (fire-and-forget)
+  //    ★ ส่งเฉพาะแถวที่คลาวด์ยังไม่ยืนยัน — appendMany เป็น INSERT-ONLY อยู่แล้ว
+  //      การส่งครบทุกแถวทุกรอบทำให้ doPost ทำงานหนักฟรี ๆ และเพิ่มจำนวน execution เท่าตัว
+  var mx = records.filter(function(r){return r.type==='mx' && !r.cloudSynced;}).map(function(r){
+    // Rebuild allChems from tanks if empty/corrupted
+    var ac = sanitizeAllChems(r.allChems||{});
+    if (Object.keys(ac).length===0 && r.tanks) {
+      r.tanks.forEach(function(t){(t.chems||[]).forEach(function(c){
+        var q=parseFloat(c.q); if(c.n&&q>0&&q<2000) ac[c.n]=(ac[c.n]||0)+q;
+      });});
+    }
+    return {id:r.id,date:normalizeDate(r.date)||r.date,time:r.time||'',mixer:r.mixer||'',supervisor:r.supervisor||'',plot:r.plot||'',sprayer:r.sprayer||'',waterPerTank:r.waterPerTank||0,totalWater:mxEffectiveWater(r),allChems:ac,note:r.note||'',createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
+  });
+  // (ยิงรวมกับ LD ด้านล่างเป็น POST เดียว)
+  // ★ LD-01 — สารที่โหลดขึ้นรถ (ส่งแยกชีต โครงสร้างเดียวกับ MX คือสารเป็นคอลัมน์)
+  var ld = records.filter(function(r){return r.type==='ld' && !r.cloudSynced;}).map(function(r){
+    return {id:r.id,date:normalizeDate(r.date)||r.date,time:r.time||'',loadedBy:r.loadedBy||'',truck:r.truck||'',
+            allChems:sanitizeAllChems(r.allChems||{}, LD_MAX),season:r.season||currentSeason,note:r.note||'',
+            createdAt:r.createdAt||'',updatedAt:r.updatedAt||r.createdAt||''};
+  });
+  // ยิง POST เดียวทั้ง 2 ชีต — ลดจำนวน execution ครึ่งหนึ่ง และ heavy recalc ทำรอบเดียว
+  var _push={};
+  if (mx.length) _push['MX-01']=mx;
+  if (ld.length) _push['LD-01']=ld;
+  if (Object.keys(_push).length) cloudWrite({action:'appendMany',sheets:_push});
+  // 2. Read cloud data (includes deletedIds from all devices)
+  cloudRead(function(resp) {
+    _syncBusy = false;
+    if (!resp) { setSyncUI(false); return; }
+    var data = resp.data || {};
+    // Sync cloud deletedIds → merge into local deletedIds so this device also forgets them
+    var cloudDeleted = resp.deletedIds || [];
+    cloudDeleted.forEach(function(id){
+      if (deletedIds.indexOf(id) < 0) deletedIds.push(id);
+    });
+    if (cloudDeleted.length > 0) saveDeletedIds();
+    var cloud = [];
+    (data['MX-01']||[]).forEach(function(r){
+      if (!(r.id||r.ID)) return;
+      r.id=r.id||r.ID; r.type='mx';
+      r.date=normalizeDate(r.date||r.Date);
+      r.updatedAt=r.updatedAt||r.UpdatedAt||'';
+      r.allChems=sanitizeAllChems(safeJ(r.allChems||r.AllChems)||buildChemMap(r,data));
+      r.mixer=r.mixer||r.Mixer||'';
+      r.plot=(r.plot||r.Plot||'').trim();
+      r.sprayer=r.sprayer||r.Sprayer||'';
+      r.time=r.time||r.Time||'';
+      r.waterPerTank=parseFloat(r.waterPerTank||r.WaterPerTank||r['Water/Tank(L)']||0);
+      r.totalWater=parseFloat(r.totalWater||r.TotalWater||r['Total Water(L)']||0);
+      r.cropType=r.cropType||r.CropType||'';
+      r.season=r.season||r.Season||'Rain Season / 26';
+      r.note=r.note||r.Note||'';
+      r.createdAt=r.createdAt||r.CreatedAt||'';
+      cloud.push(r);
+    });
+    // ★ LD-01 จากคลาวด์ — hasLdCloud=false แปลว่า backend ยังไม่รู้จักชีตนี้ (ยังไม่ได้แก้ GAS)
+    var hasLdCloud = !!data['LD-01'];
+    (data['LD-01']||[]).forEach(function(r){
+      if (!(r.id||r.ID)) return;
+      r.id=r.id||r.ID; r.type='ld';
+      r.date=normalizeDate(r.date||r.Date);
+      r.time=r.time||r.Time||'';
+      r.loadedBy=r.loadedBy||r.LoadedBy||'';
+      r.truck=r.truck||r.Truck||'';
+      r.allChems=sanitizeAllChems(safeJ(r.allChems||r.AllChems)||buildChemMap(r,data), LD_MAX);
+      r.season=r.season||r.Season||currentSeason;
+      r.note=r.note||r.Note||'';
+      r.createdAt=r.createdAt||r.CreatedAt||'';
+      r.updatedAt=r.updatedAt||r.UpdatedAt||'';
+      cloud.push(r);
+    });
+    if (cloud.length===0) { setSyncUI(false); return; }
+    // Retry delete: record ที่เคยกดลบแล้วแต่ยังค้างบน Google Sheet → ส่งคำสั่งลบซ้ำ
+    // เลือกชีตปลายทางตามชนิดของ record (mx → MX-01, ld → LD-01)
+    cloud.filter(function(r){ return deletedIds.indexOf(r.id) >= 0 && !_delRetried[r.id]; })
+      .forEach(function(r){
+        _delRetried[r.id]=true;
+        cloudJSONP({action:'delete',sheet:(r.type==='ld'?'LD-01':'MX-01'),id:r.id}, function(res){
+          if(res && res.ok) toast('🗑 '+r.id+' លុបពី Sheet (retry ok)');
+        });
+      });
+    // Filter out records that admin has permanently deleted on this device
+    cloud = cloud.filter(function(r){ return deletedIds.indexOf(r.id) < 0; });
+    // Mark every record confirmed from cloud with cloudSynced=true
+    cloud.forEach(function(r){ r.cloudSynced = true; });
+    var cloudIds={};
+    cloud.forEach(function(r){ cloudIds[r.id]=true; });
+    // localOnly: keep records that (1) not in cloud, (2) not deleted, (3) NEVER confirmed in cloud before
+    // If cloudSynced=true but missing from cloud → was deleted on another device → drop it
+    var localOnly=records.filter(function(r){
+      if (cloudIds[r.id] || deletedIds.indexOf(r.id) >= 0) return false;
+      // ถ้าคลาวด์ยังไม่รู้จัก LD-01 ห้ามดรอป LD ในเครื่อง (ไม่งั้นข้อมูลที่คีย์ไว้หายทันทีที่ sync)
+      if (r.type==='ld' && !hasLdCloud) return true;
+      return !r.cloudSynced;
+    });
+    // ถ้า cloud ส่ง allChems ว่างมาแต่ local มีข้อมูล → คงค่า local ไว้ (ใช้ทั้ง mx และ ld)
+    var localMap={};
+    records.forEach(function(r){ localMap[r.id]=r; });
+    cloud.forEach(function(r){
+      var loc = localMap[r.id];
+      var savedCloudAC = sanitizeAllChems(r.allChems||{}, chemMaxFor(r));
+      // ── Edit ledger: ถ้ามี snapshot ที่แก้ไว้และ cloud ยังไม่ตรง → เชื่อ snapshot + retry push ──
+      var ledger = ledgerLive(r.id) ? editLedger[r.id] : null;
+      if (ledger) {
+        var snap = ledger.snap;
+        var cloudMatches = (r.updatedAt && snap.updatedAt)
+          ? (r.updatedAt >= snap.updatedAt)
+          : chemsEqual(savedCloudAC, snap.allChems);
+        if (cloudMatches) {
+          clearLedger(r.id);   // cloud ยืนยันแล้ว → ปล่อยให้ cloud เป็นเจ้าของข้อมูลต่อไป
+          ledger = null;
+        } else {
+          // cloud ยังเป็นค่าเก่า → เขียน snapshot ทับ และ retry push (throttle)
+          Object.keys(snap).forEach(function(k){ r[k] = snap[k]; });
+          r.cloudSynced = true;
+          if (navigator.onLine && (Date.now()-ledger.lastPush) > EDIT_RETRY_MS) {
+            ledger.lastPush = Date.now(); saveEditLedger();
+            cloudWrite(ledger.payload);
+          }
+        }
+      }
+      // local ใหม่กว่า cloud (แก้ระหว่าง sync ก่อนเข้า ledger) → เชื่อ local
+      var localIsNewer = !ledger && loc && loc.updatedAt && (!r.updatedAt || loc.updatedAt > r.updatedAt);
+      if (localIsNewer) {
+        var fields = Object.keys(loc);
+        fields.forEach(function(k){ r[k] = loc[k]; });
+        r.cloudSynced = true;
+      }
+      // สารเคมี: ใช้ร่วมทั้ง mx และ ld — กัน LD โดนล้างสารตอน sync
+      var _max = chemMaxFor(r);
+      var localAC = loc ? sanitizeAllChems(loc.allChems||{}, _max) : {};
+      var cloudAC = savedCloudAC;
+      if (ledger) {
+        r.allChems = sanitizeAllChems(ledger.snap.allChems||{}, _max);
+      } else if (localIsNewer) {
+        r.allChems = Object.keys(localAC).length > 0 ? localAC : cloudAC;
+      } else {
+        r.allChems = Object.keys(cloudAC).length > 0 ? cloudAC : localAC;
+      }
+      if(r.type==='mx'){
+        // ถ้า cloud ไม่มีข้อมูลน้ำ (sheet เก่าไม่มีคอลัมน์ TotalWater) → ใช้ค่าจาก local
+        if(loc){
+          if(!(parseFloat(r.totalWater)>0) && parseFloat(loc.totalWater)>0) r.totalWater=parseFloat(loc.totalWater);
+          if(!(parseFloat(r.waterPerTank)>0) && parseFloat(loc.waterPerTank)>0) r.waterPerTank=parseFloat(loc.waterPerTank);
+          if(!r.tanks && loc.tanks) r.tanks=loc.tanks;
+        }
+      }
+    });
+    records=cloud.concat(localOnly);
+    saveLocal();
+    lastCloudN=cloud.length;
+    renderAll();
+    setSyncUI(true);
+  });
+}
+function buildChemMap(r, data) {
+  // DATA AN columns have unit suffixes e.g. "Emamecthrin (Kg)" and some name differences
+  var ALIAS = {
+    'Indaziflam (Becano)': 'Becano (Indaziflam)',
+    'Fluazifop':           'Fluazipob',
+    'Ametryn 80':          'Ametryn',
+  };
+  // Normalize row keys: strip trailing (unit) suffix + collapse whitespace/newlines
+  var normRow = {};
+  Object.keys(r).forEach(function(k) {
+    var nk = k.replace(/\n/g,' ').replace(/\s*\([A-Za-z]+\)\s*$/, '').trim();
+    normRow[nk] = r[k];
+  });
+  var map = {};
+  CHEMS.forEach(function(c) {
+    var val;
+    // 1. Exact column name
+    val = parseFloat(r[c.n]); if (val > 0) { map[c.n] = val; return; }
+    // 2. Normalized (unit suffix stripped)
+    val = parseFloat(normRow[c.n]); if (val > 0) { map[c.n] = val; return; }
+    // 3. Name + unit suffix explicitly e.g. "Emamecthrin (Kg)"
+    val = parseFloat(r[c.n + ' (' + c.u + ')']); if (val > 0) { map[c.n] = val; return; }
+    // 4. Alias for known name differences
+    var alias = ALIAS[c.n];
+    if (alias) {
+      val = parseFloat(normRow[alias]); if (val > 0) { map[c.n] = val; return; }
+      val = parseFloat(r[alias + ' (' + c.u + ')']); if (val > 0) { map[c.n] = val; }
+    }
+  });
+  return Object.keys(map).length?map:{};
+}
+function doRefresh() {
+  setSyncUI(false);
+  toast('🔄 Syncing...');
+  _syncBusy = false;   // ผู้ใช้กดเอง = บังคับให้เริ่มรอบใหม่เสมอ ไม่ติดตัวกันยิงซ้อน
+  cloudSync();
+}
+
+function forceUpdateApp() {
+  if (!confirm('Update app?\nClear cache and reload')) return;
+  var p = [];
+  if ('serviceWorker' in navigator) {
+    p.push(
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        return Promise.all(regs.map(function(r) { return r.unregister(); }));
+      })
+    );
+  }
+  if ('caches' in window) {
+    p.push(
+      caches.keys().then(function(keys) {
+        return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+      })
+    );
+  }
+  Promise.all(p).then(function() { location.reload(true); });
+}
+
+// ═══════════════════════════════════════════════════════════
+// MX-01
+// ═══════════════════════════════════════════════════════════
+function renderTanks() {
+  var wpt=parseFloat(document.getElementById('mx-wpt').value)||200;
+  var html='';
+  mxTanks.forEach(function(tank,ti){
+    html+='<div class="tc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:12px;font-weight:700;color:var(--teal)">🪣 ថង #'+(ti+1)+' — '+wpt.toFixed(0)+' L</span>'+(mxTanks.length>1?'<button class="rm" onclick="remTank('+ti+')">✕</button>':'')+'</div>';
+    tank.chems.forEach(function(c,ci){
+      var u=(CHEMS.find(function(x){return x.n===c.n;})||{u:'—'}).u;
+      html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:var(--muted)">Chemical #'+(ci+1)+'</span><button class="rm" onclick="remTankChem('+ti+','+ci+')">✕</button></div>';
+      html+='<div onclick="openChem('+ci+',\'mx\','+ti+')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:4px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
+      html+='<div class="g2"><div><label>Qty ('+u+')</label><input type="number" step=".001" placeholder="0" value="'+(c.q||'')+'" data-ti="'+ti+'" data-ci="'+ci+'" class="mx-qty" oninput="mxTanks['+ti+'].chems['+ci+'].q=this.value;calcTotal()" onchange="mxTanks['+ti+'].chems['+ci+'].q=this.value;calcTotal()"></div>';
+      html+='<div><label>Unit</label><input type="text" value="'+u+'" readonly style="color:var(--muted)"></div></div></div>';
+    });
+    html+='<button class="abtn" style="color:var(--teal);margin-top:4px" onclick="addTankChem('+ti+')">+ Add to Tank '+(ti+1)+'</button></div>';
+  });
+  document.getElementById('mx-tanks').innerHTML=html;
+  calcTotal();
+}
+function addTank(){mxTanks.push({chems:[{n:'',q:''}]});renderTanks();}
+function remTank(ti){mxTanks.splice(ti,1);renderTanks();}
+function addTankChem(ti){mxTanks[ti].chems.push({n:'',q:''});renderTanks();}
+function remTankChem(ti,ci){mxTanks[ti].chems.splice(ci,1);if(!mxTanks[ti].chems.length)mxTanks[ti].chems=[{n:'',q:''}];renderTanks();}
+function calcTotal(){
+  var all={};
+  mxTanks.forEach(function(t){t.chems.forEach(function(c){if(c.n&&c.q)all[c.n]=(all[c.n]||0)+parseFloat(c.q);});});
+  var box=document.getElementById('mx-total');
+  var keys=Object.keys(all);
+  if(keys.length){
+    box.style.display='block';
+    box.style.background='rgba(46,204,154,.08)';box.style.border='1px solid rgba(46,204,154,.25)';
+    box.className='calc';
+    var h='<div style="font-size:10px;color:var(--teal);font-weight:700;margin-bottom:5px">សរុប All Tanks</div>';
+    keys.forEach(function(k){h+='<div class="crow"><span>'+k+'</span><span class="cval" style="color:var(--teal)">'+all[k].toFixed(2)+'</span></div>';});
+    box.innerHTML=h;
+  } else {box.style.display='none';}
+}
+// ═══════════════════════════════════════════════════════════
+// LD-01 — โหลดสารขึ้นรถ (สต๊อกบนรถ)
+// คงเหลือบนรถ = Σ LD − Σ MX  นับตั้งแต่วันที่ LD แรกเท่านั้น
+// (ถ้านับ MX ย้อนหลัง 660 แถวก่อนเริ่มใช้ระบบ ยอดจะติดลบทั้งหมด)
+// ═══════════════════════════════════════════════════════════
+var ldChems = [{n:'',q:''}];
+
+function ldResetForm(){
+  ldChems = [{n:'',q:''}];
+  var d=document.getElementById('ld-date'); if(d) d.value=todayISO();
+  var t=document.getElementById('ld-time'); if(t) t.value=nowHM();
+  var nt=document.getElementById('ld-note'); if(nt) nt.value='';
+  renderLDChems();
+}
+function ldAddChem(){ ldChems.push({n:'',q:''}); renderLDChems(); }
+function ldRemChem(i){ ldChems.splice(i,1); if(!ldChems.length) ldChems=[{n:'',q:''}]; renderLDChems(); }
+
+function renderLDChems(){
+  var el=document.getElementById('ld-chem-rows'); if(!el) return;
+  var st=truckStock().stock;
+  var html='';
+  ldChems.forEach(function(c,i){
+    var u=(CHEMS.find(function(x){return x.n===c.n;})||{u:'—'}).u;
+    var have=c.n?(st[c.n]||0):null;
+    html+='<div class="cr"><div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:10px;color:var(--muted)">Chemical #'+(i+1)+'</span>'
+      +(ldChems.length>1?'<button class="rm" onclick="ldRemChem('+i+')">✕</button>':'')+'</div>';
+    html+='<div onclick="openChem('+i+',\'ld\')" style="cursor:pointer"><input type="text" value="'+c.n+'" placeholder="ជ្រើសសារធាតុ..." readonly style="cursor:pointer;margin-bottom:4px;color:'+(c.n?'var(--text)':'var(--faint)')+'"></div>';
+    html+='<div class="g2"><div><label>Qty ('+u+')</label><input type="number" step=".001" placeholder="0" value="'+(c.q||'')+'" oninput="ldChems['+i+'].q=this.value" onchange="ldChems['+i+'].q=this.value"></div>';
+    html+='<div><label>លើឡានឥឡូវ (บนรถตอนนี้)</label><input type="text" value="'+(have===null?'—':have.toFixed(2)+' '+u)+'" readonly style="color:var(--muted)"></div></div></div>';
+  });
+  el.innerHTML=html;
+  var cnt=document.getElementById('ld-chem-count');
+  if(cnt) cnt.textContent=ldChems.filter(function(c){return c.n;}).length+' ชนิด';
+}
+
+function submitLD(){
+  // กัน editId ของ record ชนิดอื่นค้างอยู่ → ไม่งั้น handleSave จะเขียนทับ record MX ที่ id เดิม
+  if (editId) { var _c=records.find(function(r){return r.id===editId;}); if(!_c||_c.type!=='ld'){ editId=null; editMode=false; } }
+  var chems={};
+  ldChems.forEach(function(c){ var q=parseFloat(c.q); if(c.n&&q>0) chems[c.n]=(chems[c.n]||0)+q; });
+  if(!Object.keys(chems).length){ toast('❌ ใส่สารเคมีและปริมาณอย่างน้อย 1 ชนิด'); return; }
+  var isEdit=!!editId;
+  var rec={id:uid('LD'),type:'ld',
+    date:document.getElementById('ld-date').value||todayISO(),
+    time:document.getElementById('ld-time').value||nowHM(),
+    loadedBy:document.getElementById('ld-by').value||'',
+    truck:document.getElementById('ld-truck').value||'',
+    allChems:chems,
+    note:document.getElementById('ld-note').value||'',
+    season:currentSeason,createdAt:new Date().toISOString()};
+  handleSave(rec,'LD-01',{id:rec.id,date:rec.date,time:rec.time,loadedBy:rec.loadedBy,truck:rec.truck,allChems:rec.allChems,note:rec.note,createdAt:rec.createdAt});
+  toast('✅ LD-01 '+(isEdit?'Updated!':'បានរក្សាទុក!')+' ('+rec.id+')');
+}
+
+// คงเหลือบนรถ — {start, stock, loaded, used}
+// เวลาที่ใช้จัดลำดับ: ยึดเวลาที่คีย์จริง (createdAt) เพราะสต๊อกบนรถเป็นเรื่องของลำดับก่อนหลัง
+// ถ้าไม่มี createdAt ค่อยถอยไปใช้วันที่ของรายการ
+function recTs(r){
+  var c=String(r.createdAt||'').trim();
+  if(c) return c;
+  var d=normalizeDate(r.date)||'';
+  return d ? d+'T00:00:00.000Z' : '';
+}
+function truckStock(){
+  var lds=records.filter(function(r){return r.type==='ld';});
+  if(!lds.length) return {start:null, startTs:null, stock:{}, loaded:{}, used:{}};
+  var startTs=lds.map(recTs).filter(Boolean).sort()[0]||'';
+  var start=lds.map(function(r){return normalizeDate(r.date)||'';}).filter(Boolean).sort()[0]||'';
+  var loaded={}, used={};
+  lds.forEach(function(r){
+    var ac=sanitizeAllChems(r.allChems||{}, LD_MAX);
+    Object.keys(ac).forEach(function(n){ loaded[n]=(loaded[n]||0)+(parseFloat(ac[n])||0); });
+  });
+  records.forEach(function(r){
+    if(r.type!=='mx') return;
+    // ถังที่ผสมก่อนจะมีใบ LD ใบแรก ไม่ใช่สารจากรถคันนี้ จึงไม่นับ
+    // (เทียบเวลาที่คีย์ ไม่ใช่แค่วันที่ ไม่งั้นงานที่คีย์ไว้ก่อนหน้าในวันเดียวกันจะทำให้ยอดติดลบ)
+    if(startTs && recTs(r) && recTs(r) < startTs) return;
+    var ac=sanitizeAllChems(r.allChems||{});
+    Object.keys(ac).forEach(function(n){ used[n]=(used[n]||0)+(parseFloat(ac[n])||0); });
+  });
+  var stock={};
+  Object.keys(loaded).forEach(function(n){ stock[n]=loaded[n]-(used[n]||0); });
+  Object.keys(used).forEach(function(n){ if(!(n in stock)) stock[n]=-used[n]; });
+  return {start:start, startTs:startTs, stock:stock, loaded:loaded, used:used};
+}
+
+function renderTruckStock(){
+  var el=document.getElementById('truck-stock'); if(!el) return;
+  var ts=truckStock();
+  var names=Object.keys(ts.stock).filter(function(n){ return Math.abs(ts.stock[n])>0.001; });
+  if(!names.length){ el.innerHTML=''; return; }
+  names.sort(function(a,b){ return ts.stock[b]-ts.stock[a]; });
+  var html='<div class="sec">🚚 ថ្នាំលើឡាន (สารคงเหลือบนรถ)</div>'
+    +'<div class="card" style="margin-bottom:13px;padding:11px 13px">'
+    +'<div style="font-size:10px;color:var(--muted);margin-bottom:7px">นับตั้งแต่ '+ts.start+' · โหลดขึ้น − เบิกใช้หน้าแปลง</div>';
+  names.forEach(function(n){
+    var u=(CHEMS.find(function(x){return x.n===n;})||{u:''}).u;
+    var v=ts.stock[n];
+    var col=v<-0.001?'var(--danger)':(v<0.001?'var(--muted)':'var(--acc)');
+    html+='<div style="display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;border-bottom:1px dotted var(--bdr);font-size:12px">'
+      +'<span style="color:var(--text)">'+n+'</span>'
+      +'<span style="font-weight:800;color:'+col+'">'+v.toFixed(2)+' '+u
+      +'<span style="font-size:9px;color:var(--muted);font-weight:400"> (ขึ้น '+(ts.loaded[n]||0).toFixed(2)+' · ใช้ '+(ts.used[n]||0).toFixed(2)+')</span></span>'
+      +'</div>';
+  });
+  var neg=names.filter(function(n){return ts.stock[n]<-0.001;});
+  if(neg.length) html+='<div style="font-size:10px;color:var(--danger);margin-top:7px">⚠️ ติดลบ '+neg.length+' ชนิด — ใช้มากกว่าที่คีย์ขึ้นรถ ตรวจว่าลืมคีย์ LD หรือไม่</div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function submitMX(){
+  if (editId) { var _c=records.find(function(r){return r.id===editId;}); if(!_c||_c.type!=='mx'){ editId=null; editMode=false; } }
+  if(!document.getElementById('mx-plot').value.trim()){toast('❌ Please select ចំការ (Plot) first');document.getElementById('mx-plot').focus();return;}
+  if(!document.getElementById('mx-sprayer').value){toast('❌ Please select Sprayer first');document.getElementById('mx-sprayer').focus();return;}
+  var wpt=parseFloat(document.getElementById('mx-wpt').value)||0;
+  if(wpt<=0){toast('❌ Please enter ទឹក/ថង (L) first — water must be greater than 0');document.getElementById('mx-wpt').focus();return;}
+  // Sync quantities from DOM first (in case oninput didn't fire on some browsers)
+  document.querySelectorAll('.mx-qty').forEach(function(inp){
+    var ti=parseInt(inp.getAttribute('data-ti'));
+    var ci=parseInt(inp.getAttribute('data-ci'));
+    if(mxTanks[ti]&&mxTanks[ti].chems[ci]) mxTanks[ti].chems[ci].q=inp.value;
+  });
+  var allC={};
+  mxTanks.forEach(function(t){t.chems.forEach(function(c){if(c.n&&c.q)allC[c.n]=(allC[c.n]||0)+parseFloat(c.q);});});
+  var isEdit=!!editId;
+  var rec={id:uid('MX'),type:'mx',date:document.getElementById('mx-date').value,
+    time:document.getElementById('mx-time').value,mixer:document.getElementById('mx-mixer').value,
+    plot:document.getElementById('mx-plot').value,
+    sprayer:document.getElementById('mx-sprayer').value,waterPerTank:wpt,
+    totalWater:mxTanks.length*wpt,tanks:JSON.parse(JSON.stringify(mxTanks)),
+    allChems:allC,cropType:document.getElementById('mx-crop').value||'',
+    season:currentSeason,note:document.getElementById('mx-note').value,createdAt:new Date().toISOString()};
+  handleSave(rec,'MX-01',{id:rec.id,date:rec.date,time:rec.time,mixer:rec.mixer,plot:rec.plot,sprayer:rec.sprayer,waterPerTank:rec.waterPerTank,totalWater:rec.totalWater,allChems:rec.allChems,cropType:rec.cropType,season:rec.season,note:rec.note,createdAt:rec.createdAt});
+  toast('✅ MX-01 '+(isEdit?'Updated!':'បានរក្សាទុក!')+' ('+rec.id+')');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SPRAY STATUS — เพิ่มใหม่ ไม่ใช้ shared records/handleSave (เป็น log แยก ไม่กระทบ MX-01)
+// ═══════════════════════════════════════════════════════════
+var ssChemRows = [];
+var ssChemRowSeq = 0;
+var SS_UNIT_OPTIONS = ['มล./Ha','ล./Ha','กก./Ha','มล./ถัง'];
+
+function openMapPicker(){ document.getElementById('map-modal').classList.add('on'); }
+function closeMapPicker(){ document.getElementById('map-modal').classList.remove('on'); }
+function pickMapPlot(name){
+  document.getElementById('ss-plot').value = name;
+  closeMapPicker();
+}
+function mapInactive(){ toast('⚠️ ចំការនេះមិនទាន់ប្រើ (แปลงนี้ยังไม่เปิดใช้งาน)'); }
+
+function ssResetForm(){
+  document.getElementById('ss-plot').value = '';
+  document.getElementById('ss-sprayer').selectedIndex = 0;
+  document.getElementById('ss-reporter').selectedIndex = 0;
+  document.getElementById('ss-note').value = '';
+  ssChemRows = [{id:ssChemRowSeq++, chem:'', rate:'', unit:SS_UNIT_OPTIONS[0]}];
+  ssRenderChemRows();
+}
+function ssRenderChemRows(){
+  var wrap = document.getElementById('ss-chem-rows');
+  wrap.innerHTML = ssChemRows.map(function(r){
+    var chemOpts = '<option value="">— ជ្រើសថ្នាំ —</option>' + CHEMS.map(function(c){
+      return '<option'+(r.chem===c.n?' selected':'')+'>'+c.n+'</option>';
+    }).join('');
+    var unitOpts = SS_UNIT_OPTIONS.map(function(u){
+      return '<option'+(r.unit===u?' selected':'')+'>'+u+'</option>';
+    }).join('');
+    return '<div class="chem-card">'
+      + '<div class="cc-top">'
+      + '<select onchange="ssChemRows.find(function(x){return x.id==='+r.id+';}).chem=this.value;">'+chemOpts+'</select>'
+      + '<button type="button" class="cc-rm" onclick="ssRemoveChemRow('+r.id+')"'+(ssChemRows.length<=1?' style="visibility:hidden"':'')+'>✕</button>'
+      + '</div>'
+      + '<div class="rate-row">'
+      + '<input type="number" inputmode="decimal" placeholder="อัตรา เช่น 400" value="'+r.rate+'" oninput="ssChemRows.find(function(x){return x.id==='+r.id+';}).rate=this.value;">'
+      + '<select onchange="ssChemRows.find(function(x){return x.id==='+r.id+';}).unit=this.value;">'+unitOpts+'</select>'
+      + '</div></div>';
+  }).join('');
+  document.getElementById('ss-chem-count').textContent = ssChemRows.length + ' ชนิด';
+}
+function ssAddChemRow(){
+  ssChemRows.push({id:ssChemRowSeq++, chem:'', rate:'', unit:SS_UNIT_OPTIONS[0]});
+  ssRenderChemRows();
+}
+function ssRemoveChemRow(id){
+  ssChemRows = ssChemRows.filter(function(r){return r.id!==id;});
+  if (ssChemRows.length===0) ssChemRows.push({id:ssChemRowSeq++, chem:'', rate:'', unit:SS_UNIT_OPTIONS[0]});
+  ssRenderChemRows();
+}
+function submitSprayStatus(){
+  var plot = document.getElementById('ss-plot').value.trim();
+  if (!plot){ toast('❌ សូមជ្រើសចំការ (เลือกแปลงก่อน)'); return; }
+  var sprayer = document.getElementById('ss-sprayer').value;
+  var reporter = document.getElementById('ss-reporter').value;
+  var note = document.getElementById('ss-note').value;
+  var chems = ssChemRows.filter(function(r){return r.chem;}).map(function(r){
+    return {name:r.chem, rate:r.rate, unit:r.unit};
+  });
+  cloudWrite({
+    action:'appendSprayStatus',
+    plot:plot, sprayer:sprayer, reporter:reporter, note:note,
+    chemicals:chems
+  });
+  toast('✅ រក្សាទុករាយការណ៍ (บันทึกรายงานแล้ว)');
+  hideForm();
+}
+
+function mxEffectiveWater(mx){
+  // Return totalWater from record; fallback: waterPerTank × number of tanks
+  var tw=parseFloat(mx.totalWater)||0;
+  if(tw>0) return tw;
+  var tanks=mx.tanks?mx.tanks.length:1;
+  return (parseFloat(mx.waterPerTank)||0)*tanks;
+}
+// ═══════════════════════════════════════════════════════════
+// CHEM MODAL
+// ═══════════════════════════════════════════════════════════
+function openChem(idx, form, tankIdx) {
+  curChemIdx=idx; curChemForm=form; if(tankIdx!==undefined) curTankIdx=tankIdx;
+  document.getElementById('chem-search').value='';
+  buildChemList('');
+  document.getElementById('chem-modal').classList.add('on');
+  setTimeout(function(){document.getElementById('chem-search').focus();},150);
+}
+function closeChem(){document.getElementById('chem-modal').classList.remove('on');}
+function filterChems(){buildChemList(document.getElementById('chem-search').value.toLowerCase().trim());}
+function buildChemList(q){
+  var cur='';
+  if(curChemForm==='ld'){ if(ldChems[curChemIdx]) cur=ldChems[curChemIdx].n; }
+  else if(mxTanks[curTankIdx]&&mxTanks[curTankIdx].chems[curChemIdx]) cur=mxTanks[curTankIdx].chems[curChemIdx].n;
+  var list=q?CHEMS.filter(function(c){return c.n.toLowerCase().indexOf(q)>=0||c.t.toLowerCase().indexOf(q)>=0;}):CHEMS;
+  var html=list.map(function(c){
+    var sel=cur===c.n?' sel':'';
+    var safeName=c.n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="cmi'+sel+'" onclick="selectChem(\''+safeName+'\')"><div><div class="cn">'+c.n+'</div><div class="ct">'+c.t+'</div></div></div>';
+  }).join('');
+  document.getElementById('chem-list').innerHTML=html;
+}
+function selectChem(name){
+  if(curChemForm==='ld'){
+    if(ldChems[curChemIdx]) ldChems[curChemIdx].n=name;
+    renderLDChems();
+    closeChem();
+    return;
+  }
+  if(mxTanks[curTankIdx]&&mxTanks[curTankIdx].chems[curChemIdx])mxTanks[curTankIdx].chems[curChemIdx].n=name;
+  renderTanks();
+  closeChem();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PLOT MODAL
+// ═══════════════════════════════════════════════════════════
+var extraPlots=[];
+function openPlot(targetId){
+  curPlotTarget=targetId;
+  document.getElementById('plot-search').value='';
+  buildPlotList('');
+  document.getElementById('plot-modal').classList.add('on');
+  setTimeout(function(){document.getElementById('plot-search').focus();},150);
+}
+function closePlot(){document.getElementById('plot-modal').classList.remove('on');}
+function filterPlots(){buildPlotList(document.getElementById('plot-search').value.toLowerCase().trim());}
+function buildPlotList(q){
+  var all=PLOTS.concat(extraPlots);
+  var f=q?all.filter(function(p){return p.toLowerCase().indexOf(q)>=0;}):all;
+  var html='';
+  if(q&&!all.find(function(p){return p.toLowerCase()===q;})){
+    html+='<div class="pmi" style="color:var(--teal);font-weight:700" onclick="selectPlot(\''+q+'\',true)">+ Add "'+q+'"</div>';
+  }
+  f.forEach(function(p){
+    var cur=document.getElementById(curPlotTarget)?document.getElementById(curPlotTarget).value==='':false;
+    html+='<div class="pmi" onclick="selectPlot(\''+p+'\')">'+p+'</div>';
+  });
+  document.getElementById('plot-list').innerHTML=html;
+}
+function selectPlot(p,isNew){
+  if(isNew) extraPlots.push(p);
+  if(curPlotTarget) document.getElementById(curPlotTarget).value=p;
+  closePlot();
+}
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════
+var expandedIds = {}; // track which cards are expanded
+
+function toggleExpand(id) {
+  expandedIds[id] = !expandedIds[id];
+  renderHist();
+}
+
+function buildChemDetail(r) {
+  var rows = [];
+  var ac = sanitizeAllChems(r.allChems || {}, chemMaxFor(r));
+  // Fallback: rebuild from tanks if allChems is empty
+  if (Object.keys(ac).length === 0 && r.tanks) {
+    var rebuilt = {};
+    r.tanks.forEach(function(t) {
+      (t.chems||[]).forEach(function(c) {
+        var q = parseFloat(c.q);
+        if (c.n && q > 0 && q < 2000) rebuilt[c.n] = (rebuilt[c.n]||0) + q;
+      });
+    });
+    ac = rebuilt;
+  }
+  Object.keys(ac).forEach(function(n) {
+    var u = (CHEMS.find(function(x){return x.n===n;})||{u:''}).u;
+    rows.push('<div class="crow"><span style="color:var(--muted)">'+n+'</span><span class="cval" style="color:var(--teal)">'+parseFloat(ac[n]).toFixed(2)+' '+u+'</span></div>');
+  });
+  if (r.totalWater) rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDCA7 Total Water</span><span class="cval" style="color:var(--blue)">'+r.totalWater+' L</span></div>');
+  if (r.sprayer)    rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDE81 Sprayer</span><span class="cval">'+r.sprayer+'</span></div>');
+  if (r.type==='ld') {
+    if (r.truck)    rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDE9A Truck</span><span class="cval">'+r.truck+'</span></div>');
+    if (r.loadedBy) rows.push('<div class="crow"><span style="color:var(--muted)">\uD83D\uDC64 \u0e1c\u0e39\u0e49\u0e42\u0e2b\u0e25\u0e14</span><span class="cval">'+r.loadedBy+'</span></div>');
+  }
+  if (r.type==='mx' && Object.keys(ac).length === 0 && !r.tanks) rows.push('<div style="font-size:10px;color:var(--warn)">\u26A0\uFE0F Chemical data lost \u2014 delete and re-enter</div>');
+  if (!rows.length) rows.push('<div style="font-size:10px;color:var(--faint)">\u2014 No chemical details \u2014</div>');
+  return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)">'+rows.join('')+'</div>';
+}
+
+function renderHist(){
+  var el=document.getElementById('hist-list');
+  if(!el)return;
+  var list=records.filter(function(r){return r.type==='mx'||r.type==='ld';});
+  if(!list.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:35px 0;font-size:12px">No records yet</div>';return;}
+  el.innerHTML=list.slice().sort(function(a,b){
+    var da=a.createdAt||a.date||'';
+    var db=b.createdAt||b.date||'';
+    if(da>db)return -1; if(da<db)return 1; return 0;
+  }).map(function(r){
+    var expanded = expandedIds[r.id];
+    var detail   = expanded ? buildChemDetail(r) : '';
+    var arrow    = expanded ? '\u25B2' : '\u25BC';
+    var isLd     = r.type==='ld';
+    return '<div class="card" id="hc-'+r.id+'">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+        + '<span style="font-size:12px;font-weight:700">'+(isLd?'\uD83D\uDE9A':'\u2697\uFE0F')+' '+r.id+'</span>'
+        + '<div style="display:flex;gap:6px;align-items:center">'
+          + '<span class="badge" style="background:rgba(0,0,0,.08);color:'+(isLd?'var(--blue)':'var(--teal)')+'">'+(isLd?'LD':'MX')+'</span>'
+          + '<button onclick="event.stopPropagation();editRecord(\''+r.id+'\')" style="font-size:10px;background:var(--blue);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer">\u270F\uFE0F</button>'
+          + '<button class="delbtn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')" style="font-size:10px">\uD83D\uDD10</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="font-size:10px;color:var(--muted);line-height:1.6">'
+        + (r.plot?'\uD83D\uDCCD '+r.plot+' ':'')
+        + normalizeDate(r.date)
+        + (function(){var c=r.createdAt?new Date(r.createdAt):null;return (c&&!isNaN(c))?' \u00b7 \uD83D\uDD50 '+pad(c.getHours())+':'+pad(c.getMinutes()):'';})()
+        + (r.mixer?' \u00b7 \uD83D\uDC64 '+r.mixer:'')
+        + (r.loadedBy?' \u00b7 \uD83D\uDC64 '+r.loadedBy:'')
+        + (r.truck?' \u00b7 \uD83D\uDE9A '+r.truck:'')
+        + (r.sprayer?' \u00b7 \uD83D\uDE81 '+r.sprayer:'')
+        + (r.tanks?' \u00b7 '+r.tanks.length+'\u1790\u1784':'')
+      + '</div>'
+      + '<div onclick="toggleExpand(\''+r.id+'\')" style="margin-top:6px;font-size:10px;color:var(--muted);cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px">'
+        + '<span style="font-size:8px">'+arrow+'</span>'
+        + '<span>'+(expanded?'Hide details':'Show details')+'</span>'
+      + '</div>'
+      + detail
+      + '</div>';
+  }).join('');
+}
+
+function deleteRecord(id){
+  var rec=records.find(function(r){return r.id===id;});
+  if(!rec)return;
+  var sheetName=(rec.type==='ld')?'LD-01':'MX-01';
+  var pin=window.prompt('Admin PIN required\nបញ្ចូល PIN (Enter PIN):','');
+  if(pin===null)return;
+  if(pin!==ADMIN_PIN){toast('❌ PIN មិនត្រូវ (Wrong PIN)');return;}
+  var ok=window.confirm('លុបទិន្នន័យ?\n\nID: '+id+'\nType: '+sheetName+'\nDate: '+(rec.date||'-')+'\n\n⚠️ លុបទាំង Local + Google Sheet \nទូរស័ព្ទគ្រប់ (All devices)');
+  if(!ok)return;
+  // 1. Remove locally immediately
+  records=records.filter(function(r){return r.id!==id;});
+  clearLedger(id);
+  // Remember this ID is deleted - never bring it back from cloud
+  if(deletedIds.indexOf(id) < 0) deletedIds.push(id);
+  saveDeletedIds();
+  saveLocal();
+  // 2. Animate card out
+  var card=document.getElementById('hc-'+id);
+  if(card){
+    card.style.opacity='0';
+    card.style.transition='opacity .2s';
+    setTimeout(function(){if(card.parentNode)card.parentNode.removeChild(card);},220);
+  }
+  renderHist(); renderStats();
+  // 3. Send delete to cloud, then force sync so all devices see change
+  toast('🗑  កំពុងលុប... (Deleting)');
+  // Use JSONP to delete (GET request - bypasses CORS completely)
+  cloudJSONP({action:'delete',sheet:sheetName,id:id}, function(res){
+    if(res && res.ok) {
+      toast('✅ '+id+' លុបពី Sheet (Deleted from Sheet)');
+    }
+  });
+  // 4. Force re-sync after 3s to confirm deletion propagated
+  setTimeout(function(){
+    toast('🔄 Syncing all devices...');
+    cloudSync();
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BACKUP / IMPORT
+// ═══════════════════════════════════════════════════════════
+function doExport(){
+  var mx=records.filter(function(r){return r.type==='mx';});
+  var lines=['=== MX-01 Mixing ==='];
+  mx.forEach(function(r){lines.push([r.id,r.date,r.time,r.mixer,r.plot,r.sprayer,(r.tanks?r.tanks.length:0)+'tanks',(r.totalWater||0).toFixed(0)+'L',Object.entries(r.allChems||{}).map(function(e){return e[0]+':'+parseFloat(e[1]).toFixed(2);}).join('|')].join('\t'));});
+  var ldRecs=records.filter(function(r){return r.type==='ld';});
+  if(ldRecs.length){
+    lines.push('');
+    lines.push('=== LD-01 Truck Loading ===');
+    ldRecs.forEach(function(r){
+      lines.push([r.id,r.date,r.time||'',r.loadedBy||'',r.truck||'',
+        Object.entries(sanitizeAllChems(r.allChems||{}, LD_MAX)).map(function(e){return e[0]+':'+parseFloat(e[1]).toFixed(2);}).join('|')].join('\t'));
+    });
+    var ts=truckStock();
+    lines.push('');
+    lines.push('=== Truck Stock (นับตั้งแต่ '+(ts.start||'-')+') ===');
+    Object.keys(ts.stock).forEach(function(n){
+      lines.push([n, ts.stock[n].toFixed(3), 'ขึ้น '+(ts.loaded[n]||0).toFixed(3), 'ใช้ '+(ts.used[n]||0).toFixed(3)].join('\t'));
+    });
+  }
+  var txt=lines.join('\n');
+  function copied(){var el=document.getElementById('exp-ok');el.style.display='block';setTimeout(function(){el.style.display='none';},3000);}
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(copied).catch(function(){fallback(txt,copied);});}
+  else{fallback(txt,copied);}
+  function fallback(t2,cb){var ta=document.createElement('textarea');ta.value=t2;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);cb();}
+}
+function doBkp(){
+  var blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='MegaFarm_backup_'+todayISO()+'.json';a.click();URL.revokeObjectURL(url);
+  toast('💾 Downloaded!');
+}
+function doImport(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var imp=JSON.parse(e.target.result);if(!Array.isArray(imp))throw new Error('Invalid');
+      var added=0;
+      imp.forEach(function(r){
+        if(!r||!r.id) return;
+        if(r.type!=='mx'&&r.type!=='ld') return;
+        if(records.find(function(x){return x.id===r.id;})) return;
+        delete r.cloudSynced;   // ต้อง push ขึ้นชีตใหม่ ไม่งั้นถูกดรอปตอน sync รอบถัดไป
+        records.push(r); added++;
+      });
+      saveLocal();renderAll();
+      var el=document.getElementById('import-status');el.textContent='✅ '+added+' records imported';el.style.display='block';
+      toast('✅ Imported '+added+' records');
+    }catch(err){toast('❌ Import failed: '+err.message);}
+  };
+  reader.readAsText(file);
+}
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+var toastT=null;
+function toast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(toastT);toastT=setTimeout(function(){el.style.opacity='0';},2500);
+}
+</script>
+</body>
+</html>
