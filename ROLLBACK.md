@@ -6,8 +6,10 @@
 
 | ส่วน | เวอร์ชันเดิม (ก่อน SR) | เวอร์ชันปัจจุบัน |
 |---|---|---|
-| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | `v14.5.lb` · cache `chemcontrol-v45` (เพิ่มคนงานรายวัน LB-01) |
-| Apps Script | Version 51 (Oct 8, 2026) | Version 55 (เพิ่ม LB-01) · ก่อนเพิ่ม LB-01 = Version 54 |
+| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | `v14.6.lb` · cache `chemcontrol-v46` (LB-01 ปรับตามรายงานจริง: ผู้ดูแล สถานที่ กะ นำเข้าจากข้อความ) |
+| Apps Script | Version 51 (Oct 8, 2026) | Version 57 · (56 = ใช้ LINE ร่วมกับ Rainfall, 55 = เพิ่ม LB-01, 54 = ก่อน LB-01) |
+
+จุดย้อนของ LB-01 รุ่นแรก (ก่อนปรับเป็นผู้ดูแล/สถานที่/กะ): แอป commit `0822e43` + Apps Script Version 56
 
 ถ้าปัญหาอยู่ที่ฟังก์ชันคนงานอย่างเดียว ให้ย้อนแค่บางส่วน: แอปกลับ commit `513200e` (v14.4.sr) + Apps Script Version 54 — ฟังก์ชัน SR/EV ยังอยู่ครบ ชีต `LB-01`/`LB-Deleted` ไม่ถูกลบ
 

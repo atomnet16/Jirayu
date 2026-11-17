@@ -469,10 +469,16 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
     <div class="grp"><label>วันที่ (Date)</label><input type="date" id="lb-date" onchange="lbRenderList()"></div>
     <div class="grp"><label>ผู้บันทึก (Recorder)</label><select id="lb-who"></select></div>
   </div>
+  <datalist id="lb-places"></datalist>
+  <div class="grp"><label>นำเข้าจากข้อความ (วางรายงานเดิม หรือข้อความที่ Claude แปลงจากรูป)</label>
+    <textarea id="lb-import" rows="4" placeholder="17/11/2026&#10;แม่ครัวไทย 2 คน - Office /Ning&#10;อบข้าวโพด 7(Day)+6(Night) คน - Silo/Nirut" style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(128,128,128,.4);background:transparent;color:inherit;font-family:inherit;font-size:13px"></textarea>
+    <button class="abtn" style="color:var(--blue);margin-top:6px" onclick="lbImport()">⬇️ แยกข้อมูลลงฟอร์ม</button>
+    <div class="sr-info" id="lb-import-msg" style="margin-top:6px"></div>
+  </div>
   <div class="grp">
-    <div class="chem-hdr"><label>กิจกรรม (Activity)</label><span class="chem-count" id="lb-count">1 กิจกรรม</span></div>
+    <div class="chem-hdr"><label>รายการ (กิจกรรม · สถานที่ · กะ)</label><span class="chem-count" id="lb-count">1 รายการ</span></div>
     <div id="lb-rows"></div>
-    <button class="abtn" style="color:var(--blue)" onclick="lbAddRow()">+ เพิ่มกิจกรรม</button>
+    <button class="abtn" style="color:var(--blue)" onclick="lbAddRow()">+ เพิ่มรายการ</button>
   </div>
   <div id="lb-total" class="sr-box on" style="margin-bottom:10px"></div>
   <button class="sbtn" id="lb-save-btn" style="background:var(--blue)" onclick="lbSave()">✓ บันทึกคนงาน</button>
@@ -638,7 +644,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.5.lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.6.lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -2423,18 +2429,18 @@ function srBuildSheets(){
     var all=sanitizeAllChems(m.allChems||{});
     mx.push([m.id,m.date||'',m.time||'',m.mixer||'',m.plot||'',m.sprayer||'',m.cropType||'',m.season||'',Object.keys(all).map(function(k){ return k+' '+all[k]; }).join(' | '),m.note||'',link[m.id]||'']);
   });
-  var lb=[['Date','RecordID','Recorder','Plot','Activity','Contractor','Workers','Hours','ShortReason','OT Workers','OT Hours','Man-hours','OT man-hours','Man-days']];
+  var lb=[['Date','RecordID','Recorder','Place','Activity','Shift','Supervisor','Contractor','Workers','Hours','ShortReason','OT Workers','OT Hours','Man-hours','OT man-hours','Man-days']];
   var lbDay={};
   (typeof lbRecs!=='undefined'?lbRecs:[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(r){
     (r.rows||[]).forEach(function(x){
       var c=lbCalc(x);
-      lb.push([r.date,r.id,r.who||'',x.plot,x.act,x.con,x.workers,x.hours,x.short||'',x.otW||0,x.otH||0,lbR1(c.manH),lbR1(c.otMH),Math.round(c.manD*100)/100]);
-      var k=r.date+'|'+x.con, s=lbDay[k]||(lbDay[k]={date:r.date,con:x.con,workers:0,acts:0,manH:0,otMH:0,manD:0});
-      s.workers+=c.workers; s.acts++; s.manH+=c.manH; s.otMH+=c.otMH; s.manD+=c.manD;
+      lb.push([r.date,r.id,r.who||'',x.plot,x.act,x.shift||'Day',x.sup||'',x.con||'',x.workers,x.hours,x.short||'',x.otW||0,x.otH||0,lbR1(c.manH),lbR1(c.otMH),Math.round(c.manD*100)/100]);
+      var k=r.date+'|'+x.plot, s=lbDay[k]||(lbDay[k]={date:r.date,place:x.plot,workers:0,night:0,acts:0,manH:0,otMH:0,manD:0});
+      s.workers+=c.workers; if(x.shift==='Night') s.night+=c.workers; s.acts++; s.manH+=c.manH; s.otMH+=c.otMH; s.manD+=c.manD;
     });
   });
-  var lbs=[['Date','Contractor','Workers','Activities','Man-hours','OT man-hours','Man-days']];
-  Object.keys(lbDay).sort().forEach(function(k){ var s=lbDay[k]; lbs.push([s.date,s.con,s.workers,s.acts,lbR1(s.manH),lbR1(s.otMH),Math.round(s.manD*100)/100]); });
+  var lbs=[['Date','Place','Workers','of which Night','Entries','Man-hours','OT man-hours','Man-days']];
+  Object.keys(lbDay).sort().forEach(function(k){ var s=lbDay[k]; lbs.push([s.date,s.place,s.workers,s.night,s.acts,lbR1(s.manH),lbR1(s.otMH),Math.round(s.manD*100)/100]); });
   return [['SR คำขอ',sr],['สารเคมี',ch],['Mixing รอบ',rd],['ประเมินผล',ev],['ใบเบิก CR',cr],['MX-01',mx],['คนงาน LB-01',lb],['สรุปคนงานรายวัน',lbs]];
 }
 function srExportXlsx(){
@@ -2459,26 +2465,51 @@ function srExportXlsx(){
 // ═══════════════════════════════════════════════════════════
 var LB_KEY='mf_lb', LB_DEL_KEY='mf_lb_deleted', LB_CLOUD=true;
 var LB_CONTRACTORS=['Thim','Vanda'];
-var LB_ACTS=['ถอนหญ้า','ใส่ปุ๋ย','ฉีดพ่น / ช่วยผสมสาร','ตัดแต่งกิ่ง','ปลูก / ซ่อมปลูก','เก็บเกี่ยว','รดน้ำ / ระบบน้ำ','เก็บขยะ / ทำความสะอาดแปลง','ขนย้าย'];
+// ผู้ดูแล: [ชื่อเล่น (ใช้ใน LINE), ชื่อเต็ม (เก็บในข้อมูล)]
+var LB_SUPS=[['Ning','SUTHISA SUDSALAI'],['Nirut','NIRUT PHAYACHAI'],['M','ARIYAPAS PATTANAPORNPAISARN'],['Cheata','So Cheata'],['Jirayu','JIRAYU NANTALAKHA'],['Tee','Academy'],['Bo','KRISSANAPON INTAYUNG'],['Aw','Kridsada']];
+var LB_PLACES=['Office','Silo'];
+var LB_ACTS=['แม่ครัวกัมพูชา','แม่ครัวไทย','แม่บ้าน','อบข้าวโพด','ระบบน้ำ','ช่วยช่าง','ขายข้าวโพด','เตรียมปูน','ผสมยา','ถอนหญ้า','ใส่ปุ๋ย','ตัดแต่งกิ่ง','ปลูก / ซ่อมปลูก','เก็บเกี่ยว','เก็บขยะ / ทำความสะอาดแปลง','ขนย้าย'];
 var LB_OTHER='อื่น ๆ (พิมพ์เอง)';
 var LB_SHORT=['ฝนตก','งานเสร็จก่อนเวลา','อื่น ๆ'];
+var LB_SHIFTS=['Day','Night'];
 var LB_STD_H=8, LB_BACK_DAYS=7;
 function lbLoad(k){ try{ var a=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
 var lbRecs=lbLoad(LB_KEY), lbDeleted=lbLoad(LB_DEL_KEY), lbRows=[], lbSeq=0, lbEditId=null;
 function lbPersist(){ try{ localStorage.setItem(LB_KEY,JSON.stringify(lbRecs)); localStorage.setItem(LB_DEL_KEY,JSON.stringify(lbDeleted)); }catch(e){ toast('⚠️ เก็บข้อมูลในเครื่องไม่ได้'); } }
 function lbFind(id){ for(var i=0;i<lbRecs.length;i++) if(lbRecs[i].id===id) return lbRecs[i]; return null; }
-function lbNewRow(){ return {id:lbSeq++,plot:'',act:'',other:'',con:'',workers:'',hours:String(LB_STD_H),short:'',otW:'',otH:''}; }
+function lbNewRow(){ return {id:lbSeq++,plot:'',act:'',other:'',sup:'',con:'',shift:'Day',workers:'',hours:String(LB_STD_H),short:'',otW:'',otH:'',flag:[]}; }
 function lbRowOf(id){ for(var i=0;i<lbRows.length;i++) if(lbRows[i].id===id) return lbRows[i]; return null; }
 function lbNum(x){ x=parseFloat(x); return isNaN(x)?0:x; }
 function lbR1(x){ return Math.round(x*10)/10; }
 function lbCalc(r){
-  var w=lbNum(r.workers), h=lbNum(r.hours), ow=lbNum(r.otW), oh=lbNum(r.otH);
+  var w=lbNum(r.workers), h=r.hours===''||r.hours==null?LB_STD_H:lbNum(r.hours), ow=lbNum(r.otW), oh=lbNum(r.otH);
   return {workers:w, manH:w*h, otMH:ow*oh, manD:w*h/LB_STD_H};
 }
 function lbActName(r){ return r.act===LB_OTHER ? String(r.other||'').trim() : r.act; }
+// ผู้ดูแล: รับชื่อเล่นหรือชื่อเต็ม (ไม่สนตัวพิมพ์) → {s,f} หรือ null
+function lbSupFind(x){
+  x=String(x||'').trim().toLowerCase(); if(!x) return null;
+  for(var i=0;i<LB_SUPS.length;i++) if(LB_SUPS[i][0].toLowerCase()===x || LB_SUPS[i][1].toLowerCase()===x) return {s:LB_SUPS[i][0],f:LB_SUPS[i][1]};
+  return null;
+}
+function lbSupShort(full){ var f=lbSupFind(full); return f?f.s:String(full||''); }
+function lbKnownPlace(p){
+  var l=String(p||'').toLowerCase();
+  return LB_PLACES.concat(PLOTS,extraPlots).some(function(x){ return x.toLowerCase()===l; });
+}
+// "P5/1" → "Pivot 5/1", "office" → "Office"; ชื่ออื่นคงเดิม
+function lbPlaceNorm(s){
+  s=String(s||'').trim().replace(/\s*\/\s*/g,'/');
+  var m=s.match(/^P\s*(\d+)(?:\/(\d))?$/i);
+  if(m) s='Pivot '+m[1]+(m[2]?'/'+m[2]:'');
+  var all=LB_PLACES.concat(PLOTS,extraPlots);
+  for(var i=0;i<all.length;i++) if(all[i].toLowerCase()===s.toLowerCase()) return all[i];
+  return s;
+}
 
 function lbOpen(){
   document.getElementById('lb-who').innerHTML=srOptions(SR_PEOPLE,'','— ជ្រើស —');
+  document.getElementById('lb-places').innerHTML=LB_PLACES.concat(PLOTS).map(function(p){ return '<option value="'+srE(p)+'">'; }).join('');
   lbReset();
   lbCloudPull(function(){ lbRenderList(); lbUpdateBadge(); });
 }
@@ -2487,27 +2518,33 @@ function lbReset(){
   document.getElementById('lb-edit-banner').style.display='none';
   document.getElementById('lb-save-btn').textContent='✓ บันทึกคนงาน';
   var d=document.getElementById('lb-date'); d.value=todayISO(); d.max=todayISO(); d.min=srAddDays(todayISO(),-LB_BACK_DAYS);
+  var im=document.getElementById('lb-import'); if(im) im.value='';
+  var mg=document.getElementById('lb-import-msg'); if(mg) mg.innerHTML='';
   lbRows=[lbNewRow()];
   lbRenderRows(); lbRenderList();
 }
 function lbRenderRows(){
   var opts=function(arr,sel,ph){ return '<option value="">'+ph+'</option>'+arr.map(function(x){ return '<option'+(x===sel?' selected':'')+'>'+srE(x)+'</option>'; }).join(''); };
+  var supOpts=function(sel){ return '<option value="">— ไม่ระบุ —</option>'+LB_SUPS.map(function(s){ return '<option value="'+srE(s[0])+'"'+(s[0]===sel?' selected':'')+'>'+srE(s[0])+' · '+srE(s[1])+'</option>'; }).join(''); };
   document.getElementById('lb-rows').innerHTML=lbRows.map(function(r,i){
-    var h=lbNum(r.hours);
-    return '<div class="chem-card"><div class="cc-top"><b style="font-size:12px">กิจกรรม #'+(i+1)+'</b>'
+    var h=r.hours===''?LB_STD_H:lbNum(r.hours), fl=(r.flag&&r.flag.length);
+    return '<div class="chem-card"'+(fl?' style="border:1.5px solid #f0b429"':'')+'><div class="cc-top"><b style="font-size:12px">กิจกรรม #'+(i+1)+'</b>'
       +'<button type="button" class="cc-rm" onclick="lbRemoveRow('+r.id+')"'+(lbRows.length<=1?' style="visibility:hidden"':'')+'>✕</button></div>'
-      +'<div class="grp"><label>ចំការ (Plot)</label><input type="text" id="lb-plot-'+r.id+'" value="'+srE(r.plot)+'" placeholder="ជ្រើស..." onclick="openPlot(\'lb-plot-'+r.id+'\')" readonly style="cursor:pointer"></div>'
+      +(fl?'<div style="font-size:11px;color:#b7791f;margin-bottom:6px">⚠️ '+srE(r.flag.join(' · '))+'</div>':'')
+      +'<div class="grp"><label>สถานที่ / ចំការ (แปลง · Office · Silo)</label><input type="text" list="lb-places" value="'+srE(r.plot)+'" placeholder="พิมพ์หรือเลือก" autocomplete="off" oninput="lbSet('+r.id+',\'plot\',this.value)" onchange="lbSet('+r.id+',\'plot\',lbPlaceNorm(this.value));this.value=lbPlaceNorm(this.value)"></div>'
       +'<div class="g2"><div class="grp"><label>กิจกรรม</label><select onchange="lbSet('+r.id+',\'act\',this.value,true)">'+opts(LB_ACTS.concat([LB_OTHER]),r.act,'— เลือก —')+'</select></div>'
-      +'<div class="grp"><label>ผู้รับเหมา</label><select onchange="lbSet('+r.id+',\'con\',this.value)">'+opts(LB_CONTRACTORS,r.con,'— เลือก —')+'</select></div></div>'
+      +'<div class="grp"><label>กะ</label><select onchange="lbSet('+r.id+',\'shift\',this.value)">'+LB_SHIFTS.map(function(s){ return '<option'+(s===r.shift?' selected':'')+'>'+s+'</option>'; }).join('')+'</select></div></div>'
       +(r.act===LB_OTHER?'<div class="grp"><label>ชื่อกิจกรรม</label><input type="text" value="'+srE(r.other)+'" placeholder="พิมพ์ชื่อกิจกรรม" oninput="lbSet('+r.id+',\'other\',this.value)"></div>':'')
       +'<div class="g2"><div class="grp"><label>จำนวนแรงงาน (คน)</label><input type="number" inputmode="numeric" min="1" value="'+srE(r.workers)+'" placeholder="เช่น 10" oninput="lbSet('+r.id+',\'workers\',this.value)"></div>'
+      +'<div class="grp"><label>ผู้ดูแล</label><select onchange="lbSet('+r.id+',\'sup\',this.value)">'+supOpts(r.sup)+'</select></div></div>'
+      +'<div class="g2"><div class="grp"><label>ผู้รับเหมา (ถ้ามี)</label><select onchange="lbSet('+r.id+',\'con\',this.value)">'+opts(LB_CONTRACTORS,r.con,'— ไม่ระบุ —')+'</select></div>'
       +'<div class="grp"><label>ชม.ทำงาน (ปกติ '+LB_STD_H+')</label><input type="number" inputmode="decimal" step="0.5" min="0" max="12" value="'+srE(r.hours)+'" oninput="lbSet('+r.id+',\'hours\',this.value)"></div></div>'
       +'<div class="grp" id="lb-shortwrap-'+r.id+'" style="'+(h<LB_STD_H?'':'display:none')+'"><label>เหตุผลที่เลิกก่อนเวลา</label><select onchange="lbSet('+r.id+',\'short\',this.value)">'+opts(LB_SHORT,r.short,'— เลือก —')+'</select></div>'
       +'<div class="g2"><div class="grp"><label>OT · จำนวนคน</label><input type="number" inputmode="numeric" min="0" value="'+srE(r.otW)+'" placeholder="0" oninput="lbSet('+r.id+',\'otW\',this.value)"></div>'
       +'<div class="grp"><label>OT · ชม.</label><input type="number" inputmode="decimal" step="0.5" min="0" max="6" value="'+srE(r.otH)+'" placeholder="0" oninput="lbSet('+r.id+',\'otH\',this.value)"></div></div>'
       +'<div class="sr-info" id="lb-ri-'+r.id+'"></div></div>';
   }).join('');
-  document.getElementById('lb-count').textContent=lbRows.length+' กิจกรรม';
+  document.getElementById('lb-count').textContent=lbRows.length+' รายการ';
   lbRenderCalc();
 }
 function lbSet(id,k,v,rerender){
@@ -2517,21 +2554,20 @@ function lbSet(id,k,v,rerender){
   if(rerender && k==='act'){ lbRenderRows(); return; }
   lbRenderCalc();
 }
-function lbPlotPicked(target,p){ var id=parseInt(String(target).replace('lb-plot-',''),10); var r=lbRowOf(id); if(r){ r.plot=p; lbRenderCalc(); } }
 function lbAddRow(){
   var last=lbRows[lbRows.length-1], n=lbNewRow();
-  if(last){ n.con=last.con; n.plot=last.plot; }          // ช่วยกรอกเร็ว: ผู้รับเหมา/แปลงเดิม
+  if(last){ n.sup=last.sup; n.plot=last.plot; n.shift=last.shift; }          // ช่วยกรอกเร็ว
   lbRows.push(n); lbRenderRows();
 }
 function lbRemoveRow(id){ lbRows=lbRows.filter(function(r){ return r.id!==id; }); if(!lbRows.length) lbRows=[lbNewRow()]; lbRenderRows(); }
 function lbRenderCalc(){
-  var t={workers:0,manH:0,otMH:0,manD:0};
+  var t={workers:0,night:0,manH:0,otMH:0,manD:0};
   lbRows.forEach(function(r){
     var c=lbCalc(r), el=document.getElementById('lb-ri-'+r.id);
-    t.workers+=c.workers; t.manH+=c.manH; t.otMH+=c.otMH; t.manD+=c.manD;
-    if(el) el.innerHTML = c.workers>0 ? (srNum(c.manH,1)+' คน·ชม. ('+srNum(c.manD,2)+' แรง-วัน)'+(c.otMH>0?' · OT '+srNum(c.otMH,1)+' คน·ชม.':'')) : '';
+    t.workers+=c.workers; if(r.shift==='Night') t.night+=c.workers; t.manH+=c.manH; t.otMH+=c.otMH; t.manD+=c.manD;
+    if(el) el.innerHTML = c.workers>0 ? (c.workers+' คน · '+srNum(c.manD,2)+' แรง-วัน'+(c.otMH>0?' · OT '+srNum(c.otMH,1)+' คน·ชม.':'')) : '';
   });
-  document.getElementById('lb-total').innerHTML='รวมฟอร์มนี้: <b>'+t.workers+' คน</b> · '+srNum(t.manH,1)+' คน·ชม. · <b>'+srNum(t.manD,2)+' แรง-วัน</b>'+(t.otMH>0?' · OT '+srNum(t.otMH,1)+' คน·ชม.':'');
+  document.getElementById('lb-total').innerHTML='รวมฟอร์มนี้: <b>'+t.workers+' คน</b>'+(t.night>0?' (กะดึก '+t.night+')':'')+' · <b>'+srNum(t.manD,2)+' แรง-วัน</b>'+(t.otMH>0?' · OT '+srNum(t.otMH,1)+' คน·ชม.':'');
 }
 function lbValidate(){
   var d=srV('lb-date'), today=todayISO();
@@ -2540,11 +2576,10 @@ function lbValidate(){
   if(d<srAddDays(today,-LB_BACK_DAYS)) return 'บันทึกย้อนหลังได้ไม่เกิน '+LB_BACK_DAYS+' วัน';
   if(!srV('lb-who')) return 'เลือกผู้บันทึก';
   for(var i=0;i<lbRows.length;i++){
-    var r=lbRows[i], n='กิจกรรม #'+(i+1)+': ';
-    var w=parseFloat(r.workers), h=parseFloat(r.hours), ow=lbNum(r.otW), oh=lbNum(r.otH);
-    if(!r.plot) return n+'เลือกแปลง';
+    var r=lbRows[i], n='รายการ #'+(i+1)+': ';
+    var w=parseFloat(r.workers), h=r.hours===''?LB_STD_H:parseFloat(r.hours), ow=lbNum(r.otW), oh=lbNum(r.otH);
+    if(!String(r.plot||'').trim()) return n+'ใส่สถานที่';
     if(!lbActName(r)) return n+'เลือก/พิมพ์ชื่อกิจกรรม';
-    if(!r.con) return n+'เลือกผู้รับเหมา';
     if(!(w>0) || Math.round(w)!==w) return n+'จำนวนแรงงานต้องเป็นจำนวนเต็มมากกว่า 0';
     if(isNaN(h) || h<0 || h>12) return n+'ชม.ทำงานต้องอยู่ระหว่าง 0–12';
     if(h<LB_STD_H && !r.short) return n+'เลือกเหตุผลที่เลิกก่อนเวลา';
@@ -2559,8 +2594,9 @@ function lbSave(){
   var err=lbValidate(); if(err){ toast('❌ '+err); return; }
   var now=new Date().toISOString(), old=lbEditId?lbFind(lbEditId):null;
   var rec={id:old?old.id:uid('LB'), date:srV('lb-date'), who:srV('lb-who'),
-    rows:lbRows.map(function(r){ return {plot:r.plot, act:lbActName(r), con:r.con, workers:parseFloat(r.workers), hours:parseFloat(r.hours),
-      short:parseFloat(r.hours)<LB_STD_H?r.short:'', otW:lbNum(r.otW), otH:lbNum(r.otH)}; }),
+    rows:lbRows.map(function(r){ var h=r.hours===''?LB_STD_H:parseFloat(r.hours), s=lbSupFind(r.sup);
+      return {plot:lbPlaceNorm(r.plot), act:lbActName(r), sup:s?s.f:'', supS:s?s.s:'', con:r.con||'', shift:r.shift||'Day', workers:parseFloat(r.workers), hours:h,
+      short:h<LB_STD_H?r.short:'', otW:lbNum(r.otW), otH:lbNum(r.otH)}; }),
     createdAt:old?old.createdAt:now, updatedAt:now, editCount:old?((old.editCount||0)+1):0};
   if(old) lbRecs[lbRecs.indexOf(old)]=rec; else lbRecs.push(rec);
   lbPersist(); lbCloudPush(rec); lbUpdateBadge();
@@ -2574,7 +2610,7 @@ function lbEdit(id){
   srSet('lb-date',r.date); srSet('lb-who',r.who);
   lbRows=r.rows.map(function(x){
     var known=LB_ACTS.indexOf(x.act)>=0;
-    return {id:lbSeq++,plot:x.plot,act:known?x.act:LB_OTHER,other:known?'':x.act,con:x.con,workers:String(x.workers),hours:String(x.hours),short:x.short||'',otW:x.otW?String(x.otW):'',otH:x.otH?String(x.otH):''};
+    return {id:lbSeq++,plot:x.plot,act:known?x.act:LB_OTHER,other:known?'':x.act,sup:x.supS||lbSupShort(x.sup),con:x.con||'',shift:x.shift||'Day',workers:String(x.workers),hours:String(x.hours),short:x.short||'',otW:x.otW?String(x.otW):'',otH:x.otH?String(x.otH):'',flag:[]};
   });
   lbRenderRows();
   document.getElementById('lb-edit-id').textContent=id;
@@ -2591,12 +2627,87 @@ function lbDelete(id){
   if(lbDeleted.indexOf(id)<0) lbDeleted.push(id);
   lbPersist(); lbCloudDelete(id); lbUpdateBadge(); lbRenderList(); toast('🗑 ลบแล้ว ('+id+')');
 }
+
+// ---------- นำเข้าจากข้อความ ----------
+// รับ 2 รูปแบบ: (ก) รายงานเดิม "ชื่องาน 2 คน - Office /Ning" , "อบข้าวโพด 7(Day)+6(Night) คน - Silo/Nirut"
+//               (ข) บล็อกจาก Claude "กิจกรรม | คน | สถานที่ | ผู้ดูแล | กะ"
+function lbParseCount(expr){
+  var parts=String(expr||'').split('+'), out=[], flags=[];
+  parts.forEach(function(p,i){
+    var m=p.match(/(\d+)\s*(?:\(([^)]*)\))?/); if(!m) return;
+    var item={n:parseInt(m[1],10),shift:'Day',con:''}, tag=String(m[2]||'').trim().toLowerCase();
+    if(tag){
+      if(/night|ดึก/.test(tag)) item.shift='Night';
+      else if(/^(day|เช้า)$/.test(tag)) item.shift='Day';
+      else if(tag==='da' || tag==='vanda') item.con='Vanda';
+      else if(tag==='th' || tag==='thim') item.con='Thim';
+      else flags.push('ไม่รู้จัก "('+m[2]+')"');
+    } else if(i>0 && parts.length>1) { flags.push('กะของ "+'+m[1]+'" ไม่ระบุ (ใช้ Day)'); }
+    out.push(item);
+  });
+  return {items:out,flags:flags};
+}
+function lbParseText(text){
+  var lines=String(text||'').split(/\r?\n/), rows=[], warns=[], date='';
+  lines.forEach(function(raw){
+    var line=raw.replace(/^[\s\-•*]+/,'').trim(); if(!line) return;
+    var dm=line.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(dm){ date=dm[3]+'-'+srPad(+dm[2])+'-'+srPad(+dm[1]); return; }
+    dm=line.match(/วันที่\s*[:：]?\s*(\d{4})-(\d{2})-(\d{2})/); if(dm){ date=dm[1]+'-'+dm[2]+'-'+dm[3]; return; }
+    if(/^รวม/.test(line)) return;
+    var act='',cnt=null,place='',sup='',shiftCell='',flag=[];
+    if(line.indexOf('|')>=0){
+      var c=line.split('|').map(function(x){ return x.trim(); });
+      act=c[0]||''; place=c[2]||''; var supCell=c[3]||''; shiftCell=c[4]||'';
+      var q=/\?/.test(line); place=place.replace(/\?.*$/,'').trim(); supCell=supCell.replace(/\?.*$/,'').trim();
+      cnt=lbParseCount(String(c[1]||'').replace(/\?.*$/,'')); if(q) flag.push('Claude ไม่แน่ใจ — ตรวจรายการนี้');
+      sup=supCell; if(/night|ดึก/i.test(shiftCell)){ cnt.items.forEach(function(i){ i.shift='Night'; }); }
+      var tagInPlace=line.match(/\?\s*\(([^)]*)\)/); if(tagInPlace){ var tg=tagInPlace[1].toLowerCase(); if(tg==='da'||tg==='vanda') cnt.items.forEach(function(i){ i.con='Vanda'; }); }
+    } else {
+      var m=line.match(/^(.+?)\s+(\d[\d+()\sA-Za-z฀-๿]*?)\s*คน\s*[-–—]\s*(.+)$/);
+      if(!m){ warns.push('อ่านไม่ได้: "'+line+'"'); return; }
+      act=m[1].trim(); cnt=lbParseCount(m[2]);
+      var toks=m[3].split('/').map(function(x){ return x.trim(); }).filter(function(x){ return x!==''; });
+      if(toks.length>1 && lbSupFind(toks[toks.length-1])){ sup=toks.pop(); }
+      place=toks.join('/');
+    }
+    if(!cnt || !cnt.items.length){ warns.push('ไม่พบจำนวนคน: "'+line+'"'); return; }
+    place=lbPlaceNorm(place);
+    var sf=lbSupFind(sup);
+    if(sup && !sf) flag.push('ไม่รู้จักผู้ดูแล "'+sup+'"');
+    if(!sup) flag.push('ไม่ระบุผู้ดูแล (ปล่อยว่างได้)');
+    if(place && !lbKnownPlace(place)) flag.push('สถานที่ "'+place+'" ไม่อยู่ในรายการ');
+    cnt.flags.forEach(function(f){ flag.push(f); });
+    var known=LB_ACTS.indexOf(act)>=0;
+    cnt.items.forEach(function(it){
+      rows.push({id:lbSeq++,plot:place,act:known?act:LB_OTHER,other:known?'':act,sup:sf?sf.s:'',con:it.con,shift:it.shift,workers:String(it.n),hours:String(LB_STD_H),short:'',otW:'',otH:'',flag:flag.slice()});
+    });
+  });
+  return {rows:rows,warns:warns,date:date};
+}
+function lbImport(){
+  var txt=srV('lb-import'); if(!txt.trim()){ toast('วางข้อความรายงานก่อน'); return; }
+  var res=lbParseText(txt), msg=[];
+  if(!res.rows.length){ document.getElementById('lb-import-msg').innerHTML='<span style="color:#e74c3c">ไม่พบรายการที่อ่านได้</span>'+(res.warns.length?'<br>'+res.warns.map(srE).join('<br>'):''); return; }
+  lbRows=res.rows; lbRenderRows();
+  if(res.date){
+    if(res.date>todayISO()) msg.push('วันที่ในข้อความเป็นอนาคต — ไม่ได้เปลี่ยนวันที่');
+    else if(res.date<srAddDays(todayISO(),-LB_BACK_DAYS)) msg.push('วันที่ในข้อความย้อนเกิน '+LB_BACK_DAYS+' วัน — ไม่ได้เปลี่ยนวันที่');
+    else { srSet('lb-date',res.date); lbRenderList(); }
+  }
+  var tot=0, fl=0; res.rows.forEach(function(r){ tot+=parseInt(r.workers,10)||0; if(r.flag.length) fl++; });
+  document.getElementById('lb-import-msg').innerHTML='✅ แยกได้ <b>'+res.rows.length+' รายการ</b> · รวม <b>'+tot+' คน</b>'+(fl?' · <span style="color:#b7791f">'+fl+' รายการมีเครื่องหมายเตือน (กรอบสีเหลือง) ตรวจก่อนบันทึก</span>':'')
+    +(msg.length||res.warns.length?'<br>'+msg.concat(res.warns).map(srE).join('<br>'):'')+'<br>เลือกผู้บันทึกแล้วกดบันทึกด้านล่าง';
+  window.scrollTo(0,0);
+}
+
+// ---------- สรุป / รายการ ----------
 function lbDaySummary(date){
   var by={};
   lbRecs.filter(function(r){ return r.date===date; }).forEach(function(r){
     r.rows.forEach(function(x){
-      var s=by[x.con]||(by[x.con]={workers:0,manH:0,otMH:0,manD:0,acts:0});
-      var c=lbCalc(x); s.workers+=c.workers; s.manH+=c.manH; s.otMH+=c.otMH; s.manD+=c.manD; s.acts++;
+      var s=by[x.plot]||(by[x.plot]={workers:0,night:0,manD:0,otMH:0,acts:0});
+      var c=lbCalc(x); s.workers+=c.workers; if(x.shift==='Night') s.night+=c.workers; s.manD+=c.manD; s.otMH+=c.otMH; s.acts++;
     });
   });
   return by;
@@ -2605,13 +2716,14 @@ function lbRenderList(){
   var box=document.getElementById('lb-list'); if(!box) return;
   var date=srV('lb-date')||todayISO();
   var list=lbRecs.filter(function(r){ return r.date===date; }).sort(function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); });
-  var sum=lbDaySummary(date), keys=Object.keys(sum);
+  var sum=lbDaySummary(date), keys=Object.keys(sum), tw=0, tn=0;
+  keys.forEach(function(k){ tw+=sum[k].workers; tn+=sum[k].night; });
   document.getElementById('lb-day-sum').innerHTML = keys.length ? '<div class="sr-box on">'+keys.map(function(k){ var s=sum[k];
-    return '🧑‍🌾 <b>'+srE(k)+'</b> — '+s.workers+' คน · '+s.acts+' กิจกรรม · '+srNum(s.manD,2)+' แรง-วัน'+(s.otMH>0?' · OT '+srNum(s.otMH,1)+' คน·ชม.':''); }).join('<br>')+'</div>' : '';
+    return '📍 <b>'+srE(k)+'</b> — '+s.workers+' คน'+(s.night>0?' (กะดึก '+s.night+')':'')+' · '+s.acts+' รายการ · '+srNum(s.manD,2)+' แรง-วัน'+(s.otMH>0?' · OT '+srNum(s.otMH,1)+' คน·ชม.':''); }).join('<br>')+'<br><b>รวม '+tw+' คน</b>'+(tn>0?' (กะดึก '+tn+')':'')+'</div>' : '';
   box.innerHTML = list.length ? list.map(function(r){
-    return '<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.date)+' · '+srE(r.who)+(r.editCount?' · แก้ไข '+r.editCount+' ครั้ง':'')+'</span></div>'
+    return '<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.date)+' · '+srE(lbSupShort(r.who)||r.who)+(r.editCount?' · แก้ไข '+r.editCount+' ครั้ง':'')+'</span></div>'
       +r.rows.map(function(x){ var c=lbCalc(x);
-        return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+' · '+srE(x.con)+'<br><span class="sr-sub">'+x.workers+' คน × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':'')+(x.otW>0?' | OT '+x.otW+' คน × '+x.otH+' ชม.':'')+' → '+srNum(c.manD,2)+' แรง-วัน</span></div>'; }).join('')
+        return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+(x.shift==='Night'?' · 🌙 กะดึก':'')+'<br><span class="sr-sub">'+x.workers+' คน'+(x.hours!==LB_STD_H?' × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':''):'')+(x.otW>0?' | OT '+x.otW+' คน × '+x.otH+' ชม.':'')+(x.supS||x.sup?' · ดูแล: '+srE(x.supS||lbSupShort(x.sup)):'')+(x.con?' · '+srE(x.con):'')+'</span></div>'; }).join('')
       +'<div class="sr-btns"><button class="sr-btn ghost" onclick="lbEdit(\''+r.id+'\')">✏️ แก้ไข</button><button class="sr-btn ghost" onclick="lbDelete(\''+r.id+'\')">🗑 ลบ</button></div></div>';
   }).join('') : '<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีบันทึกของวันนี้</div>';
 }
