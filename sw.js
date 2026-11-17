@@ -1,4 +1,4 @@
-﻿const CACHE = 'chemcontrol-v46';
+﻿const CACHE = 'chemcontrol-v48';
 const STATIC = [
   '/Jirayu/',
   '/Jirayu/index.html',

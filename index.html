@@ -644,7 +644,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.6.lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.8.lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -2465,6 +2465,7 @@ function srExportXlsx(){
 // ═══════════════════════════════════════════════════════════
 var LB_KEY='mf_lb', LB_DEL_KEY='mf_lb_deleted', LB_CLOUD=true;
 var LB_CONTRACTORS=['Thim','Vanda'];
+var LB_DEF_CON='Thim'; // ไม่ระบุผู้รับเหมา = Thim (Da = Vanda)
 // ผู้ดูแล: [ชื่อเล่น (ใช้ใน LINE), ชื่อเต็ม (เก็บในข้อมูล)]
 var LB_SUPS=[['Ning','SUTHISA SUDSALAI'],['Nirut','NIRUT PHAYACHAI'],['M','ARIYAPAS PATTANAPORNPAISARN'],['Cheata','So Cheata'],['Jirayu','JIRAYU NANTALAKHA'],['Tee','Academy'],['Bo','KRISSANAPON INTAYUNG'],['Aw','Kridsada']];
 var LB_PLACES=['Office','Silo'];
@@ -2477,7 +2478,7 @@ function lbLoad(k){ try{ var a=JSON.parse(localStorage.getItem(k)||'[]'); return
 var lbRecs=lbLoad(LB_KEY), lbDeleted=lbLoad(LB_DEL_KEY), lbRows=[], lbSeq=0, lbEditId=null;
 function lbPersist(){ try{ localStorage.setItem(LB_KEY,JSON.stringify(lbRecs)); localStorage.setItem(LB_DEL_KEY,JSON.stringify(lbDeleted)); }catch(e){ toast('⚠️ เก็บข้อมูลในเครื่องไม่ได้'); } }
 function lbFind(id){ for(var i=0;i<lbRecs.length;i++) if(lbRecs[i].id===id) return lbRecs[i]; return null; }
-function lbNewRow(){ return {id:lbSeq++,plot:'',act:'',other:'',sup:'',con:'',shift:'Day',workers:'',hours:String(LB_STD_H),short:'',otW:'',otH:'',flag:[]}; }
+function lbNewRow(){ return {id:lbSeq++,plot:'',act:'',other:'',sup:'',con:LB_DEF_CON,shift:'Day',workers:'',hours:String(LB_STD_H),short:'',otW:'',otH:'',flag:[]}; }
 function lbRowOf(id){ for(var i=0;i<lbRows.length;i++) if(lbRows[i].id===id) return lbRows[i]; return null; }
 function lbNum(x){ x=parseFloat(x); return isNaN(x)?0:x; }
 function lbR1(x){ return Math.round(x*10)/10; }
@@ -2492,6 +2493,7 @@ function lbSupFind(x){
   for(var i=0;i<LB_SUPS.length;i++) if(LB_SUPS[i][0].toLowerCase()===x || LB_SUPS[i][1].toLowerCase()===x) return {s:LB_SUPS[i][0],f:LB_SUPS[i][1]};
   return null;
 }
+function lbSupFull(x){ var f=lbSupFind(x); return f?f.f:String(x||''); }
 function lbSupShort(full){ var f=lbSupFind(full); return f?f.s:String(full||''); }
 function lbKnownPlace(p){
   var l=String(p||'').toLowerCase();
@@ -2595,7 +2597,7 @@ function lbSave(){
   var now=new Date().toISOString(), old=lbEditId?lbFind(lbEditId):null;
   var rec={id:old?old.id:uid('LB'), date:srV('lb-date'), who:srV('lb-who'),
     rows:lbRows.map(function(r){ var h=r.hours===''?LB_STD_H:parseFloat(r.hours), s=lbSupFind(r.sup);
-      return {plot:lbPlaceNorm(r.plot), act:lbActName(r), sup:s?s.f:'', supS:s?s.s:'', con:r.con||'', shift:r.shift||'Day', workers:parseFloat(r.workers), hours:h,
+      return {plot:lbPlaceNorm(r.plot), act:lbActName(r), sup:s?s.f:'', supS:s?s.s:'', con:r.con||LB_DEF_CON, shift:r.shift||'Day', workers:parseFloat(r.workers), hours:h,
       short:h<LB_STD_H?r.short:'', otW:lbNum(r.otW), otH:lbNum(r.otH)}; }),
     createdAt:old?old.createdAt:now, updatedAt:now, editCount:old?((old.editCount||0)+1):0};
   if(old) lbRecs[lbRecs.indexOf(old)]=rec; else lbRecs.push(rec);
@@ -2635,7 +2637,7 @@ function lbParseCount(expr){
   var parts=String(expr||'').split('+'), out=[], flags=[];
   parts.forEach(function(p,i){
     var m=p.match(/(\d+)\s*(?:\(([^)]*)\))?/); if(!m) return;
-    var item={n:parseInt(m[1],10),shift:'Day',con:''}, tag=String(m[2]||'').trim().toLowerCase();
+    var item={n:parseInt(m[1],10),shift:'Day',con:LB_DEF_CON}, tag=String(m[2]||'').trim().toLowerCase();
     if(tag){
       if(/night|ดึก/.test(tag)) item.shift='Night';
       else if(/^(day|เช้า)$/.test(tag)) item.shift='Day';
@@ -2723,7 +2725,7 @@ function lbRenderList(){
   box.innerHTML = list.length ? list.map(function(r){
     return '<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.date)+' · '+srE(lbSupShort(r.who)||r.who)+(r.editCount?' · แก้ไข '+r.editCount+' ครั้ง':'')+'</span></div>'
       +r.rows.map(function(x){ var c=lbCalc(x);
-        return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+(x.shift==='Night'?' · 🌙 กะดึก':'')+'<br><span class="sr-sub">'+x.workers+' คน'+(x.hours!==LB_STD_H?' × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':''):'')+(x.otW>0?' | OT '+x.otW+' คน × '+x.otH+' ชม.':'')+(x.supS||x.sup?' · ดูแล: '+srE(x.supS||lbSupShort(x.sup)):'')+(x.con?' · '+srE(x.con):'')+'</span></div>'; }).join('')
+        return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+(x.shift==='Night'?' · 🌙 กะดึก':'')+'<br><span class="sr-sub">'+x.workers+' คน'+(x.hours!==LB_STD_H?' × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':''):'')+(x.otW>0?' | OT '+x.otW+' คน × '+x.otH+' ชม.':'')+(x.supS||x.sup?' · ดูแล: '+srE(lbSupFull(x.sup||x.supS)):'')+(x.con?' · '+srE(x.con):'')+'</span></div>'; }).join('')
       +'<div class="sr-btns"><button class="sr-btn ghost" onclick="lbEdit(\''+r.id+'\')">✏️ แก้ไข</button><button class="sr-btn ghost" onclick="lbDelete(\''+r.id+'\')">🗑 ลบ</button></div></div>';
   }).join('') : '<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีบันทึกของวันนี้</div>';
 }
