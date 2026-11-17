@@ -259,6 +259,12 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
       <div class="fe">ประเมินผลหลังพ่น</div>
       <span class="badge" id="ev-home-badge" style="background:rgba(240,180,41,.2);color:var(--warn)">EV-01</span>
     </div>
+    <div class="fcard" onclick="showForm('lb'); lbOpen();">
+      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">👷</div>
+      <div class="fk">កម្មករប្រចាំថ្ងៃ</div>
+      <div class="fe">คนงานรายวัน</div>
+      <span class="badge" id="lb-home-badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LB-01</span>
+    </div>
   </div>
   <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
     🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 60s</span>
@@ -451,6 +457,31 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   <div id="ev-list"></div>
 </div>
 
+<!-- LB-01 · คนงานรายวัน -->
+<div class="fw" id="fw-lb">
+  <div class="fhdr">
+    <button class="back" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">👷 កម្មករប្រចាំថ្ងៃ (คนงานรายวัน)</div>
+    <span class="badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LB-01</span>
+  </div>
+  <div id="lb-edit-banner" style="display:none;background:rgba(240,180,41,.18);border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:10px">✏️ กำลังแก้ไข <b id="lb-edit-id"></b> · <span style="text-decoration:underline;cursor:pointer" onclick="lbReset()">ยกเลิกการแก้ไข</span></div>
+  <div class="g2">
+    <div class="grp"><label>วันที่ (Date)</label><input type="date" id="lb-date" onchange="lbRenderList()"></div>
+    <div class="grp"><label>ผู้บันทึก (Recorder)</label><select id="lb-who"></select></div>
+  </div>
+  <div class="grp">
+    <div class="chem-hdr"><label>กิจกรรม (Activity)</label><span class="chem-count" id="lb-count">1 กิจกรรม</span></div>
+    <div id="lb-rows"></div>
+    <button class="abtn" style="color:var(--blue)" onclick="lbAddRow()">+ เพิ่มกิจกรรม</button>
+  </div>
+  <div id="lb-total" class="sr-box on" style="margin-bottom:10px"></div>
+  <button class="sbtn" id="lb-save-btn" style="background:var(--blue)" onclick="lbSave()">✓ บันทึกคนงาน</button>
+  <div class="sec" style="margin-top:16px">รายการของวันที่เลือก</div>
+  <div id="lb-day-sum"></div>
+  <div id="lb-list"></div>
+  <button class="sbtn" style="background:var(--teal);margin-top:6px" onclick="lbSendLine()">📤 ส่งสรุปวันนี้เข้า LINE</button>
+</div>
+
 <!-- SR-01 MODAL -->
 <div class="pmo" id="sr-modal" onclick="if(event.target===this)srCloseModal()">
   <div class="pmb">
@@ -607,7 +638,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.4.sr'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.5.lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -1568,6 +1599,7 @@ function selectPlot(p,isNew){
   closePlot();
   if(curPlotTarget==='sr-plot' && typeof srPlotChanged==='function') srPlotChanged();
   if(curPlotTarget==='mx-plot' && typeof srMxRefresh==='function') { try{ srMxRefresh(); }catch(e){} }
+  if(String(curPlotTarget).indexOf('lb-plot-')===0 && typeof lbPlotPicked==='function') lbPlotPicked(curPlotTarget,p);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2391,7 +2423,19 @@ function srBuildSheets(){
     var all=sanitizeAllChems(m.allChems||{});
     mx.push([m.id,m.date||'',m.time||'',m.mixer||'',m.plot||'',m.sprayer||'',m.cropType||'',m.season||'',Object.keys(all).map(function(k){ return k+' '+all[k]; }).join(' | '),m.note||'',link[m.id]||'']);
   });
-  return [['SR คำขอ',sr],['สารเคมี',ch],['Mixing รอบ',rd],['ประเมินผล',ev],['ใบเบิก CR',cr],['MX-01',mx]];
+  var lb=[['Date','RecordID','Recorder','Plot','Activity','Contractor','Workers','Hours','ShortReason','OT Workers','OT Hours','Man-hours','OT man-hours','Man-days']];
+  var lbDay={};
+  (typeof lbRecs!=='undefined'?lbRecs:[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(r){
+    (r.rows||[]).forEach(function(x){
+      var c=lbCalc(x);
+      lb.push([r.date,r.id,r.who||'',x.plot,x.act,x.con,x.workers,x.hours,x.short||'',x.otW||0,x.otH||0,lbR1(c.manH),lbR1(c.otMH),Math.round(c.manD*100)/100]);
+      var k=r.date+'|'+x.con, s=lbDay[k]||(lbDay[k]={date:r.date,con:x.con,workers:0,acts:0,manH:0,otMH:0,manD:0});
+      s.workers+=c.workers; s.acts++; s.manH+=c.manH; s.otMH+=c.otMH; s.manD+=c.manD;
+    });
+  });
+  var lbs=[['Date','Contractor','Workers','Activities','Man-hours','OT man-hours','Man-days']];
+  Object.keys(lbDay).sort().forEach(function(k){ var s=lbDay[k]; lbs.push([s.date,s.con,s.workers,s.acts,lbR1(s.manH),lbR1(s.otMH),Math.round(s.manD*100)/100]); });
+  return [['SR คำขอ',sr],['สารเคมี',ch],['Mixing รอบ',rd],['ประเมินผล',ev],['ใบเบิก CR',cr],['MX-01',mx],['คนงาน LB-01',lb],['สรุปคนงานรายวัน',lbs]];
 }
 function srExportXlsx(){
   toast('⏳ กำลังสร้างไฟล์ Excel…');
@@ -2410,12 +2454,218 @@ function srExportXlsx(){
   });
 }
 
+// ═══════════════════════════════════════════════════════════
+// LB-01 · คนงานรายวัน (เก็บแยก ไม่ใช้ records/handleSave ของ MX/LD)
+// ═══════════════════════════════════════════════════════════
+var LB_KEY='mf_lb', LB_DEL_KEY='mf_lb_deleted', LB_CLOUD=true;
+var LB_CONTRACTORS=['Thim','Vanda'];
+var LB_ACTS=['ถอนหญ้า','ใส่ปุ๋ย','ฉีดพ่น / ช่วยผสมสาร','ตัดแต่งกิ่ง','ปลูก / ซ่อมปลูก','เก็บเกี่ยว','รดน้ำ / ระบบน้ำ','เก็บขยะ / ทำความสะอาดแปลง','ขนย้าย'];
+var LB_OTHER='อื่น ๆ (พิมพ์เอง)';
+var LB_SHORT=['ฝนตก','งานเสร็จก่อนเวลา','อื่น ๆ'];
+var LB_STD_H=8, LB_BACK_DAYS=7;
+function lbLoad(k){ try{ var a=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+var lbRecs=lbLoad(LB_KEY), lbDeleted=lbLoad(LB_DEL_KEY), lbRows=[], lbSeq=0, lbEditId=null;
+function lbPersist(){ try{ localStorage.setItem(LB_KEY,JSON.stringify(lbRecs)); localStorage.setItem(LB_DEL_KEY,JSON.stringify(lbDeleted)); }catch(e){ toast('⚠️ เก็บข้อมูลในเครื่องไม่ได้'); } }
+function lbFind(id){ for(var i=0;i<lbRecs.length;i++) if(lbRecs[i].id===id) return lbRecs[i]; return null; }
+function lbNewRow(){ return {id:lbSeq++,plot:'',act:'',other:'',con:'',workers:'',hours:String(LB_STD_H),short:'',otW:'',otH:''}; }
+function lbRowOf(id){ for(var i=0;i<lbRows.length;i++) if(lbRows[i].id===id) return lbRows[i]; return null; }
+function lbNum(x){ x=parseFloat(x); return isNaN(x)?0:x; }
+function lbR1(x){ return Math.round(x*10)/10; }
+function lbCalc(r){
+  var w=lbNum(r.workers), h=lbNum(r.hours), ow=lbNum(r.otW), oh=lbNum(r.otH);
+  return {workers:w, manH:w*h, otMH:ow*oh, manD:w*h/LB_STD_H};
+}
+function lbActName(r){ return r.act===LB_OTHER ? String(r.other||'').trim() : r.act; }
+
+function lbOpen(){
+  document.getElementById('lb-who').innerHTML=srOptions(SR_PEOPLE,'','— ជ្រើស —');
+  lbReset();
+  lbCloudPull(function(){ lbRenderList(); lbUpdateBadge(); });
+}
+function lbReset(){
+  lbEditId=null;
+  document.getElementById('lb-edit-banner').style.display='none';
+  document.getElementById('lb-save-btn').textContent='✓ บันทึกคนงาน';
+  var d=document.getElementById('lb-date'); d.value=todayISO(); d.max=todayISO(); d.min=srAddDays(todayISO(),-LB_BACK_DAYS);
+  lbRows=[lbNewRow()];
+  lbRenderRows(); lbRenderList();
+}
+function lbRenderRows(){
+  var opts=function(arr,sel,ph){ return '<option value="">'+ph+'</option>'+arr.map(function(x){ return '<option'+(x===sel?' selected':'')+'>'+srE(x)+'</option>'; }).join(''); };
+  document.getElementById('lb-rows').innerHTML=lbRows.map(function(r,i){
+    var h=lbNum(r.hours);
+    return '<div class="chem-card"><div class="cc-top"><b style="font-size:12px">กิจกรรม #'+(i+1)+'</b>'
+      +'<button type="button" class="cc-rm" onclick="lbRemoveRow('+r.id+')"'+(lbRows.length<=1?' style="visibility:hidden"':'')+'>✕</button></div>'
+      +'<div class="grp"><label>ចំការ (Plot)</label><input type="text" id="lb-plot-'+r.id+'" value="'+srE(r.plot)+'" placeholder="ជ្រើស..." onclick="openPlot(\'lb-plot-'+r.id+'\')" readonly style="cursor:pointer"></div>'
+      +'<div class="g2"><div class="grp"><label>กิจกรรม</label><select onchange="lbSet('+r.id+',\'act\',this.value,true)">'+opts(LB_ACTS.concat([LB_OTHER]),r.act,'— เลือก —')+'</select></div>'
+      +'<div class="grp"><label>ผู้รับเหมา</label><select onchange="lbSet('+r.id+',\'con\',this.value)">'+opts(LB_CONTRACTORS,r.con,'— เลือก —')+'</select></div></div>'
+      +(r.act===LB_OTHER?'<div class="grp"><label>ชื่อกิจกรรม</label><input type="text" value="'+srE(r.other)+'" placeholder="พิมพ์ชื่อกิจกรรม" oninput="lbSet('+r.id+',\'other\',this.value)"></div>':'')
+      +'<div class="g2"><div class="grp"><label>จำนวนแรงงาน (คน)</label><input type="number" inputmode="numeric" min="1" value="'+srE(r.workers)+'" placeholder="เช่น 10" oninput="lbSet('+r.id+',\'workers\',this.value)"></div>'
+      +'<div class="grp"><label>ชม.ทำงาน (ปกติ '+LB_STD_H+')</label><input type="number" inputmode="decimal" step="0.5" min="0" max="12" value="'+srE(r.hours)+'" oninput="lbSet('+r.id+',\'hours\',this.value)"></div></div>'
+      +'<div class="grp" id="lb-shortwrap-'+r.id+'" style="'+(h<LB_STD_H?'':'display:none')+'"><label>เหตุผลที่เลิกก่อนเวลา</label><select onchange="lbSet('+r.id+',\'short\',this.value)">'+opts(LB_SHORT,r.short,'— เลือก —')+'</select></div>'
+      +'<div class="g2"><div class="grp"><label>OT · จำนวนคน</label><input type="number" inputmode="numeric" min="0" value="'+srE(r.otW)+'" placeholder="0" oninput="lbSet('+r.id+',\'otW\',this.value)"></div>'
+      +'<div class="grp"><label>OT · ชม.</label><input type="number" inputmode="decimal" step="0.5" min="0" max="6" value="'+srE(r.otH)+'" placeholder="0" oninput="lbSet('+r.id+',\'otH\',this.value)"></div></div>'
+      +'<div class="sr-info" id="lb-ri-'+r.id+'"></div></div>';
+  }).join('');
+  document.getElementById('lb-count').textContent=lbRows.length+' กิจกรรม';
+  lbRenderCalc();
+}
+function lbSet(id,k,v,rerender){
+  var r=lbRowOf(id); if(!r) return;
+  r[k]=v;
+  if(k==='hours'){ var sw=document.getElementById('lb-shortwrap-'+id); if(sw) sw.style.display = (v!=='' && lbNum(v)<LB_STD_H) ? '' : 'none'; }
+  if(rerender && k==='act'){ lbRenderRows(); return; }
+  lbRenderCalc();
+}
+function lbPlotPicked(target,p){ var id=parseInt(String(target).replace('lb-plot-',''),10); var r=lbRowOf(id); if(r){ r.plot=p; lbRenderCalc(); } }
+function lbAddRow(){
+  var last=lbRows[lbRows.length-1], n=lbNewRow();
+  if(last){ n.con=last.con; n.plot=last.plot; }          // ช่วยกรอกเร็ว: ผู้รับเหมา/แปลงเดิม
+  lbRows.push(n); lbRenderRows();
+}
+function lbRemoveRow(id){ lbRows=lbRows.filter(function(r){ return r.id!==id; }); if(!lbRows.length) lbRows=[lbNewRow()]; lbRenderRows(); }
+function lbRenderCalc(){
+  var t={workers:0,manH:0,otMH:0,manD:0};
+  lbRows.forEach(function(r){
+    var c=lbCalc(r), el=document.getElementById('lb-ri-'+r.id);
+    t.workers+=c.workers; t.manH+=c.manH; t.otMH+=c.otMH; t.manD+=c.manD;
+    if(el) el.innerHTML = c.workers>0 ? (srNum(c.manH,1)+' คน·ชม. ('+srNum(c.manD,2)+' แรง-วัน)'+(c.otMH>0?' · OT '+srNum(c.otMH,1)+' คน·ชม.':'')) : '';
+  });
+  document.getElementById('lb-total').innerHTML='รวมฟอร์มนี้: <b>'+t.workers+' คน</b> · '+srNum(t.manH,1)+' คน·ชม. · <b>'+srNum(t.manD,2)+' แรง-วัน</b>'+(t.otMH>0?' · OT '+srNum(t.otMH,1)+' คน·ชม.':'');
+}
+function lbValidate(){
+  var d=srV('lb-date'), today=todayISO();
+  if(!d) return 'เลือกวันที่';
+  if(d>today) return 'วันที่ต้องไม่เกินวันนี้';
+  if(d<srAddDays(today,-LB_BACK_DAYS)) return 'บันทึกย้อนหลังได้ไม่เกิน '+LB_BACK_DAYS+' วัน';
+  if(!srV('lb-who')) return 'เลือกผู้บันทึก';
+  for(var i=0;i<lbRows.length;i++){
+    var r=lbRows[i], n='กิจกรรม #'+(i+1)+': ';
+    var w=parseFloat(r.workers), h=parseFloat(r.hours), ow=lbNum(r.otW), oh=lbNum(r.otH);
+    if(!r.plot) return n+'เลือกแปลง';
+    if(!lbActName(r)) return n+'เลือก/พิมพ์ชื่อกิจกรรม';
+    if(!r.con) return n+'เลือกผู้รับเหมา';
+    if(!(w>0) || Math.round(w)!==w) return n+'จำนวนแรงงานต้องเป็นจำนวนเต็มมากกว่า 0';
+    if(isNaN(h) || h<0 || h>12) return n+'ชม.ทำงานต้องอยู่ระหว่าง 0–12';
+    if(h<LB_STD_H && !r.short) return n+'เลือกเหตุผลที่เลิกก่อนเวลา';
+    if(ow<0 || Math.round(ow)!==ow) return n+'จำนวนคน OT ต้องเป็นจำนวนเต็ม';
+    if(ow>w) return n+'คน OT ต้องไม่เกินจำนวนแรงงาน';
+    if(oh<0 || oh>6) return n+'ชม. OT ต้องอยู่ระหว่าง 0–6';
+    if((ow>0)!==(oh>0)) return n+'ใส่ทั้งจำนวนคน OT และชม. OT (หรือเว้นว่างทั้งคู่)';
+  }
+  return '';
+}
+function lbSave(){
+  var err=lbValidate(); if(err){ toast('❌ '+err); return; }
+  var now=new Date().toISOString(), old=lbEditId?lbFind(lbEditId):null;
+  var rec={id:old?old.id:uid('LB'), date:srV('lb-date'), who:srV('lb-who'),
+    rows:lbRows.map(function(r){ return {plot:r.plot, act:lbActName(r), con:r.con, workers:parseFloat(r.workers), hours:parseFloat(r.hours),
+      short:parseFloat(r.hours)<LB_STD_H?r.short:'', otW:lbNum(r.otW), otH:lbNum(r.otH)}; }),
+    createdAt:old?old.createdAt:now, updatedAt:now, editCount:old?((old.editCount||0)+1):0};
+  if(old) lbRecs[lbRecs.indexOf(old)]=rec; else lbRecs.push(rec);
+  lbPersist(); lbCloudPush(rec); lbUpdateBadge();
+  toast(old?'✅ แก้ไขแล้ว ('+rec.id+')':'✅ บันทึกแล้ว ('+rec.id+')');
+  var keepDate=rec.date, keepWho=rec.who;
+  lbReset(); srSet('lb-date',keepDate); srSet('lb-who',keepWho); lbRenderList();
+}
+function lbEdit(id){
+  var r=lbFind(id); if(!r) return;
+  lbEditId=id;
+  srSet('lb-date',r.date); srSet('lb-who',r.who);
+  lbRows=r.rows.map(function(x){
+    var known=LB_ACTS.indexOf(x.act)>=0;
+    return {id:lbSeq++,plot:x.plot,act:known?x.act:LB_OTHER,other:known?'':x.act,con:x.con,workers:String(x.workers),hours:String(x.hours),short:x.short||'',otW:x.otW?String(x.otW):'',otH:x.otH?String(x.otH):''};
+  });
+  lbRenderRows();
+  document.getElementById('lb-edit-id').textContent=id;
+  document.getElementById('lb-edit-banner').style.display='';
+  document.getElementById('lb-save-btn').textContent='✓ บันทึกการแก้ไข';
+  window.scrollTo(0,0);
+}
+function lbDelete(id){
+  var r=lbFind(id); if(!r) return;
+  var pin=window.prompt('Admin PIN (ลบ '+id+'):',''); if(pin===null) return;
+  if(pin!==ADMIN_PIN){ toast('❌ Wrong PIN'); return; }
+  if(!window.confirm('ลบบันทึก '+id+' ('+srFmtDate(r.date)+') ?\nลบแล้วกู้คืนไม่ได้')) return;
+  lbRecs=lbRecs.filter(function(x){ return x.id!==id; });
+  if(lbDeleted.indexOf(id)<0) lbDeleted.push(id);
+  lbPersist(); lbCloudDelete(id); lbUpdateBadge(); lbRenderList(); toast('🗑 ลบแล้ว ('+id+')');
+}
+function lbDaySummary(date){
+  var by={};
+  lbRecs.filter(function(r){ return r.date===date; }).forEach(function(r){
+    r.rows.forEach(function(x){
+      var s=by[x.con]||(by[x.con]={workers:0,manH:0,otMH:0,manD:0,acts:0});
+      var c=lbCalc(x); s.workers+=c.workers; s.manH+=c.manH; s.otMH+=c.otMH; s.manD+=c.manD; s.acts++;
+    });
+  });
+  return by;
+}
+function lbRenderList(){
+  var box=document.getElementById('lb-list'); if(!box) return;
+  var date=srV('lb-date')||todayISO();
+  var list=lbRecs.filter(function(r){ return r.date===date; }).sort(function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); });
+  var sum=lbDaySummary(date), keys=Object.keys(sum);
+  document.getElementById('lb-day-sum').innerHTML = keys.length ? '<div class="sr-box on">'+keys.map(function(k){ var s=sum[k];
+    return '🧑‍🌾 <b>'+srE(k)+'</b> — '+s.workers+' คน · '+s.acts+' กิจกรรม · '+srNum(s.manD,2)+' แรง-วัน'+(s.otMH>0?' · OT '+srNum(s.otMH,1)+' คน·ชม.':''); }).join('<br>')+'</div>' : '';
+  box.innerHTML = list.length ? list.map(function(r){
+    return '<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.date)+' · '+srE(r.who)+(r.editCount?' · แก้ไข '+r.editCount+' ครั้ง':'')+'</span></div>'
+      +r.rows.map(function(x){ var c=lbCalc(x);
+        return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+' · '+srE(x.con)+'<br><span class="sr-sub">'+x.workers+' คน × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':'')+(x.otW>0?' | OT '+x.otW+' คน × '+x.otH+' ชม.':'')+' → '+srNum(c.manD,2)+' แรง-วัน</span></div>'; }).join('')
+      +'<div class="sr-btns"><button class="sr-btn ghost" onclick="lbEdit(\''+r.id+'\')">✏️ แก้ไข</button><button class="sr-btn ghost" onclick="lbDelete(\''+r.id+'\')">🗑 ลบ</button></div></div>';
+  }).join('') : '<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีบันทึกของวันนี้</div>';
+}
+function lbUpdateBadge(){
+  var b=document.getElementById('lb-home-badge'); if(!b) return;
+  var s=lbDaySummary(todayISO()), w=0; Object.keys(s).forEach(function(k){ w+=s[k].workers; });
+  b.textContent = w ? 'LB-01 · วันนี้ '+w+' คน' : 'LB-01';
+}
+function lbSendLine(){
+  var date=srV('lb-date')||todayISO();
+  if(!lbRecs.some(function(r){ return r.date===date; })){ toast('ยังไม่มีบันทึกของวันที่ '+srFmtDate(date)); return; }
+  if(!(LB_CLOUD && USE_CLOUD && navigator.onLine)){ toast('⚠️ ต้องออนไลน์เพื่อส่ง LINE'); return; }
+  if(!window.confirm('ส่งสรุปคนงานวันที่ '+srFmtDate(date)+' เข้า LINE ?')) return;
+  toast('⏳ กำลังส่ง…');
+  cloudJSONP({action:'sendLaborSummary', date:date}, function(res){
+    if(res && res.ok && res.sent) toast('✅ ส่งสรุปเข้า LINE แล้ว');
+    else if(res && res.ok && res.reason==='no-line') toast('⚠️ ยังไม่ได้ตั้งค่า LINE ใน Apps Script');
+    else if(res && res.ok && res.reason==='no-data') toast('⚠️ ยังไม่มีข้อมูลวันนี้บนคลาวด์ ลองใหม่อีกครั้งใน 10 วินาที');
+    else toast('❌ ส่งไม่สำเร็จ');
+  });
+}
+// ---------- Cloud ----------
+function lbCloudOk(){ return LB_CLOUD && USE_CLOUD && navigator.onLine; }
+function lbCloudPush(rec){ if(lbCloudOk()) cloudWrite({action:'upsertLabor', record:rec}); }
+function lbCloudDelete(id){ if(lbCloudOk()) cloudWrite({action:'deleteLabor', id:id}); }
+function lbCloudPull(cb){
+  if(!lbCloudOk()){ if(cb) cb(); return; }
+  cloudJSONP({action:'getLabor'}, function(res){
+    if(res && res.ok && Array.isArray(res.data)){
+      (res.deletedIds||[]).forEach(function(id){ if(lbDeleted.indexOf(id)<0) lbDeleted.push(id); });
+      lbRecs=lbRecs.filter(function(r){ return lbDeleted.indexOf(r.id)<0; });
+      var byId={}; lbRecs.forEach(function(r){ byId[r.id]=r; });
+      res.data.forEach(function(c){
+        if(!c || !c.id || lbDeleted.indexOf(c.id)>=0) return;
+        var l=byId[c.id];
+        if(!l) lbRecs.push(c);
+        else if(String(c.updatedAt||'')>String(l.updatedAt||'')) lbRecs[lbRecs.indexOf(l)]=c;
+        else if(String(c.updatedAt||'')<String(l.updatedAt||'')) lbCloudPush(l);
+      });
+      var ids={}; res.data.forEach(function(c){ if(c&&c.id) ids[c.id]=1; });
+      lbRecs.forEach(function(l){ if(!ids[l.id]) lbCloudPush(l); });
+      lbPersist();
+    }
+    if(cb) cb();
+  });
+}
+
 // ---------- Badge หน้าแรก ----------
 function srUpdateBadges(){
   var n=srRecs.filter(function(r){ return r.status==='pending' && r.kind!=='ev'; }).length;
   var b=document.getElementById('sr-home-badge'); if(b) b.textContent = n ? 'SR-01 · รออนุมัติ '+n : 'SR-01';
   var p=document.getElementById('sr-pend'); if(p) p.textContent = n ? '('+n+')' : '';
   var e=document.getElementById('ev-home-badge'); if(e){ var k=0; try{ k=evDueCount(); }catch(x){} e.textContent = k ? 'EV-01 · ครบกำหนด '+k : 'EV-01'; }
+  if(typeof lbUpdateBadge==='function'){ try{ lbUpdateBadge(); }catch(x){} }
 }
 window.addEventListener('load', function(){ srUpdateBadges(); });
 

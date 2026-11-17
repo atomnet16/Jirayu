@@ -6,8 +6,10 @@
 
 | ส่วน | เวอร์ชันเดิม (ก่อน SR) | เวอร์ชันปัจจุบัน |
 |---|---|---|
-| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | commit `513200e` · `v14.4.sr` · cache `chemcontrol-v43` |
-| Apps Script | Version 51 (Oct 8, 2026) | Version 54 |
+| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | `v14.5.lb` · cache `chemcontrol-v45` (เพิ่มคนงานรายวัน LB-01) |
+| Apps Script | Version 51 (Oct 8, 2026) | Version 55 (เพิ่ม LB-01) · ก่อนเพิ่ม LB-01 = Version 54 |
+
+ถ้าปัญหาอยู่ที่ฟังก์ชันคนงานอย่างเดียว ให้ย้อนแค่บางส่วน: แอปกลับ commit `513200e` (v14.4.sr) + Apps Script Version 54 — ฟังก์ชัน SR/EV ยังอยู่ครบ ชีต `LB-01`/`LB-Deleted` ไม่ถูกลบ
 
 ไฟล์แอปเดิมในรีโปนี้: `index.pre-SR.html` และ `sw.pre-SR.js` (ตรงกับ commit cbc6cf2 ทุกไบต์ — SHA-256 B00F520CCA7AC40C811E9D902FC8F76E46AA9D9374D6A53B2D6AF48661E38D60)
 
@@ -47,3 +49,8 @@
 | `eaf5b3d` | + แปลงพิมพ์เอง รายการสาร DATA AN LINE รุ่นแรก |
 | `afa3abc` | + Flow ผูก Mixing จบแปลง EV-01 ใบเบิก |
 | `513200e` | + Export xlsx |
+| (ถัดไป) | + คนงานรายวัน LB-01 + LINE สรุป 18:00 |
+
+## Trigger ที่อาจตั้งไว้ (ลบเมื่อย้อน)
+- `srDailyReminders_` (08:00) จาก `srInstallTrigger`
+- `lbDailyLine_` (18:00) จาก `lbInstallTrigger`
