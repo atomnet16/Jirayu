@@ -279,7 +279,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
       <div class="fe">คนงานรายวัน</div>
       <span class="badge" id="lb-home-badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LB-01</span>
     </div>
-    <div class="fcard" onclick="showForm('p3'); p3Open();">
+    <div class="fcard" onclick="p3OpenWithPin()">
       <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">🌽</div>
       <div class="fk">ចំការ P3</div>
       <div class="fe">บันทึกแปลง P3 (Pivot 3)</div>
@@ -984,7 +984,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.1.p3'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.2.p3'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3184,6 +3184,14 @@ function p3Opts(map,sel){ return Object.keys(map).map(function(k){ return '<opti
 function p3Num(id){ var v=srV(id); return v===''?null:parseFloat(v); }
 
 // ---------- ฟอร์ม ----------
+// PIN เข้าหน้า P3 (ถามทุกครั้งที่กดการ์ด) — กันกดเข้าโดยไม่ตั้งใจ ไม่ใช่ระบบความปลอดภัย เพราะโค้ดหน้าเว็บเปิดดูได้
+var P3_PIN='1234';
+function p3OpenWithPin(){
+  var pin=window.prompt('PIN เข้าหน้า P3 (Pivot 3):','');
+  if(pin===null) return;
+  if(String(pin).trim()!==P3_PIN){ toast('❌ PIN ไม่ถูกต้อง'); return; }
+  showForm('p3'); p3Open();
+}
 function p3Open(){
   var who=''; try{ who=localStorage.getItem(P3_WHO_KEY)||''; }catch(e){}
   document.getElementById('p3-who').innerHTML=srOptions(SR_PEOPLE,who,'— ជ្រើស —');
