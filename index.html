@@ -1190,7 +1190,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.20.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.22.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3807,7 +3807,7 @@ function p3ReportHtml(m,imgs){
       if(!L.length) return kpi('สำรวจล่าสุด','–','ยังไม่มี');
       var bad=L.some(function(x){ return x.result==='reached'; }), th=L.filter(function(x){ return x.threshold!==null; })[0];
       return kpi('สำรวจล่าสุด',L.map(function(x){ return '<div style="font-size:'+(L.length>1?13:17)+'px;line-height:1.25">'+E(pn(x.pest))+' '+N(x.pct)+'%</div>'; }).join(''),
-        L.map(function(x){ return P3Core.RESULTS[x.result]; }).filter(function(v,i,a){ return a.indexOf(v)===i; }).join(' · ')+(th?' · เกณฑ์ &lt; '+N(th.threshold)+'%':''),bad?R:G);
+        L.map(function(x){ return x.result==='below'?'มาตรฐาน':P3Core.RESULTS[x.result]; }).filter(function(v,i,a){ return a.indexOf(v)===i; }).join(' · ')+(th?' · เกณฑ์ &lt; '+N(th.threshold)+'%':''),bad?R:G);
     })()+'</div>';
   // ปุ๋ย + ธาตุอาหาร
   h+=sec('🧪 ปุ๋ยและธาตุอาหารสะสม');
@@ -3844,7 +3844,8 @@ function p3ReportHtml(m,imgs){
 }
 // ท้ายหน้า: อยู่นอกกล่องเนื้อหา (กล่องเนื้อหาถูกย่อ/ขยายด้วย transform) จึงติดขอบล่างกระดาษเสมอ
 function p3ReportFoot(){
-  return '<div style="position:absolute;left:34px;right:34px;bottom:18px;display:flex;justify-content:space-between;font-size:9px;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:4px"><span>ผู้บันทึก: '+srE(srV('p3-who')||'')+' · Chem Control '+srE(APP_VERSION)+'</span><span>สร้างเมื่อ '+srE(srFmtDate(todayISO())+' '+new Date().toTimeString().slice(0,5))+' · หน้า 1/1</span></div>';
+  var who=srV('p3-who'); if(!who) return '';   // ท้ายหน้าแสดงเฉพาะผู้บันทึก (ไม่แสดงเวอร์ชันแอป / เวลาสร้าง)
+  return '<div style="position:absolute;left:34px;right:34px;bottom:18px;font-size:9px;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:4px">ผู้บันทึก: '+srE(who)+'</div>';
 }
 var _p3Pdf=false;
 function p3MakePdf(){ p3MakeReport('pdf'); }
