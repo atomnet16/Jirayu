@@ -769,6 +769,7 @@ var P3Core = (function(){
     return p.length?p[p.length-1]:null;
   }
   function seedsPerRai(seedsPerMeter,rowSpacingCm){ var s=num(seedsPerMeter), r=num(rowSpacingCm); if(s===null||!r) return null; return s/(r/100)*1600; }
+  function seedsPerHa(seedsPerMeter,rowSpacingCm){ var s=num(seedsPerMeter), r=num(rowSpacingCm); if(s===null||!r) return null; return s/(r/100)*10000; }
   // สารพ่น: kg/ha → g/rai, L/ha → cc/rai
   function sprayPerRai(rate,unit,cfg){ cfg=cfgWith(cfg); var r=num(rate); if(r===null) return null; return {value:r/cfg.raiPerHa*1000, unit:(unit==='kg/ha'?'g/rai':'cc/rai')}; }
 
@@ -838,7 +839,7 @@ var P3Core = (function(){
         return '🧪 ใส่ปุ๋ย '+r.product+' '+fmtN(c.kgPerHa)+' กก./ฮ. · '+fmtN(c.kgPerRai)+' กก./ไร่ (รวม '+fmtN(c.totalKg,1)+' กก.)'
           +(nr.length?'\n     ธาตุ: '+nr.map(function(x){ return x[0]+' '+fmtN(x[1])+' กก./ไร่ ('+fmtN(x[2])+' กก./ฮ.)'; }).join(' · '):''); }
       if(r.type==='irrigation') return '💧 ให้น้ำ '+(IRR_METHODS[r.method]||r.method)+' '+fmtN(r.waterMm,1)+' มม.'+(r.rainMm?' · ฝน '+fmtN(r.rainMm,1)+' มม.':'');
-      if(r.type==='landprep_plant') return '🚜 '+(LP_ACTS[r.activity]||r.activity)+(r.seedsPerMeter?' '+fmtN(r.seedsPerMeter)+' เมล็ด/ม. แถว '+fmtN(r.rowSpacingCm)+' ซม.':'');
+      if(r.type==='landprep_plant') return '🚜 '+(LP_ACTS[r.activity]||r.activity)+(r.seedsPerMeter?' '+fmtN(r.seedsPerMeter)+' เมล็ด/ม. แถว '+fmtN(r.rowSpacingCm)+' ซม. = '+fmtN(seedsPerHa(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ฮ. · '+fmtN(seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ไร่':'');
       if(r.type==='spray') return '🚿 พ่น'+(SPRAY_TYPES[r.sprayType]?'('+SPRAY_TYPES[r.sprayType]+')':'')+' '+(r.items||[]).map(function(it){ var pr=sprayPerRai(it.rate,it.rateUnit,cfg); return it.product+' '+fmtN(it.rate)+' '+it.rateUnit+(pr?' ('+fmtN(pr.value,1)+' '+pr.unit.replace('/rai','/ไร่')+')':''); }).join(' + ');
       if(r.type==='population'){ var pe=popEval(r); return '🌱 นับต้น '+(pe?fmtN(pe.plantsPerM)+' ต้น/ม. (แถว '+fmtN(r.rowSpacingCm)+' ซม.) = '+fmtN(pe.plantsPerHa,0)+' ต้น/ฮ. · '+fmtN(pe.plantsPerRai,0)+' ต้น/ไร่':''); }
       if(r.type==='scout'){ var ev=scoutEval(r,cfg); return '🔍 '+pestName(r)+' '+fmtN(r.pctFound)+'% ('+RESULTS[ev.result]+(ev.threshold!==null?' '+fmtN(ev.threshold)+'%':'')+') — '+(DECISIONS[r.decision]||r.decision||''); }
@@ -881,7 +882,7 @@ var P3Core = (function(){
     else if(r.type==='spray') text='พ่น'+(SPRAY_TYPES[r.sprayType]||'')+' · '+(r.items||[]).map(function(it){ return it.product; }).join(' + ');
     else if(r.type==='scout'){ var ev=scoutEval(r,cfg); text=pestShort(r)+' '+fmtN(r.pctFound)+'% · '+(TIMINGS[r.timing]||''); tag={cls:ev.result==='reached'?'bad':(ev.result==='below'?'ok':'none'), text:RESULTS[ev.result]}; }
     else if(r.type==='population'){ var pe=popEval(r); text='นับต้น '+(pe?fmtN(pe.plantsPerM)+' ต้น/ม. · '+fmtN(pe.plantsPerHa,0)+' ต้น/ฮ.':''); }
-    else { text=(LP_ACTS[r.activity]||r.activity||'')+((r.activity==='plant'||r.activity==='replant')&&r.seedsPerMeter?' '+fmtN(r.seedsPerMeter)+' เมล็ด/ม. · '+fmtN(seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+'/ไร่':''); }
+    else { text=(LP_ACTS[r.activity]||r.activity||'')+((r.activity==='plant'||r.activity==='replant')&&r.seedsPerMeter?' '+fmtN(r.seedsPerMeter)+' เมล็ด/ม. · '+fmtN(seedsPerHa(r.seedsPerMeter,r.rowSpacingCm),0)+'/ฮ. · '+fmtN(seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+'/ไร่':''); }
     return {id:r.id, t:t, icon:CHIP_ICON[t], text:text, tag:tag, photos:(r.photos||[]).length};
   }
   function timeline(recs,mxDates,cfg,today,ferts){
@@ -1020,7 +1021,7 @@ var P3Core = (function(){
     fertOf:fertOf, dae:dae, popCalc:popCalc, popEval:popEval, latestPop:latestPop,
     FORM_TYPES:FORM_TYPES, SPRAY_TYPES:SPRAY_TYPES, reminders:reminders, PHOTO:PHOTO, fitSize:fitSize, summaryText:summaryText,
     cfgWith:cfgWith, addDays:addDays, daysBetween:daysBetween, dap:dap, stage:stage, findFert:findFert,
-    fertCalc:fertCalc, seedsPerRai:seedsPerRai, sprayPerRai:sprayPerRai, cumulative:cumulative, validate:validate, seedRecords:seedRecords};
+    fertCalc:fertCalc, seedsPerRai:seedsPerRai, seedsPerHa:seedsPerHa, sprayPerRai:sprayPerRai, cumulative:cumulative, validate:validate, seedRecords:seedRecords};
 })();
 if (typeof module!=='undefined' && module.exports) module.exports = P3Core;
 </script>
@@ -1107,7 +1108,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.7.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.8.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3462,7 +3463,7 @@ function p3Preview(){
     lines.push('🎯 เกณฑ์ '+(ev.threshold===null?'—':'<b>'+p3Fmt(ev.threshold)+'%</b> <span class="sr-sub">(DAE '+(ev.dap<=40?'≤':'>')+' '+ev.splitDae+')</span>'));
     if(r.pctFound!==null) lines.push('ผล: <span class="sr-tag '+P3_RESULT_CLS[ev.result]+'">'+P3Core.RESULTS[ev.result]+'</span>'+(ev.result==='reached'?' <span class="sr-sub">พิจารณาขอพ่น (SR-01)</span>':''));
   }
-  if(r.type==='landprep_plant' && r.seedsPerMeter && r.rowSpacingCm) lines.push('🌱 ≈ <b>'+p3Fmt(P3Core.seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+'</b> เมล็ด/ไร่');
+  if(r.type==='landprep_plant' && r.seedsPerMeter && r.rowSpacingCm) lines.push('🌱 ≈ <b>'+p3Fmt(P3Core.seedsPerHa(r.seedsPerMeter,r.rowSpacingCm),0)+'</b> เมล็ด/ฮ. · <b>'+p3Fmt(P3Core.seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+'</b> เมล็ด/ไร่');
   box.innerHTML=lines.join('<br>')||'<span class="sr-sub">กรอกข้อมูลเพื่อดูผลคำนวณ</span>';
 }
 function p3Save(){
@@ -3562,7 +3563,7 @@ function p3Describe(r){
   }
   var s='<b>'+srE(P3Core.LP_ACTS[r.activity]||r.activity)+'</b>';
   if(r.seedsPerMeter) s+=' '+p3Fmt(r.seedsPerMeter)+' เมล็ด/ม. · แถว '+p3Fmt(r.rowSpacingCm)+' ซม.'+(r.variety?' · '+srE(r.variety):'')
-    +'<br><span class="sr-sub">≈ '+p3Fmt(P3Core.seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ไร่</span>';
+    +'<br><span class="sr-sub">≈ '+p3Fmt(P3Core.seedsPerHa(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ฮ. · '+p3Fmt(P3Core.seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ไร่</span>';
   return s;
 }
 function p3RenderAll(){ p3RenderSync(); p3RenderReminders(); p3RenderSummary(); p3RenderList(); p3Preview(); p3UpdateBadge(); p3RenderReport(); }
@@ -3918,13 +3919,15 @@ function p3ExportSheets(){
   var sorted=p3Recs.slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date))||String(a.createdAt).localeCompare(String(b.createdAt)); });
   // ชีต PL-01 ใน Excel มีคอลัมน์ธาตุอาหาร ต่อ ฮ. เพิ่ม (ไม่เพิ่มในชีตซิงก์ เพื่อไม่ให้โครงสร้างชีตเดิมเลื่อน)
   var iK=P3_PL_HEAD.indexOf('K2O (kg/Rai)')+1, cfg=p3Cfg();
-  var plHead=P3_PL_HEAD.slice(0,iK).concat(['N (kg/Ha)','P2O5 (kg/Ha)','K2O (kg/Ha)'],P3_PL_HEAD.slice(iK));
+  var iS=P3_PL_HEAD.indexOf('Seeds/Rai')+1;
+  var plHead=P3_PL_HEAD.slice(0,iK).concat(['N (kg/Ha)','P2O5 (kg/Ha)','K2O (kg/Ha)'],P3_PL_HEAD.slice(iK,iS),['Seeds/Ha'],P3_PL_HEAD.slice(iS));
   var pl=[plHead], sc=[P3_SC_HEAD];
   sorted.forEach(function(r){
     var x=p3SheetRow(r);
     if(x.sheet==='SC-01'){ sc.push(x.row); return; }
     var c=r.type==='fertilizer'?P3Core.fertOf(r,P3Core.findFert(r.product,p3Ferts()),cfg):null;
-    var row=x.row.slice(0,iK).concat([c?p3R3(c.NHa):'',c?p3R3(c.P2O5Ha):'',c?p3R3(c.K2OHa):''],x.row.slice(iK));
+    var sh=(r.type==='landprep_plant'&&r.seedsPerMeter)?P3Core.seedsPerHa(r.seedsPerMeter,r.rowSpacingCm):null;
+    var row=x.row.slice(0,iK).concat([c?p3R3(c.NHa):'',c?p3R3(c.P2O5Ha):'',c?p3R3(c.K2OHa):''],x.row.slice(iK,iS),[sh!==null?Math.round(sh):''],x.row.slice(iS));
     pl.push(row);
   });
   var pop=[['Date','DAE','Stage','Plants/m (avg)','Row (cm)','Plants/Ha','Plants/Rai','Recorder','Note','ID']];
