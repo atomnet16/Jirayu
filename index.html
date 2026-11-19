@@ -328,6 +328,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   <div class="card" style="margin-bottom:11px">
     <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">🌽 แปลง P3 (Pivot 3)</div>
     <div class="g2">
+      <div class="grp"><label>เริ่มฤดูปลูกนี้</label><input type="date" id="p3s-cropStartDate"></div>
       <div class="grp"><label>วันปลูก (DAP 0)</label><input type="date" id="p3s-plantDate"></div>
       <div class="grp"><label>ระยะแถว (ซม.)</label><input type="number" inputmode="decimal" id="p3s-rowSpacingCm"></div>
       <div class="grp"><label>พื้นที่ (ฮ.)</label><input type="number" inputmode="decimal" id="p3s-plotAreaHa" oninput="p3SetRaiPreview()"></div>
@@ -653,6 +654,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
 var P3Core = (function(){
   var DEFAULT_CFG = {
     plot:'P3', plotName:'Pivot 3', crop:'corn',
+    cropStartDate:'2026-11-07',   // วันเริ่มฤดูปลูกนี้ — ข้อมูล/วันพ่น (รวม MX-01 Pivot 3) ก่อนวันนี้ไม่นับในตัวเตือน
     plantDate:'2026-11-08', rowSpacingCm:50,
     plotAreaHa:44, raiPerHa:6.25,
     targetDryYieldKgPerRai:1500, targetMoisturePct:14.0,
@@ -733,8 +735,11 @@ var P3Core = (function(){
   // mxDates = วันที่ MX-01 ที่ plot = Pivot 3 (อ่านอย่างเดียว)
   function dueStatus(due,today){ var d=daysBetween(due,today); return {due:due, status:d>0?'overdue':(d===0?'due_today':'ok'), daysOver:Math.max(d,0), daysLeft:Math.max(-d,0)}; }
   function reminders(recs,mxDates,cfg,today){
-    cfg=cfgWith(cfg); recs=recs||[]; mxDates=mxDates||[];
-    var all=recs.map(function(r){ return r.date; }).concat(mxDates).filter(Boolean);
+    cfg=cfgWith(cfg);
+    var start=cfg.cropStartDate||cfg.plantDate, inCrop=function(d){ return d && d>=start; };
+    recs=(recs||[]).filter(function(r){ return inCrop(r.date); });
+    mxDates=(mxDates||[]).filter(inCrop);                    // MX-01 ของ Pivot 3 จากฤดูก่อนไม่นับ
+    var all=recs.map(function(r){ return r.date; }).concat(mxDates);
     // กฎ 1 — กรอกข้อมูลทุก N วัน (ยังไม่มีบันทึก → นับจากวันปลูก)
     var lastEntry=all.length?all.reduce(function(m,d){ return d>m?d:m; }):null;
     var r1=dueStatus(addDays(lastEntry||cfg.plantDate,cfg.dataEntryEveryDays),today); r1.last=lastEntry;
@@ -814,6 +819,7 @@ var P3Core = (function(){
     if(!r.date || !/^\d{4}-\d{2}-\d{2}$/.test(r.date)) e.push('ระบุวันที่');
     else {
       if(today && r.date>today) e.push('วันที่ห้ามอยู่ในอนาคต');
+      if(cfg.cropStartDate && r.date<cfg.cropStartDate) e.push('วันที่อยู่ก่อนเริ่มฤดูปลูกนี้ ('+cfg.cropStartDate.split('-').reverse().join('/')+')');
       if(r.date<cfg.plantDate){
         var preOk = r.type==='irrigation'
           || (r.type==='landprep_plant' && ['plow','disk','leveling','other'].indexOf(r.activity)>=0)
@@ -978,7 +984,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.p3'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.1.p3'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3492,7 +3498,7 @@ function p3UpdateBadge(){
 }
 
 // ---------- Settings ----------
-var P3_SET_FIELDS=['plantDate','rowSpacingCm','plotAreaHa','raiPerHa','dataEntryEveryDays','scoutAfterSprayDays','scoutGraceDays','scoutEveryDays'];
+var P3_SET_FIELDS=['cropStartDate','plantDate','rowSpacingCm','plotAreaHa','raiPerHa','dataEntryEveryDays','scoutAfterSprayDays','scoutGraceDays','scoutEveryDays'];
 function p3RenderSettings(){
   var cfg=p3Cfg();
   P3_SET_FIELDS.forEach(function(k){ srSet('p3s-'+k,cfg[k]); });
@@ -3506,9 +3512,10 @@ function p3SaveSettings(){
   var n={}, bad=[];
   P3_SET_FIELDS.forEach(function(k){
     var v=srV('p3s-'+k);
-    if(k==='plantDate'){ if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) bad.push('วันปลูก'); else n[k]=v; }
+    if(k==='plantDate'||k==='cropStartDate'){ if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) bad.push(k==='plantDate'?'วันปลูก':'วันเริ่มฤดู'); else n[k]=v; }
     else { var x=parseFloat(v); if(isNaN(x)||x<=0) bad.push(k); else n[k]=x; }
   });
+  if(!bad.length && n.cropStartDate>n.plantDate) bad.push('วันเริ่มฤดูต้องไม่หลังวันปลูก');
   if(bad.length){ toast('❌ ค่าไม่ถูกต้อง: '+bad.join(', ')); return; }
   var pin=window.prompt('Admin PIN (P3 Settings):',''); if(pin===null) return;
   if(pin!==ADMIN_PIN){ toast('❌ Wrong PIN'); return; }
