@@ -609,6 +609,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   </div>
   <div class="sr-info" id="p3-report-msg"></div>
 </div>
+<div id="p3-pick" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center" onclick="if(event.target===this)p3ClosePick()"><div style="background:var(--card,#fff);color:inherit;width:100%;max-width:480px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;padding:14px 14px 18px;box-sizing:border-box;background-color:#fff"><div id="p3-pick-body"></div></div></div>
 <div id="p3-pv" onclick="if(event.target===this)p3ClosePhoto()"><button onclick="p3ClosePhoto()">✕</button><img id="p3-pv-img" alt=""><div class="cap" id="p3-pv-cap"></div></div>
 
 <!-- SR-01 MODAL -->
@@ -1189,7 +1190,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.18.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.20.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3849,12 +3850,76 @@ var _p3Pdf=false;
 function p3MakePdf(){ p3MakeReport('pdf'); }
 function p3MakeImage(){ p3MakeReport('png'); }
 // kind: 'pdf' (A4 1 แผ่น) | 'png' (รูปหน้า A4 เดียวกัน เหมาะส่ง LINE / แชร์ภาพ)
-function p3MakeReport(kind){
+// ---------- เลือกรูปก่อนสร้างรายงาน ----------
+var p3PickKind=null, p3PickSel=[], p3PickPool=[], p3PickExtra=[], p3PickBusy=false;   // p3PickExtra = รูปที่เลือกจากมือถือเพื่อใส่รายงานเท่านั้น (ไม่ผูกกับกิจกรรม)
+function p3OpenPhotoPick(kind){
+  if(_p3Pdf) return;
+  var date=p3ReportDate(), pool=p3PickExtra.slice();
+  p3Recs.filter(function(r){ return r.date<=date && r.photos && r.photos.length; }).sort(function(a,b){
+    if(a.date!==b.date) return a.date<b.date?1:-1; var ca=String(a.createdAt||''), cb=String(b.createdAt||''); return ca<cb?1:ca>cb?-1:0; })
+    .forEach(function(r){ r.photos.forEach(function(p){ pool.push({id:p.id, date:r.date, type:r.type}); }); });
+  p3PickKind=kind; p3PickPool=pool;
+  p3PickSel=P3Core.reportModel({recs:p3Recs, mxDates:p3MxDates(), cfg:p3Cfg(), ferts:p3Ferts(), date:date}).photos.map(function(p){ return p.id; });   // เริ่มต้นเลือกรูปของกิจกรรมล่าสุดให้
+  p3RenderPick();
+  document.getElementById('p3-pick').style.display='flex';
+}
+function p3RenderPick(){
+  var max=P3Core.PHOTO.max, n=p3PickSel.length, label=p3PickKind==='png'?'รูป':'PDF';
+  document.getElementById('p3-pick-body').innerHTML='<div style="font-weight:700;font-size:15px">📷 เลือกรูปใส่รายงาน</div>'
+    +'<div class="sr-sub" style="margin:2px 0 8px">แตะเพื่อเลือก/ยกเลิก · เลือกได้สูงสุด '+max+' รูป (ตอนนี้ '+n+') · เรียงใหม่ → เก่า</div>'
+    +'<label class="sr-btn" style="display:block;text-align:center;background:var(--blue);margin-bottom:10px;cursor:pointer">'+(p3PickBusy?'⏳ กำลังย่อรูป…':'📱 เลือกรูปจากมือถือ (ถ่ายใหม่ / คลังภาพ)<input type="file" accept="image/*" multiple style="display:none" onchange="p3PickAddFiles(this)">')+'</label>'
+    +(p3PickPool.length?'':'<div class="sr-sub" style="text-align:center;margin:8px 0">ยังไม่มีรูปในระบบ — เลือกจากมือถือด้านบน หรือสร้างโดยไม่ใส่รูป</div>')
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'+p3PickPool.map(function(p){
+      var i=p3PickSel.indexOf(p.id), on=i>=0;
+      return '<div onclick="p3PickToggle(\''+srE(p.id)+'\')" style="position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:3px solid '+(on?'var(--acc,#1f7a4d)':'transparent')+'">'
+        +'<img data-p3ph="'+srE(p.id)+'" alt="" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#eee">'
+        +(on?'<span style="position:absolute;top:4px;right:4px;background:var(--acc,#1f7a4d);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+(i+1)+'</span>':'')
+        +'<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:2px 4px">'+(P3_ICONS[p.type]||'📱')+' '+p3ThDate(p.date)+(p.type==='phone'?' · จากมือถือ':'')+'</span></div>';
+    }).join('')+'</div>'
+    +'<div class="sr-btns" style="margin-top:12px"><button class="sr-btn" style="background:var(--acc)" onclick="p3PickGo()">'+(n?'สร้าง'+label+' ('+n+' รูป)':'สร้าง'+label+' (ไม่ใส่รูป)')+'</button>'
+    +'<button class="sr-btn ghost" onclick="p3PickClear()">ไม่ใส่รูป</button><button class="sr-btn ghost" onclick="p3ClosePick()">ยกเลิก</button></div>';
+  p3Hydrate(document.getElementById('p3-pick-body'));
+}
+function p3PickToggle(id){
+  var i=p3PickSel.indexOf(id);
+  if(i>=0) p3PickSel.splice(i,1);
+  else if(p3PickSel.length>=P3Core.PHOTO.max){ toast('เลือกได้ไม่เกิน '+P3Core.PHOTO.max+' รูป'); return; }
+  else p3PickSel.push(id);
+  p3RenderPick();
+}
+// เลือก/ถ่ายรูปจากมือถือ → ย่อในเครื่อง เก็บชั่วคราวใน IndexedDB (ใช้กับรายงานเท่านั้น) แล้วติ๊กเลือกให้อัตโนมัติ
+function p3PickAddFiles(input){
+  var files=Array.prototype.slice.call(input.files||[]); input.value='';
+  if(!files.length || p3PickBusy) return;
+  p3PickBusy=true; p3RenderPick();
+  var skipped=0;
+  files.reduce(function(chain,f){
+    return chain.then(function(){
+      return p3Resize(f).then(function(x){
+        var id=uid('PH');
+        return p3PhotoPut({id:id, blob:x.blob, w:x.w, h:x.h, createdAt:new Date().toISOString()}).then(function(){
+          p3PickExtra.unshift({id:id, date:p3ReportDate(), type:'phone'}); p3PickPool.unshift(p3PickExtra[0]);
+          if(p3PickSel.length<P3Core.PHOTO.max) p3PickSel.push(id); else skipped++;
+        });
+      }).catch(function(e){ toast(e&&e.message==='no-idb'?'⚠️ เครื่องนี้เก็บรูปไม่ได้':'⚠️ เปิดรูป '+(f.name||'')+' ไม่ได้'); });
+    });
+  },Promise.resolve()).then(function(){
+    p3PickBusy=false; p3RenderPick();
+    if(skipped) toast('เลือกครบ '+P3Core.PHOTO.max+' รูปแล้ว — รูปที่เกินอยู่ในรายการ แตะสลับได้');
+  });
+}
+function p3PickClear(){ p3PickSel=[]; p3RenderPick(); }
+function p3ClosePick(){ document.getElementById('p3-pick').style.display='none'; }
+function p3PickGo(){ var kind=p3PickKind, ids=p3PickSel.slice(); p3ClosePick(); p3MakeReport(kind,ids); }
+// ids: รหัสรูปที่เลือก (ไม่ส่ง = เปิดหน้าเลือกรูปก่อน)
+function p3MakeReport(kind,ids){
+  if(ids===undefined){ p3OpenPhotoPick(kind); return; }
   if(_p3Pdf) return;
   var isPng=kind==='png', btn=document.getElementById(isPng?'p3-img-btn':'p3-pdf-btn'), old=btn?btn.innerHTML:'', label=isPng?'รูป':'PDF';
   function busy(on){ _p3Pdf=on; ['p3-pdf-btn','p3-img-btn'].forEach(function(id){ var b=document.getElementById(id); if(b) b.disabled=on; }); if(btn) btn.innerHTML=on?'⏳ กำลังสร้าง'+label+'…':old; }
   busy(true);
   var m=P3Core.reportModel({recs:p3Recs, mxDates:p3MxDates(), cfg:p3Cfg(), ferts:p3Ferts(), date:p3ReportDate()}), host=null;
+  m.photos=ids.map(function(id){ return {id:id}; }); m.photosTotal=ids.length;   // รูปตามที่ผู้ใช้เลือก
   Promise.all([isPng?p3LoadScript(P3_LIBS.h2c,function(){ return !!window.html2canvas; }):p3PdfLibs(), p3ReportPhotos(m)]).then(function(x){
     var imgs=x[1];
     host=document.createElement('div');
@@ -4105,6 +4170,7 @@ function p3PhotoUrl(id){
 function p3SweepPhotos(){
   var used={}; p3Recs.forEach(function(r){ (r.photos||[]).forEach(function(p){ used[p.id]=1; }); });
   p3NewPhotoIds.forEach(function(id){ used[id]=1; });
+  p3PickExtra.forEach(function(p){ used[p.id]=1; });   // รูปที่เลือกจากมือถือไว้ใส่รายงาน (ยังใช้อยู่ในรอบนี้)
   p3PhotoKeys().then(function(keys){ p3PhotoDel((keys||[]).filter(function(k){ return !used[k]; })); }).catch(function(){});
 }
 function p3Resize(file){
