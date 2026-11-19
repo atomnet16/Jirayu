@@ -709,7 +709,7 @@ var P3Core = (function(){
   ];
   var STAGES = [[-Infinity,'ก่อนปลูก'],[0,'ปลูก'],[1,'ก่อนงอก'],[5,'VE'],[8,'V2'],[15,'V4'],[21,'V6'],[28,'V8'],[36,'V10'],[43,'V12+'],[53,'VT'],[59,'R1'],[66,'R2'],[76,'R3'],[86,'R4'],[96,'R5'],[106,'R6']];
   var TYPES = {fertilizer:'ใส่ปุ๋ย', irrigation:'ให้น้ำ', landprep_plant:'เตรียมดิน/ปลูก', scout:'สำรวจศัตรูพืช', population:'นับต้น (Population)', spray:'พ่นสาร'};
-  var FORM_TYPES = ['fertilizer','irrigation','landprep_plant','scout','population'];
+  var FORM_TYPES = ['fertilizer','irrigation','landprep_plant','spray','scout','population'];
   var SPRAY_TYPES = {pre_emergent:'ก่อนงอก', post_emergent:'หลังงอก', insecticide:'กำจัดแมลง', foliar:'ทางใบ'};
   // SC-01: เกณฑ์ % [DAP ≤ 40, DAP > 40] · null = ไม่มีเกณฑ์
   var PESTS = {
@@ -1176,7 +1176,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.10.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.11.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3439,6 +3439,29 @@ function p3SetType(t,rec){
   p3RenderFields(rec||{});
   p3Preview();
 }
+// ---------- ฟอร์มพ่นสาร: หลายสารต่อครั้ง กรอกปริมาณรวมทั้งแปลง (kg / L) ----------
+var p3SprayRows=[];
+function srChemU(name){ for(var i=0;i<SR_CHEMS.length;i++) if(SR_CHEMS[i].n===name) return SR_CHEMS[i].u==='Kg'?'kg':'L'; return null; }
+function p3SpraySync(){
+  p3SprayRows=p3SprayRows.map(function(x,i){ return {product:srV('p3-sp-prod-'+i).trim(), total:srV('p3-sp-tot-'+i), unit:srV('p3-sp-unit-'+i)||x.unit}; });
+}
+function p3RenderSprayRows(){
+  var box=document.getElementById('p3-spray-rows'); if(!box) return;
+  box.innerHTML=p3SprayRows.map(function(x,i){
+    return '<div style="display:grid;grid-template-columns:1fr 84px 58px 28px;gap:6px;margin-bottom:6px;align-items:center">'
+      +'<input type="text" list="p3-chems" id="p3-sp-prod-'+i+'" placeholder="ชื่อสาร" value="'+srE(x.product)+'" onchange="p3SprayProd('+i+')">'
+      +'<input type="number" inputmode="decimal" step="any" id="p3-sp-tot-'+i+'" placeholder="รวมแปลง" value="'+srE(x.total)+'" oninput="p3Preview()">'
+      +'<select id="p3-sp-unit-'+i+'" onchange="p3Preview()"><option'+(x.unit==='kg'?' selected':'')+'>kg</option><option'+(x.unit==='L'?' selected':'')+'>L</option></select>'
+      +'<button type="button" onclick="p3SprayDel('+i+')" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer">✕</button></div>';
+  }).join('');
+}
+function p3SprayProd(i){ var u=srChemU(srV('p3-sp-prod-'+i).trim()); if(u) srSet('p3-sp-unit-'+i,u); p3Preview(); }   // เลือกสารจากรายการ → ตั้งหน่วยให้
+function p3SprayAdd(){ p3SpraySync(); p3SprayRows.push({product:'',total:'',unit:'L'}); p3RenderSprayRows(); }
+function p3SprayDel(i){ p3SpraySync(); p3SprayRows.splice(i,1); if(!p3SprayRows.length) p3SprayRows.push({product:'',total:'',unit:'L'}); p3RenderSprayRows(); p3Preview(); }
+function p3SprayItems(){
+  p3SpraySync();
+  return p3SprayRows.filter(function(x){ return x.product||x.total!==''; }).map(function(x){ var t=parseFloat(x.total); return {product:x.product, total:isNaN(t)?null:t, totalUnit:x.unit}; });
+}
 // พื้นที่แปลง: แก้ไขได้ตลอดเวลาจากในฟอร์ม — อัตรา ต่อ ฮ./ไร่ ทุกรายการคำนวณใหม่อัตโนมัติ
 function p3AreaBox(cfg,hint){
   return '<div class="sr-info" style="margin:-4px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:6px">📐 พื้นที่แปลง '
@@ -3491,6 +3514,15 @@ function p3RenderFields(r){
      +'<input type="number" inputmode="decimal" id="p3-t20" placeholder="20 ซม." value="'+v(tm.cm20)+'">'
      +'<input type="number" inputmode="decimal" id="p3-t40" placeholder="40 ซม." value="'+v(tm.cm40)+'">'
      +'<input type="number" inputmode="decimal" id="p3-t60" placeholder="60 ซม." value="'+v(tm.cm60)+'"></div></div>';
+  } else if(p3Type==='spray'){
+    p3SprayRows=(r.items&&r.items.length?r.items:[{}]).map(function(it){
+      var c=it.product?P3Core.sprayItemCalc(it,cfg):null, sc=it.product?srChemU(it.product):null;
+      return {product:it.product||'', total:c?Math.round(c.total*1000)/1000:'', unit:c?c.unit:(sc||'L')};
+    });
+    h='<div class="grp"><label>ชนิดการพ่น</label><select id="p3-sptype" onchange="p3Preview()"><option value="">— เลือก —</option>'+p3Opts(P3Core.SPRAY_TYPES,r.sprayType)+'</select></div>'
+     +p3AreaBox(cfg,'กรอกปริมาณสารที่ใช้ทั้งแปลง ระบบคำนวณต่อ ฮ./ไร่ให้')
+     +'<div id="p3-spray-rows"></div><button type="button" class="abtn" style="margin:0 0 10px" onclick="p3SprayAdd()">＋ เพิ่มสาร</button>'
+     +'<datalist id="p3-chems">'+SR_CHEMS.map(function(c){ return '<option value="'+srE(c.n)+'">'; }).join('')+'</datalist>';
   } else if(p3Type==='population'){
     h='<div class="g2"><div class="grp"><label>ต้น/เมตร (ค่าเฉลี่ย)</label><input type="number" inputmode="decimal" step="0.01" id="p3-pop-pm" value="'+v(r.plantsPerM)+'" oninput="p3Preview()"></div>'
      +'<div class="grp"><label>ระยะแถว (ซม.)</label><input type="number" inputmode="decimal" id="p3-pop-row" value="'+v(r.rowSpacingCm!=null?r.rowSpacingCm:cfg.rowSpacingCm)+'" oninput="p3Preview()"></div></div>'
@@ -3515,6 +3547,7 @@ function p3RenderFields(r){
      +'<div class="grp"><label>พันธุ์ (Variety)</label><input type="text" id="p3-variety" value="'+v(r.variety)+'"></div></div>';
   }
   document.getElementById('p3-fields').innerHTML=h;
+  if(p3Type==='spray') p3RenderSprayRows();
   if(p3Type==='landprep_plant') p3TogglePlant();
   if(p3Type==='scout') p3PestChanged(true);
 }
@@ -3532,6 +3565,8 @@ function p3Collect(){
   else if(p3Type==='irrigation'){
     r.method=srV('p3-imethod'); r.waterMm=p3Num('p3-waterMm'); r.rainMm=p3Num('p3-rainMm');
     r.tensiometer={}; [['cm20','p3-t20'],['cm40','p3-t40'],['cm60','p3-t60']].forEach(function(x){ var n=p3Num(x[1]); if(n!==null) r.tensiometer[x[0]]=n; });
+  } else if(p3Type==='spray'){
+    r.sprayType=srV('p3-sptype'); r.items=p3SprayItems();
   } else if(p3Type==='population'){
     r.plantsPerM=p3Num('p3-pop-pm'); r.rowSpacingCm=p3Num('p3-pop-row');
   } else if(p3Type==='scout'){
@@ -3557,6 +3592,7 @@ function p3Preview(){
              lines.push('🌱 ต่อ ฮ.: N <b>'+p3Fmt(c.NHa,2)+'</b> · P₂O₅ <b>'+p3Fmt(c.P2O5Ha,2)+'</b> · K₂O <b>'+p3Fmt(c.K2OHa,2)+'</b> กก.'); }
     }
   }
+  if(r.type==='spray') (r.items||[]).forEach(function(it){ if(it.product && it.total>0) lines.push('🚿 '+srE(P3Core.sprayText(it,cfg))); });
   if(r.type==='irrigation' && (r.waterMm||r.rainMm)) lines.push('💧 รวมรายการนี้ '+p3Fmt((r.waterMm||0)+(r.rainMm||0),1)+' มม.');
   if(r.type==='population' && r.date){
     var pe=P3Core.popEval(r);
