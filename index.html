@@ -197,20 +197,6 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
 .sr-mh button{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
 .sr-mb{padding:12px 14px 14px;overflow-y:auto}
 .sr-ev{border-top:1px dashed rgba(26,107,54,.25);margin-top:6px;padding-top:5px}
-/* P3 · รูปประกอบ */
-.p3-ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
-.p3-ph img{width:58px;height:58px;object-fit:cover;border-radius:8px;border:1px solid var(--bdr);background:rgba(0,0,0,.06);cursor:pointer}
-.p3-fph{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.p3-fph .t{position:relative;aspect-ratio:1;border-radius:9px;overflow:hidden;border:1px solid var(--bdr);background:rgba(0,0,0,.06)}
-.p3-fph .t img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
-.p3-fph .t button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:13px;line-height:24px;padding:0;cursor:pointer}
-.p3-fph label{aspect-ratio:1;border:2px dashed rgba(26,107,54,.35);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;color:var(--acc);cursor:pointer;background:rgba(255,255,255,.4)}
-.p3-fph label span{font-size:10.5px;font-weight:700;margin-top:2px}
-#p3-pv{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;align-items:center;justify-content:center;flex-direction:column}
-#p3-pv.on{display:flex}
-#p3-pv img{max-width:100%;max-height:85vh;object-fit:contain}
-#p3-pv .cap{color:#fff;font-size:12px;margin-top:8px;opacity:.8}
-#p3-pv button{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer}
 
 /* SR print (ใบเบิก A5 แนวนอน) */
 #sr-print{display:none}
@@ -279,12 +265,6 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
       <div class="fe">คนงานรายวัน</div>
       <span class="badge" id="lb-home-badge" style="background:rgba(91,164,245,.2);color:var(--blue)">LB-01</span>
     </div>
-    <div class="fcard" onclick="p3OpenWithPin()">
-      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">🌽</div>
-      <div class="fk">ចំការ P3</div>
-      <div class="fe">บันทึกแปลง P3 (Pivot 3)</div>
-      <span class="badge" id="p3-home-badge" style="background:rgba(26,107,54,.15);color:var(--acc)">PL-01</span>
-    </div>
   </div>
   <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
     🔄 ផ្ទុកទិន្នន័យថ្មី (Refresh) <span style="font-size:11px;opacity:.7">auto 60s</span>
@@ -324,34 +304,6 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
     <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">🌾 Production Season</div>
     <div class="crow" style="margin-bottom:9px"><span style="color:var(--muted)">Current Season</span><span class="cval" id="set-season-lbl">—</span></div>
     <button onclick="changeSeason()" style="width:100%;background:rgba(15,122,104,0.1);border:1px solid rgba(15,122,104,0.35);color:var(--teal);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔄 Change Season (PIN)</button>
-  </div>
-  <div class="card" style="margin-bottom:11px">
-    <div style="font-size:11px;font-weight:700;margin-bottom:9px;color:var(--acc)">🌽 แปลง P3 (Pivot 3)</div>
-    <div class="g2">
-      <div class="grp"><label>เริ่มฤดูปลูกนี้</label><input type="date" id="p3s-cropStartDate"></div>
-      <div class="grp"><label>วันปลูก (DAP 0)</label><input type="date" id="p3s-plantDate"></div>
-      <div class="grp"><label>ระยะแถว (ซม.)</label><input type="number" inputmode="decimal" id="p3s-rowSpacingCm"></div>
-      <div class="grp"><label>พื้นที่ (ฮ.)</label><input type="number" inputmode="decimal" id="p3s-plotAreaHa" oninput="p3SetRaiPreview()"></div>
-      <div class="grp"><label>ไร่ต่อ ฮ.</label><input type="number" inputmode="decimal" id="p3s-raiPerHa" oninput="p3SetRaiPreview()"></div>
-    </div>
-    <div class="crow" style="margin-bottom:9px"><span style="color:var(--muted)">พื้นที่ (ไร่)</span><span class="cval" id="p3s-rai">—</span></div>
-    <div style="font-size:11px;font-weight:700;margin:4px 0 6px;color:var(--muted)">ตัวเตือน (วัน)</div>
-    <div class="g2">
-      <div class="grp"><label>กรอกข้อมูลทุก</label><input type="number" inputmode="numeric" id="p3s-dataEntryEveryDays"></div>
-      <div class="grp"><label>สำรวจหลังพ่น</label><input type="number" inputmode="numeric" id="p3s-scoutAfterSprayDays"></div>
-      <div class="grp"><label>ผ่อนผันสำรวจ</label><input type="number" inputmode="numeric" id="p3s-scoutGraceDays"></div>
-      <div class="grp"><label>นับหนอนทุก</label><input type="number" inputmode="numeric" id="p3s-scoutEveryDays"></div>
-    </div>
-    <button onclick="p3SaveSettings()" style="width:100%;background:rgba(26,107,54,0.1);border:1px solid rgba(26,107,54,0.35);color:var(--acc);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">💾 บันทึกค่าแปลง P3 (PIN)</button>
-    <div style="font-size:11px;font-weight:700;margin:14px 0 6px;color:var(--muted)">ทะเบียนปุ๋ย (% N-P₂O₅-K₂O · ว่าง = ไม่ทราบสูตร ไม่นับธาตุอาหาร)</div>
-    <div id="p3s-ferts"></div>
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
-      <input type="text" id="p3s-fname" placeholder="ชื่อปุ๋ย">
-      <input type="number" inputmode="decimal" id="p3s-fn" placeholder="N">
-      <input type="number" inputmode="decimal" id="p3s-fp" placeholder="P₂O₅">
-      <input type="number" inputmode="decimal" id="p3s-fk" placeholder="K₂O">
-    </div>
-    <button class="abtn" style="color:var(--acc)" onclick="p3AddFert()">+ เพิ่มปุ๋ยในทะเบียน</button>
   </div>
   <button onclick="doRefresh()" style="width:100%;background:var(--dim);border:1px solid var(--bdr);color:var(--acc);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">
     🔄 Force Sync Now
@@ -514,7 +466,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   </div>
   <div id="lb-edit-banner" style="display:none;background:rgba(240,180,41,.18);border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:10px">✏️ กำลังแก้ไข <b id="lb-edit-id"></b> · <span style="text-decoration:underline;cursor:pointer" onclick="lbReset()">ยกเลิกการแก้ไข</span></div>
   <div class="g2">
-    <div class="grp"><label>วันที่ (Date)</label><input type="date" id="lb-date" onchange="lbRenderList()"></div>
+    <div class="grp"><label>วันที่ (Date) — กด ‹ › เพื่อดู/แก้วันที่ผ่านมา</label><div style="display:flex;gap:6px;align-items:center"><button type="button" class="sr-btn ghost" style="flex:0 0 44px;padding:8px 0" onclick="lbStepDay(-1)">‹</button><input type="date" id="lb-date" onchange="lbRenderList()" style="flex:1"><button type="button" class="sr-btn ghost" style="flex:0 0 44px;padding:8px 0" onclick="lbStepDay(1)">›</button></div></div>
     <div class="grp"><label>ผู้บันทึก (Recorder)</label><select id="lb-who"></select></div>
   </div>
   <datalist id="lb-places"></datalist>
@@ -535,42 +487,6 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   <div id="lb-list"></div>
   <button class="sbtn" style="background:var(--teal);margin-top:6px" onclick="lbSendLine()">📤 ส่งสรุปวันนี้เข้า LINE</button>
 </div>
-
-<!-- P3 · บันทึกแปลง (PL-01) -->
-<div class="fw" id="fw-p3">
-  <div class="fhdr">
-    <button class="back" onclick="hideForm()">← ត្រឡប់</button>
-    <div class="ftitle">🌽 P3 · Pivot 3 (บันทึกแปลง)</div>
-    <span class="badge" style="background:rgba(26,107,54,.15);color:var(--acc)">PL-01</span>
-  </div>
-  <div id="p3-sync" class="sr-info" style="margin:-6px 0 8px"></div>
-  <div id="p3-rem"></div>
-  <div id="p3-sum" class="sr-box on"></div>
-  <div id="p3-edit-banner" style="display:none;background:rgba(240,180,41,.18);border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:10px">✏️ กำลังแก้ไข <b id="p3-edit-id"></b> · <span style="text-decoration:underline;cursor:pointer" onclick="p3Reset()">ยกเลิกการแก้ไข</span></div>
-  <div class="sr-seg" id="p3-type-seg"></div>
-  <div class="g2">
-    <div class="grp"><label>วันที่ (Date)</label><input type="date" id="p3-date" onchange="p3Preview()"></div>
-    <div class="grp"><label>ผู้บันทึก (Recorder)</label><select id="p3-who"></select></div>
-  </div>
-  <div id="p3-fields"></div>
-  <div class="grp"><label>หมายเหตุ (Note)</label><input type="text" id="p3-note"></div>
-  <div class="grp"><label>รูปประกอบ (สูงสุด 4 รูป)</label><div id="p3-photos"></div></div>
-  <div id="p3-calc" class="sr-box on"></div>
-  <div id="p3-err" style="display:none;background:rgba(192,48,42,.1);border:1px solid rgba(192,48,42,.35);color:var(--danger);border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.6"></div>
-  <button class="sbtn" id="p3-save-btn" style="background:var(--acc)" onclick="p3Save()">✓ บันทึกกิจกรรม</button>
-  <div class="sec" style="margin-top:16px">ไทม์ไลน์ P3</div>
-  <div id="p3-seed-box"></div>
-  <div id="p3-list"></div>
-  <div class="sec" style="margin-top:16px">📤 สรุปแปลง (RP-01)</div>
-  <div class="grp"><label>วันที่สรุป</label><input type="date" id="p3-sum-date" onchange="p3RenderReport()"></div>
-  <textarea id="p3-report" readonly rows="14" style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(128,128,128,.4);background:rgba(255,255,255,.5);color:inherit;font-family:inherit;font-size:12.5px;line-height:1.55"></textarea>
-  <div class="sr-btns">
-    <button class="sr-btn" style="background:var(--blue)" onclick="p3CopyReport()">📋 คัดลอกข้อความ</button>
-    <button class="sr-btn" style="background:var(--teal)" id="p3-send-btn" onclick="p3SendReport()">📤 ส่งเข้า LINE</button>
-  </div>
-  <div class="sr-info" id="p3-report-msg"></div>
-</div>
-<div id="p3-pv" onclick="if(event.target===this)p3ClosePhoto()"><button onclick="p3ClosePhoto()">✕</button><img id="p3-pv-img" alt=""><div class="cap" id="p3-pv-cap"></div></div>
 
 <!-- SR-01 MODAL -->
 <div class="pmo" id="sr-modal" onclick="if(event.target===this)srCloseModal()">
@@ -645,262 +561,6 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
 </div>
 
 <div id="toast"></div>
-
-<script id="p3-core">
-// ═══════════════════════════════════════════════════════════
-// P3 CORE — สูตรคำนวณแปลง P3 (ฟังก์ชันล้วน ไม่แตะ DOM / localStorage)
-// ทดสอบด้วย: node tests/p3-core.test.js  (ดึงบล็อกนี้ไปรันใน Node)
-// ═══════════════════════════════════════════════════════════
-var P3Core = (function(){
-  var DEFAULT_CFG = {
-    plot:'P3', plotName:'Pivot 3', crop:'corn',
-    cropStartDate:'2026-11-07',   // วันเริ่มฤดูปลูกนี้ — ข้อมูล/วันพ่น (รวม MX-01 Pivot 3) ก่อนวันนี้ไม่นับในตัวเตือน
-    plantDate:'2026-11-08', rowSpacingCm:50,
-    plotAreaHa:44, raiPerHa:6.25,
-    targetDryYieldKgPerRai:1500, targetMoisturePct:14.0,
-    dataEntryEveryDays:2, scoutAfterSprayDays:2, scoutGraceDays:2, scoutEveryDays:7
-  };
-  // ทะเบียนปุ๋ย: n/p/k = % N, P2O5, K2O (null = ไม่ทราบสูตร → ไม่นับธาตุอาหาร)
-  var DEFAULT_FERTS = [
-    {name:'DAP 18-46-0', n:18, p:46, k:0},
-    {name:'Urea 46-0-0', n:46, p:0,  k:0},
-    {name:'KCl 0-0-60',  n:0,  p:0,  k:60},
-    {name:'15-15-15',    n:15, p:15, k:15},
-    {name:'16-20-0',     n:16, p:20, k:0}
-  ];
-  var STAGES = [[-Infinity,'ก่อนปลูก'],[0,'ปลูก'],[1,'ก่อนงอก'],[5,'VE'],[8,'V2'],[15,'V4'],[21,'V6'],[28,'V8'],[36,'V10'],[43,'V12+'],[53,'VT'],[59,'R1'],[66,'R2'],[76,'R3'],[86,'R4'],[96,'R5'],[106,'R6']];
-  var TYPES = {fertilizer:'ใส่ปุ๋ย', irrigation:'ให้น้ำ', landprep_plant:'เตรียมดิน/ปลูก', scout:'สำรวจศัตรูพืช', spray:'พ่นสาร'};
-  var FORM_TYPES = ['fertilizer','irrigation','landprep_plant','scout'];   // spray มาจาก MX-01 / ข้อมูลตั้งต้น ไม่กรอกในฟอร์มนี้
-  var SPRAY_TYPES = {pre_emergent:'ก่อนงอก', post_emergent:'หลังงอก', insecticide:'กำจัดแมลง', foliar:'ทางใบ'};
-  // SC-01: เกณฑ์ % [DAP ≤ 40, DAP > 40] · null = ไม่มีเกณฑ์
-  var PESTS = {
-    FAW:{label:'หนอนกระทู้ข้าวโพด (FAW)', th:[10,30]},
-    cutworm:{label:'หนอนกระทู้หอม/หนอนตัดต้น', th:[5,5]},
-    aphid:{label:'เพลี้ยอ่อน', th:[50,50]},
-    downy_mildew:{label:'ราน้ำค้าง', th:[0.1,0.1]},
-    weed:{label:'วัชพืช', th:[5,5], cover:true},
-    other:{label:'อื่น ๆ', th:null}
-  };
-  var THRESHOLD_SPLIT_DAP = 40;
-  var DECISIONS = {watch:'เฝ้าระวัง', spray:'พ่น', none:'ไม่ต้องทำอะไร'};
-  var TIMINGS = {routine:'สำรวจปกติ', pre_spray:'ก่อนพ่น', post_spray:'หลังพ่น'};
-  var RESULTS = {reached:'ถึงเกณฑ์', below:'ต่ำกว่าเกณฑ์', no_threshold:'ไม่มีเกณฑ์'};
-  var FERT_METHODS = {basal:'รองพื้น', broadcast:'หว่าน', topdress:'แต่งหน้า'};
-  var IRR_METHODS = {pivot:'Pivot', furrow:'ร่อง', drip:'น้ำหยด', other:'อื่น ๆ'};
-  var LP_ACTS = {plow:'ไถ', disk:'พรวน', leveling:'Leveling', plant:'ปลูก', replant:'ซ่อมปลูก', other:'อื่น ๆ'};
-
-  function cfgWith(c){ var o={}, k; for(k in DEFAULT_CFG) o[k]=DEFAULT_CFG[k]; if(c) for(k in c) if(c[k]!==undefined&&c[k]!==null&&c[k]!=='') o[k]=c[k]; o.plotAreaRai=o.plotAreaHa*o.raiPerHa; return o; }
-  function num(v){ if(v===null||v===undefined||v==='') return null; var x=parseFloat(v); return isNaN(x)?null:x; }
-  function isoToUTC(iso){ var p=String(iso).split('-'); return Date.UTC(+p[0],+p[1]-1,+p[2]); }
-  function addDays(iso,n){ var d=new Date(isoToUTC(iso)+n*86400000); return d.getUTCFullYear()+'-'+('0'+(d.getUTCMonth()+1)).slice(-2)+'-'+('0'+d.getUTCDate()).slice(-2); }
-  function daysBetween(a,b){ return Math.round((isoToUTC(b)-isoToUTC(a))/86400000); }
-  function dap(date,cfg){ return daysBetween(cfgWith(cfg).plantDate,date); }
-  function stage(d){ var s=STAGES[0][1]; for(var i=0;i<STAGES.length;i++) if(d>=STAGES[i][0]) s=STAGES[i][1]; return s; }
-  function findFert(name,ferts){ ferts=ferts||DEFAULT_FERTS; for(var i=0;i<ferts.length;i++) if(ferts[i].name===name) return ferts[i]; return null; }
-
-  // ปุ๋ย: กรอก totalKg (รวมทั้งแปลง) → ต่อ ฮ. / ต่อไร่ / ธาตุอาหารต่อไร่
-  function fertCalc(totalKg,fert,cfg){
-    cfg=cfgWith(cfg); var t=num(totalKg);
-    if(t===null) return null;
-    var perRai=t/cfg.plotAreaRai;
-    var f=fert||{};
-    function nut(pct){ return (pct===null||pct===undefined)?null:perRai*pct/100; }
-    return {kgPerHa:t/cfg.plotAreaHa, kgPerRai:perRai, N:nut(f.n), P2O5:nut(f.p), K2O:nut(f.k)};
-  }
-  function seedsPerRai(seedsPerMeter,rowSpacingCm){ var s=num(seedsPerMeter), r=num(rowSpacingCm); if(s===null||!r) return null; return s/(r/100)*1600; }
-  // สารพ่น: kg/ha → g/rai, L/ha → cc/rai
-  function sprayPerRai(rate,unit,cfg){ cfg=cfgWith(cfg); var r=num(rate); if(r===null) return null; return {value:r/cfg.raiPerHa*1000, unit:(unit==='kg/ha'?'g/rai':'cc/rai')}; }
-
-  // SC-01: เกณฑ์ตาม DAP และผล (ถึงเกณฑ์เมื่อ % พบ ≥ เกณฑ์)
-  function threshold(pest,d){ var p=PESTS[pest]; if(!p||!p.th) return null; return d<=THRESHOLD_SPLIT_DAP?p.th[0]:p.th[1]; }
-  function scoutEval(r,cfg){
-    var d=dap(r.date,cfg), th=threshold(r.pest,d), pct=num(r.pctFound);
-    var result = th===null ? 'no_threshold' : (pct!==null && pct>=th ? 'reached' : 'below');
-    return {dap:d, threshold:th, result:result};
-  }
-  // สำรวจล่าสุด (ถึงวันที่ upTo): ทุกรายการของวันสำรวจล่าสุด
-  function latestScouts(recs,upTo){
-    var s=(recs||[]).filter(function(r){ return r.type==='scout' && (!upTo || r.date<=upTo); });
-    if(!s.length) return [];
-    var last=s.reduce(function(m,r){ return r.date>m?r.date:m; },'');
-    return s.filter(function(r){ return r.date===last; });
-  }
-
-  // รูปประกอบ: สูงสุดต่อรายการ + ขนาดหลังย่อ (ด้านยาวไม่เกิน max, ไม่ขยายรูปเล็ก)
-  var PHOTO = {max:4, maxSide:1280, quality:0.7};
-  function fitSize(w,h,max){ max=max||PHOTO.maxSide; if(!(w>0&&h>0)) return null; var s=Math.min(1,max/Math.max(w,h)); return {w:Math.round(w*s), h:Math.round(h*s)}; }
-
-  // RM-01: ตัวเตือนงาน
-  // recs   = เรคอร์ด P3 ทั้งหมด (รวม spray ที่เป็นข้อมูลตั้งต้น)
-  // mxDates = วันที่ MX-01 ที่ plot = Pivot 3 (อ่านอย่างเดียว)
-  function dueStatus(due,today){ var d=daysBetween(due,today); return {due:due, status:d>0?'overdue':(d===0?'due_today':'ok'), daysOver:Math.max(d,0), daysLeft:Math.max(-d,0)}; }
-  function reminders(recs,mxDates,cfg,today){
-    cfg=cfgWith(cfg);
-    var start=cfg.cropStartDate||cfg.plantDate, inCrop=function(d){ return d && d>=start; };
-    recs=(recs||[]).filter(function(r){ return inCrop(r.date); });
-    mxDates=(mxDates||[]).filter(inCrop);                    // MX-01 ของ Pivot 3 จากฤดูก่อนไม่นับ
-    var all=recs.map(function(r){ return r.date; }).concat(mxDates);
-    // กฎ 1 — กรอกข้อมูลทุก N วัน (ยังไม่มีบันทึก → นับจากวันปลูก)
-    var lastEntry=all.length?all.reduce(function(m,d){ return d>m?d:m; }):null;
-    var r1=dueStatus(addDays(lastEntry||cfg.plantDate,cfg.dataEntryEveryDays),today); r1.last=lastEntry;
-    // กฎ 2 — สำรวจหลังพ่น (group by date) ช่วงนับ [D+1, D+after+grace]
-    var scouts=recs.filter(function(r){ return r.type==='scout'; }).map(function(r){ return r.date; });
-    var sd={}; recs.forEach(function(r){ if(r.type==='spray') sd[r.date]=1; }); mxDates.forEach(function(d){ sd[d]=1; });
-    var sprays=Object.keys(sd).filter(function(d){ return d<=today; }).sort().map(function(D){
-      var due=addDays(D,cfg.scoutAfterSprayDays), from=addDays(D,1), to=addDays(due,cfg.scoutGraceDays);
-      var hit=scouts.filter(function(s){ return s>=from && s<=to; }).sort()[0]||null;
-      var st=hit?'done':(today>due?'overdue':'pending');
-      return {sprayDate:D, due:due, windowFrom:from, windowTo:to, status:st, doneBy:hit, daysOver:st==='overdue'?daysBetween(due,today):0, dueToday:!hit&&today===due};
-    });
-    // กฎ 3 — นับประชากรหนอนทุก N วัน
-    var lastScout=scouts.length?scouts.reduce(function(m,d){ return d>m?d:m; }):null;
-    var r3=dueStatus(addDays(lastScout||cfg.plantDate,cfg.scoutEveryDays),today); r3.last=lastScout;
-    var overdue=(r1.status==='overdue'?1:0)+(r3.status==='overdue'?1:0)+sprays.filter(function(s){ return s.status==='overdue'; }).length;
-    return {dataEntry:r1, sprays:sprays, weekly:r3, overdueCount:overdue,
-      scoutOverdue: r3.status==='overdue' || sprays.some(function(s){ return s.status==='overdue'; })};
-  }
-
-  // RP-01: ข้อความสรุปแปลงประจำวัน (ส่ง LINE / คัดลอก)
-  // o = {recs, mxDates, cfg, ferts, date}
-  function fmtN(x,d){ if(x===null||x===undefined||isNaN(x)) return '–'; var f=Math.pow(10,d==null?2:d); return String(Math.round(x*f)/f).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
-  function fmtD(iso){ var p=String(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:String(iso||'–'); }
-  function pestName(r){ return r.pest==='other'?(r.pestOther||'อื่น ๆ'):((PESTS[r.pest]||{}).label||r.pest); }
-  function summaryText(o){
-    var cfg=cfgWith(o.cfg), date=o.date, recs=o.recs||[], ferts=o.ferts, mx=o.mxDates||[];
-    var d=dap(date,cfg), L=[];
-    L.push('🌽 P3 · '+cfg.plotName+' — '+fmtD(date));
-    L.push('DAP '+d+' · ระยะ '+stage(d));
-    var today=recs.filter(function(r){ return r.date===date; });
-    var lines=today.map(function(r){
-      if(r.type==='fertilizer'){ var c=fertCalc(r.totalKg,findFert(r.product,ferts),cfg); return '🧪 ใส่ปุ๋ย '+r.product+' รวม '+fmtN(r.totalKg,1)+' กก. ('+fmtN(c&&c.kgPerHa)+' กก./ฮ. · '+fmtN(c&&c.kgPerRai)+' กก./ไร่)'; }
-      if(r.type==='irrigation') return '💧 ให้น้ำ '+(IRR_METHODS[r.method]||r.method)+' '+fmtN(r.waterMm,1)+' มม.'+(r.rainMm?' · ฝน '+fmtN(r.rainMm,1)+' มม.':'');
-      if(r.type==='landprep_plant') return '🚜 '+(LP_ACTS[r.activity]||r.activity)+(r.seedsPerMeter?' '+fmtN(r.seedsPerMeter)+' เมล็ด/ม. แถว '+fmtN(r.rowSpacingCm)+' ซม.':'');
-      if(r.type==='spray') return '🚿 พ่น'+(SPRAY_TYPES[r.sprayType]?'('+SPRAY_TYPES[r.sprayType]+')':'')+' '+(r.items||[]).map(function(it){ return it.product+' '+fmtN(it.rate)+' '+it.rateUnit; }).join(' + ');
-      if(r.type==='scout'){ var ev=scoutEval(r,cfg); return '🔍 '+pestName(r)+' '+fmtN(r.pctFound)+'% ('+RESULTS[ev.result]+(ev.threshold!==null?' '+fmtN(ev.threshold)+'%':'')+') — '+(DECISIONS[r.decision]||r.decision||''); }
-      return r.type;
-    });
-    if(mx.indexOf(date)>=0 && !today.some(function(r){ return r.type==='spray'; })) lines.push('🚿 พ่นสาร (บันทึกใน MX-01)');
-    L.push('วันนี้:'+(lines.length?'\n'+lines.map(function(x){ return ' - '+x; }).join('\n'):' ไม่มีบันทึก'));
-    var cum=cumulative(recs,date,ferts,cfg);
-    L.push('สะสม: N '+fmtN(cum.N)+' / P2O5 '+fmtN(cum.P2O5)+' / K2O '+fmtN(cum.K2O)+' กก./ไร่ · น้ำ+ฝน '+fmtN(cum.totalMm,1)+' มม.');
-    var ls=latestScouts(recs,date);
-    L.push('สำรวจล่าสุด: '+(ls.length?ls.map(function(r){ var ev=scoutEval(r,cfg); return pestName(r)+' '+fmtN(r.pctFound)+'% — '+RESULTS[ev.result]; }).join(', ')+' ('+fmtD(ls[0].date)+')':'ยังไม่มี'));
-    var rm=reminders(recs,mx,cfg,date);
-    function due(x){ return fmtD(x.due)+(x.status==='overdue'?' ⚠️ เลยกำหนด '+x.daysOver+' วัน':(x.status==='due_today'?' (วันนี้)':'')); }
-    var T=[' - กรอกข้อมูลครั้งถัดไป '+due(rm.dataEntry),' - นับหนอนครั้งถัดไป '+due(rm.weekly)];
-    rm.sprays.forEach(function(s){ if(s.status!=='done') T.push(' - สำรวจหลังพ่น '+fmtD(s.sprayDate)+' → ครบ '+fmtD(s.due)+(s.status==='overdue'?' ⚠️ เลยกำหนด '+s.daysOver+' วัน':(s.dueToday?' (วันนี้)':''))); });
-    L.push('งานครบกำหนด:\n'+T.join('\n'));
-    L.push('เตือน: '+(rm.overdueCount?'เลยกำหนด '+rm.overdueCount+' งาน':'ไม่มี'));
-    var ph=[]; today.forEach(function(r){ (r.photos||[]).forEach(function(p){ ph.push(p); }); });
-    if(ph.length){ var urls=ph.filter(function(p){ return p.driveUrl; }).map(function(p){ return p.driveUrl.replace('/thumbnail?id=','/file/d/').replace(/&sz=.*$/,'/view'); });
-      L.push('รูปวันนี้: '+ph.length+' รูป'+(urls.length<ph.length?' (อัปโหลดแล้ว '+urls.length+')':'')+(urls.length?'\n'+urls.join('\n'):'')); }
-    return L.join('\n');
-  }
-
-  // สะสมถึงวันที่ upTo (รวมวันนั้น): ธาตุอาหารต่อไร่ + น้ำ+ฝน มม.
-  function cumulative(recs,upTo,ferts,cfg){
-    var out={N:0,P2O5:0,K2O:0,waterMm:0,rainMm:0};
-    (recs||[]).forEach(function(r){
-      if(upTo && r.date>upTo) return;
-      if(r.type==='fertilizer'){
-        var c=fertCalc(r.totalKg,findFert(r.product,ferts),cfg);
-        if(c){ if(c.N) out.N+=c.N; if(c.P2O5) out.P2O5+=c.P2O5; if(c.K2O) out.K2O+=c.K2O; }
-      } else if(r.type==='irrigation'){
-        out.waterMm+=num(r.waterMm)||0; out.rainMm+=num(r.rainMm)||0;
-      }
-    });
-    out.totalMm=out.waterMm+out.rainMm;
-    return out;
-  }
-
-  // ตรวจข้อมูล → [] = ผ่าน, มิฉะนั้นเป็นรายการข้อความ
-  function validate(r,cfg,today){
-    cfg=cfgWith(cfg); var e=[];
-    if(!r.date || !/^\d{4}-\d{2}-\d{2}$/.test(r.date)) e.push('ระบุวันที่');
-    else {
-      if(today && r.date>today) e.push('วันที่ห้ามอยู่ในอนาคต');
-      if(cfg.cropStartDate && r.date<cfg.cropStartDate) e.push('วันที่อยู่ก่อนเริ่มฤดูปลูกนี้ ('+cfg.cropStartDate.split('-').reverse().join('/')+')');
-      if(r.date<cfg.plantDate){
-        var preOk = r.type==='irrigation'
-          || (r.type==='landprep_plant' && ['plow','disk','leveling','other'].indexOf(r.activity)>=0)
-          || (r.type==='fertilizer' && r.method==='basal')
-          || r.type==='spray';
-        if(!preOk) e.push(r.type==='scout' ? 'ห้ามบันทึกการสำรวจก่อนวันปลูก' : 'ก่อนวันปลูกบันทึกได้เฉพาะ ให้น้ำ / เตรียมดิน / ปุ๋ยรองพื้น');
-      }
-    }
-    if(!r.recorder) e.push('เลือกผู้บันทึก');
-    if(!TYPES[r.type]) e.push('เลือกประเภทกิจกรรม');
-    if(r.type==='fertilizer'){
-      if(!r.product) e.push('เลือกปุ๋ย');
-      var t=num(r.totalKg); if(t===null||t<=0) e.push('ปริมาณปุ๋ยรวมทั้งแปลงต้องมากกว่า 0 กก.');
-      if(!FERT_METHODS[r.method]) e.push('เลือกวิธีใส่ปุ๋ย');
-    }
-    if(r.type==='irrigation'){
-      if(!IRR_METHODS[r.method]) e.push('เลือกวิธีให้น้ำ');
-      var w=num(r.waterMm), rn=num(r.rainMm);
-      if(w===null||w<0) e.push('ปริมาณน้ำ (มม.) ต้องเป็น 0 ขึ้นไป');
-      if(rn!==null&&rn<0) e.push('ฝน (มม.) ต้องเป็น 0 ขึ้นไป');
-      var tm=r.tensiometer||{};
-      ['cm20','cm40','cm60'].forEach(function(k){ var v=num(tm[k]); if(v!==null&&v<0) e.push('Tensiometer เก็บเป็นค่าบวก kPa'); });
-    }
-    if(r.type==='landprep_plant'){
-      if(!LP_ACTS[r.activity]) e.push('เลือกกิจกรรม');
-      if(r.activity==='plant'||r.activity==='replant'){
-        var s=num(r.seedsPerMeter); if(s===null||s<=0) e.push('ระบุเมล็ด/เมตร');
-        var rs=num(r.rowSpacingCm); if(rs===null||rs<=0) e.push('ระบุระยะแถว (ซม.)');
-      }
-    }
-    if(r.photos && r.photos.length>PHOTO.max) e.push('แนบรูปได้ไม่เกิน '+PHOTO.max+' รูปต่อรายการ');
-    if(r.type==='spray'){
-      if(!SPRAY_TYPES[r.sprayType]) e.push('เลือกชนิดการพ่น');
-      if(!Array.isArray(r.items)||!r.items.length) e.push('ระบุสารที่พ่น');
-      else r.items.forEach(function(it){ var q=num(it.rate); if(!it.product||q===null||q<=0||['kg/ha','L/ha'].indexOf(it.rateUnit)<0) e.push('รายการสารไม่ครบ (ชื่อ อัตรา หน่วย kg/ha หรือ L/ha)'); });
-    }
-    if(r.type==='scout'){
-      if(!PESTS[r.pest]) e.push('เลือกศัตรูพืช');
-      if(r.pest==='other' && !(r.pestOther||'').trim()) e.push('ระบุชื่อศัตรูพืช (อื่น ๆ)');
-      var pct=num(r.pctFound); if(pct===null||pct<0||pct>100) e.push('% ที่พบต้องอยู่ระหว่าง 0–100');
-      var sp=num(r.samplePoints); if(sp!==null && (sp<=0 || Math.floor(sp)!==sp)) e.push('จำนวนจุดสำรวจต้องเป็นจำนวนเต็มบวก');
-      if(!TIMINGS[r.timing]) e.push('เลือกช่วงเวลาการสำรวจ');
-      if(!DECISIONS[r.decision]) e.push('เลือกการตัดสินใจ');
-    }
-    return e.filter(function(x,i,a){ return a.indexOf(x)===i; });
-  }
-
-  // ข้อมูลจริงถึง 19 พ.ย. 2026 (เฉพาะ PL-01 — การพ่นอยู่ใน MX-01, การสำรวจอยู่ใน SC-01)
-  function seedRecords(){
-    var R='JIRAYU NANTALAKHA';
-    function irr(d,mm,note){ return {type:'irrigation',date:d,method:'pivot',waterMm:mm,rainMm:null,tensiometer:{},note:note||''}; }
-    var a=[
-      irr('2026-11-07',7,'ก่อนปลูก'),
-      {type:'landprep_plant',date:'2026-11-08',activity:'leveling',note:'Leveling 1 ครั้ง'},
-      {type:'landprep_plant',date:'2026-11-08',activity:'plant',seedsPerMeter:4.18,rowSpacingCm:50,variety:''},
-      {type:'fertilizer',date:'2026-11-08',product:'DAP 18-46-0',totalKg:5720,method:'basal',note:'130 กก./ฮ. × 44 ฮ.'},
-      irr('2026-11-08',7),
-      irr('2026-11-09',5),
-      irr('2026-11-12',5),
-      irr('2026-11-14',5),
-      {type:'fertilizer',date:'2026-11-16',product:'KCl 0-0-60',totalKg:6600,method:'broadcast',note:'150 กก./ฮ. × 44 ฮ.'},
-      {type:'fertilizer',date:'2026-11-17',product:'Urea 46-0-0',totalKg:1700,method:'broadcast'},
-      irr('2026-11-17',5),
-      {type:'scout',date:'2026-11-18',pest:'FAW',pctFound:12.5,samplePoints:null,timing:'pre_spray',decision:'spray',note:'สำรวจก่อนพ่นหลังงอก'},
-      {type:'scout',date:'2026-11-19',pest:'FAW',pctFound:1.4,samplePoints:null,timing:'post_spray',decision:'watch'},
-      // วันพ่นที่ยังไม่มีใน MX-01 — ใช้กับกฎ 2 (สำรวจหลังพ่น)
-      {type:'spray',date:'2026-11-09',sprayType:'pre_emergent',items:[{product:'Pendimethalin',rate:2.5,rateUnit:'L/ha'},{product:'Profenofos',rate:1,rateUnit:'L/ha'}]},
-      {type:'spray',date:'2026-11-15',sprayType:'insecticide',items:[{product:'Emamectin',rate:0.3,rateUnit:'kg/ha'},{product:'K30',rate:0.3,rateUnit:'L/ha'},{product:'Surfactant',rate:0.1,rateUnit:'L/ha'}]},
-      {type:'spray',date:'2026-11-18',sprayType:'post_emergent',items:[{product:'Nicosulfuron',rate:0.6,rateUnit:'L/ha'},{product:'Atrazine',rate:1.0,rateUnit:'kg/ha'},{product:'Emamectin',rate:0.3,rateUnit:'kg/ha'},{product:'Surfactant',rate:0.15,rateUnit:'L/ha'}]}
-    ];
-    return a.map(function(r,i){ r.id='P3-SEED'+('0'+(i+1)).slice(-2); r.plot='P3'; r.recorder=R; r.source='seed'; r.time=''; r.note=r.note||''; r.createdAt='2026-11-19T00:00:00.000Z'; r.updatedAt=r.createdAt; return r; });
-  }
-
-  return {DEFAULT_CFG:DEFAULT_CFG, DEFAULT_FERTS:DEFAULT_FERTS, TYPES:TYPES, FERT_METHODS:FERT_METHODS, IRR_METHODS:IRR_METHODS, LP_ACTS:LP_ACTS,
-    PESTS:PESTS, DECISIONS:DECISIONS, TIMINGS:TIMINGS, RESULTS:RESULTS, threshold:threshold, scoutEval:scoutEval, latestScouts:latestScouts,
-    FORM_TYPES:FORM_TYPES, SPRAY_TYPES:SPRAY_TYPES, reminders:reminders, PHOTO:PHOTO, fitSize:fitSize, summaryText:summaryText,
-    cfgWith:cfgWith, addDays:addDays, daysBetween:daysBetween, dap:dap, stage:stage, findFert:findFert,
-    fertCalc:fertCalc, seedsPerRai:seedsPerRai, sprayPerRai:sprayPerRai, cumulative:cumulative, validate:validate, seedRecords:seedRecords};
-})();
-if (typeof module!=='undefined' && module.exports) module.exports = P3Core;
-</script>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -984,7 +644,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.2.p3'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -1164,7 +824,6 @@ function renderSettings() {
   if (rcEl) rcEl.textContent = records.length;
   var slEl = document.getElementById('set-season-lbl');
   if (slEl) slEl.textContent = currentSeason;
-  if (typeof p3RenderSettings === 'function') p3RenderSettings();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1346,7 +1005,6 @@ function renderAll() {
   renderStats();
   renderTruckStock();
   renderHist();
-  try { if (typeof p3UpdateBadge === 'function') p3UpdateBadge(); } catch(e) {}  // RM-01: MX-01 ใหม่ของ Pivot 3 อาจเปลี่ยนงานสำรวจหลังพ่น
 }
 
 function renderStats() {
@@ -2783,8 +2441,7 @@ function srBuildSheets(){
   });
   var lbs=[['Date','Place','Workers','of which Night','Entries','Man-hours','OT man-hours','Man-days']];
   Object.keys(lbDay).sort().forEach(function(k){ var s=lbDay[k]; lbs.push([s.date,s.place,s.workers,s.night,s.acts,lbR1(s.manH),lbR1(s.otMH),Math.round(s.manD*100)/100]); });
-  return [['SR คำขอ',sr],['สารเคมี',ch],['Mixing รอบ',rd],['ประเมินผล',ev],['ใบเบิก CR',cr],['MX-01',mx],['คนงาน LB-01',lb],['สรุปคนงานรายวัน',lbs]]
-    .concat(typeof p3ExportSheets==='function'?p3ExportSheets():[]);
+  return [['SR คำขอ',sr],['สารเคมี',ch],['Mixing รอบ',rd],['ประเมินผล',ev],['ใบเบิก CR',cr],['MX-01',mx],['คนงาน LB-01',lb],['สรุปคนงานรายวัน',lbs]];
 }
 function srExportXlsx(){
   toast('⏳ กำลังสร้างไฟล์ Excel…');
@@ -2862,7 +2519,7 @@ function lbReset(){
   lbEditId=null;
   document.getElementById('lb-edit-banner').style.display='none';
   document.getElementById('lb-save-btn').textContent='✓ บันทึกคนงาน';
-  var d=document.getElementById('lb-date'); d.value=todayISO(); d.max=todayISO(); d.min=srAddDays(todayISO(),-LB_BACK_DAYS);
+  var d=document.getElementById('lb-date'); d.value=todayISO(); d.max=todayISO(); d.removeAttribute('min'); // ดู/แก้ย้อนหลังได้ไม่จำกัด (บันทึกใหม่ยังจำกัด LB_BACK_DAYS ใน lbValidate)
   var im=document.getElementById('lb-import'); if(im) im.value='';
   var mg=document.getElementById('lb-import-msg'); if(mg) mg.innerHTML='';
   lbRows=[lbNewRow()];
@@ -2918,7 +2575,7 @@ function lbValidate(){
   var d=srV('lb-date'), today=todayISO();
   if(!d) return 'เลือกวันที่';
   if(d>today) return 'วันที่ต้องไม่เกินวันนี้';
-  if(d<srAddDays(today,-LB_BACK_DAYS)) return 'บันทึกย้อนหลังได้ไม่เกิน '+LB_BACK_DAYS+' วัน';
+  if(!lbEditId && d<srAddDays(today,-LB_BACK_DAYS)) return 'บันทึกใหม่ย้อนหลังได้ไม่เกิน '+LB_BACK_DAYS+' วัน (ถ้าเป็นการแก้ไขรายการเดิม แก้ได้ทุกวัน)';
   if(!srV('lb-who')) return 'เลือกผู้บันทึก';
   for(var i=0;i<lbRows.length;i++){
     var r=lbRows[i], n='รายการ #'+(i+1)+': ';
@@ -2948,9 +2605,35 @@ function lbSave(){
   toast(old?'✅ แก้ไขแล้ว ('+rec.id+')':'✅ บันทึกแล้ว ('+rec.id+')');
   var keepDate=rec.date, keepWho=rec.who;
   lbReset(); srSet('lb-date',keepDate); srSet('lb-who',keepWho); lbRenderList();
+  if(old) lbVerifyCloud(rec);
+}
+// เลื่อนวันที่ทีละวัน (ดู/แก้วันที่ผ่านมา) — ไม่ข้ามวันนี้
+function lbStepDay(n){
+  if(lbEditId){ toast('กำลังแก้ไขรายการอยู่ — บันทึกหรือยกเลิกก่อนเปลี่ยนวัน'); return; }
+  var cur=srV('lb-date')||todayISO(), nx=srAddDays(cur,n);
+  if(nx>todayISO()) nx=todayISO();
+  srSet('lb-date',nx); lbRenderList();
+}
+// ยืนยันว่า Google Sheet ได้ค่าที่แก้แล้วจริง (cloudWrite เป็น fire-and-forget) — ถ้ายังไม่ตรงส่งซ้ำ 1 ครั้ง
+function lbVerifyCloud(rec){
+  if(!lbCloudOk()) { toast('📴 ออฟไลน์ — แก้ในเครื่องแล้ว จะส่งขึ้น Sheet เมื่อเปิด LB-01 ตอนออนไลน์'); return; }
+  var check=function(retry){
+    cloudJSONP({action:'getLabor'}, function(res){
+      var c=null;
+      if(res && res.ok && Array.isArray(res.data)) for(var i=0;i<res.data.length;i++) if(res.data[i] && res.data[i].id===rec.id){ c=res.data[i]; break; }
+      if(c && String(c.updatedAt||'')>=String(rec.updatedAt||'')) { toast('✅ อัปเดตใน Sheet แล้ว ('+rec.id+')'); return; }
+      if(retry){ lbCloudPush(rec); setTimeout(function(){ check(false); }, 5000); }
+      else toast('⏳ Sheet ยังไม่อัปเดต — จะส่งซ้ำอัตโนมัติเมื่อเปิด LB-01 ครั้งหน้า');
+    });
+  };
+  setTimeout(function(){ check(true); }, 4000);
 }
 function lbEdit(id){
   var r=lbFind(id); if(!r) return;
+  if(srDayDiff(r.date,todayISO())>LB_BACK_DAYS){   // แก้รายการเก่ากว่า 7 วัน ต้องใส่ PIN
+    var pin=window.prompt('Admin PIN (แก้ '+id+' วันที่ '+srFmtDate(r.date)+'):',''); if(pin===null) return;
+    if(pin!==ADMIN_PIN){ toast('❌ Wrong PIN'); return; }
+  }
   lbEditId=id;
   srSet('lb-date',r.date); srSet('lb-who',r.who);
   lbRows=r.rows.map(function(x){
@@ -3070,7 +2753,7 @@ function lbRenderList(){
       +r.rows.map(function(x){ var c=lbCalc(x);
         return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+(x.shift==='Night'?' · 🌙 กะดึก':'')+'<br><span class="sr-sub">'+x.workers+' คน'+(x.hours!==LB_STD_H?' × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':''):'')+(x.otW>0?' | OT '+x.otW+' คน × '+x.otH+' ชม.':'')+(x.supS||x.sup?' · ดูแล: '+srE(lbSupFull(x.sup||x.supS)):'')+(x.con?' · '+srE(x.con):'')+'</span></div>'; }).join('')
       +'<div class="sr-btns"><button class="sr-btn ghost" onclick="lbEdit(\''+r.id+'\')">✏️ แก้ไข</button><button class="sr-btn ghost" onclick="lbDelete(\''+r.id+'\')">🗑 ลบ</button></div></div>';
-  }).join('') : '<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีบันทึกของวันนี้</div>';
+  }).join('') : '<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีบันทึกของ'+(date===todayISO()?'วันนี้':'วันที่ '+srFmtDate(date))+'</div>';
 }
 function lbUpdateBadge(){
   var b=document.getElementById('lb-home-badge'); if(!b) return;
@@ -3151,648 +2834,6 @@ function srCloudPull(cb){
     if(cb) cb();
   });
 }
-
-// ═══════════════════════════════════════════════════════════
-// P3 · บันทึกแปลง (PL-01) — เก็บในเครื่องเท่านั้น (ซิงก์ทำในขั้นถัดไป)
-// สูตรคำนวณอยู่ใน P3Core (<script id="p3-core">)
-// ═══════════════════════════════════════════════════════════
-var P3_KEY='mf_p3', P3_DEL_KEY='mf_p3_deleted', P3_CFG_KEY='mf_p3_cfg', P3_FERT_KEY='mf_p3_ferts', P3_WHO_KEY='mf_p3_who';
-function p3LoadJ(k,def){ try{ var v=JSON.parse(localStorage.getItem(k)||'null'); return v==null?def:v; }catch(e){ return def; } }
-var p3Recs=p3LoadJ(P3_KEY,[]); if(!Array.isArray(p3Recs)) p3Recs=[];
-var p3Deleted=p3LoadJ(P3_DEL_KEY,[]); if(!Array.isArray(p3Deleted)) p3Deleted=[];
-var p3CfgUser=p3LoadJ(P3_CFG_KEY,{});
-var p3FertsUser=p3LoadJ(P3_FERT_KEY,null);
-var p3Type='fertilizer', p3EditId=null;
-var P3_ICONS={fertilizer:'🧪', irrigation:'💧', landprep_plant:'🚜', scout:'🔍', spray:'🚿'};
-var P3_DOT='<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--danger);margin-left:5px;vertical-align:middle"></span>';
-// RM-01: วันพ่นจาก MX-01 ของ Pivot 3 (อ่านอย่างเดียว) + เรคอร์ด P3
-function p3MxDates(){
-  var name=p3Cfg().plotName;
-  return (typeof records!=='undefined'?records:[]).filter(function(r){ return r && r.type==='mx' && r.plot===name; })
-    .map(function(r){ return normalizeDate(r.date)||r.date; }).filter(Boolean);
-}
-function p3Rem(){ return P3Core.reminders(p3Recs,p3MxDates(),p3Cfg(),todayISO()); }
-var P3_RESULT_CLS={reached:'bad', below:'ok', no_threshold:'none'};
-function p3PestName(r){ return r.pest==='other' ? (r.pestOther||'อื่น ๆ') : ((P3Core.PESTS[r.pest]||{}).label||r.pest); }
-function p3PctLabel(pest){ return (P3Core.PESTS[pest]||{}).cover ? '% คลุมพื้นที่' : '% ต้นที่พบ'; }
-
-function p3Cfg(){ return P3Core.cfgWith(p3CfgUser); }
-function p3Ferts(){ return (Array.isArray(p3FertsUser)&&p3FertsUser.length)?p3FertsUser:P3Core.DEFAULT_FERTS; }
-function p3Persist(){ try{ localStorage.setItem(P3_KEY,JSON.stringify(p3Recs)); localStorage.setItem(P3_DEL_KEY,JSON.stringify(p3Deleted)); }catch(e){ toast('⚠️ เก็บข้อมูลในเครื่องไม่ได้'); } }
-function p3Fmt(x,d){ if(x===null||x===undefined||isNaN(x)) return '–'; return Number(x).toLocaleString('en-US',{maximumFractionDigits:d==null?2:d}); }
-function p3Opts(map,sel){ return Object.keys(map).map(function(k){ return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+srE(map[k])+'</option>'; }).join(''); }
-function p3Num(id){ var v=srV(id); return v===''?null:parseFloat(v); }
-
-// ---------- ฟอร์ม ----------
-// PIN เข้าหน้า P3 (ถามทุกครั้งที่กดการ์ด) — กันกดเข้าโดยไม่ตั้งใจ ไม่ใช่ระบบความปลอดภัย เพราะโค้ดหน้าเว็บเปิดดูได้
-var P3_PIN='1234';
-function p3OpenWithPin(){
-  var pin=window.prompt('PIN เข้าหน้า P3 (Pivot 3):','');
-  if(pin===null) return;
-  if(String(pin).trim()!==P3_PIN){ toast('❌ PIN ไม่ถูกต้อง'); return; }
-  showForm('p3'); p3Open();
-}
-function p3Open(){
-  var who=''; try{ who=localStorage.getItem(P3_WHO_KEY)||''; }catch(e){}
-  document.getElementById('p3-who').innerHTML=srOptions(SR_PEOPLE,who,'— ជ្រើស —');
-  p3Reset();
-  p3SweepPhotos();
-  p3CloudSync();
-}
-function p3Reset(){
-  p3EditId=null;
-  document.getElementById('p3-edit-banner').style.display='none';
-  document.getElementById('p3-save-btn').textContent='✓ บันทึกกิจกรรม';
-  var d=document.getElementById('p3-date'); d.value=todayISO(); d.max=todayISO();
-  var sd=document.getElementById('p3-sum-date'); if(sd){ if(!sd.value) sd.value=todayISO(); sd.max=todayISO(); }
-  srSet('p3-note','');
-  document.getElementById('p3-err').style.display='none';
-  p3DiscardUnsavedPhotos(); p3RenderFormPhotos();
-  p3SetType(p3Type);
-  p3RenderAll();
-}
-function p3SetType(t,rec){
-  p3Type=t;
-  var rm=p3Rem(), dot={scout:rm.scoutOverdue};
-  document.getElementById('p3-type-seg').innerHTML=P3Core.FORM_TYPES.map(function(k){
-    return '<button type="button" class="'+(k===t?'on':'')+'" onclick="p3SetType(\''+k+'\')"'+(p3EditId&&k!==t?' disabled style="opacity:.4"':'')+'>'+P3_ICONS[k]+' '+P3Core.TYPES[k]+(dot[k]?P3_DOT:'')+'</button>';
-  }).join('');
-  p3RenderFields(rec||{});
-  p3Preview();
-}
-function p3RenderFields(r){
-  var cfg=p3Cfg(), h='', v=function(x){ return x===null||x===undefined?'':srE(x); };
-  if(p3Type==='fertilizer'){
-    var fopts=p3Ferts().map(function(f){ return '<option'+(f.name===r.product?' selected':'')+'>'+srE(f.name)+'</option>'; }).join('');
-    if(r.product && !P3Core.findFert(r.product,p3Ferts())) fopts+='<option selected>'+srE(r.product)+'</option>';
-    h='<div class="grp"><label>ปุ๋ย (Product)</label><select id="p3-product" onchange="p3Preview()"><option value="">— เลือก —</option>'+fopts+'</select></div>'
-     +'<div class="g2"><div class="grp"><label>ปริมาณรวมทั้งแปลง (กก.)</label><input type="number" inputmode="decimal" id="p3-totalKg" value="'+v(r.totalKg)+'" oninput="p3Preview()"></div>'
-     +'<div class="grp"><label>วิธีใส่</label><select id="p3-fmethod" onchange="p3Preview()"><option value="">— เลือก —</option>'+p3Opts(P3Core.FERT_METHODS,r.method)+'</select></div></div>';
-  } else if(p3Type==='irrigation'){
-    var tm=r.tensiometer||{};
-    h='<div class="g2"><div class="grp"><label>วิธีให้น้ำ</label><select id="p3-imethod">'+p3Opts(P3Core.IRR_METHODS,r.method||'pivot')+'</select></div>'
-     +'<div class="grp"><label>น้ำ (มม.)</label><input type="number" inputmode="decimal" id="p3-waterMm" value="'+v(r.waterMm)+'" oninput="p3Preview()"></div></div>'
-     +'<div class="grp"><label>ฝน (มม.) — ถ้ามี</label><input type="number" inputmode="decimal" id="p3-rainMm" value="'+v(r.rainMm)+'" oninput="p3Preview()"></div>'
-     +'<div class="grp"><label>Tensiometer (kPa · ค่าบวก) — ถ้ามี</label><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'
-     +'<input type="number" inputmode="decimal" id="p3-t20" placeholder="20 ซม." value="'+v(tm.cm20)+'">'
-     +'<input type="number" inputmode="decimal" id="p3-t40" placeholder="40 ซม." value="'+v(tm.cm40)+'">'
-     +'<input type="number" inputmode="decimal" id="p3-t60" placeholder="60 ซม." value="'+v(tm.cm60)+'"></div></div>';
-  } else if(p3Type==='scout'){
-    var pest=r.pest||'FAW';
-    h='<div class="grp"><label>ศัตรูพืช (Pest)</label><select id="p3-pest" onchange="p3PestChanged()">'
-       +Object.keys(P3Core.PESTS).map(function(k){ return '<option value="'+k+'"'+(k===pest?' selected':'')+'>'+srE(P3Core.PESTS[k].label)+'</option>'; }).join('')+'</select></div>'
-     +'<div class="grp" id="p3-pestOther-box"><label>ชื่อศัตรูพืช</label><input type="text" id="p3-pestOther" value="'+v(r.pestOther)+'"></div>'
-     +'<div class="g2"><div class="grp"><label id="p3-pct-lbl">'+p3PctLabel(pest)+'</label><input type="number" inputmode="decimal" min="0" max="100" id="p3-pct" value="'+v(r.pctFound)+'" oninput="p3Preview()"></div>'
-     +'<div class="grp"><label>จำนวนจุดสำรวจ</label><input type="number" inputmode="numeric" id="p3-points" value="'+v(r.samplePoints)+'"></div></div>'
-     +'<div class="g2"><div class="grp"><label>ช่วงเวลา</label><select id="p3-timing">'+p3Opts(P3Core.TIMINGS,r.timing||'routine')+'</select></div>'
-     +'<div class="grp"><label>การตัดสินใจ</label><select id="p3-decision"><option value="">— เลือก —</option>'+p3Opts(P3Core.DECISIONS,r.decision)+'</select></div></div>'
-     +'<div class="sr-info" style="margin:-4px 0 10px">ไม่สำรวจในวันเดียวกับวันพ่น — ถ้าสำรวจวันพ่น ให้เลือก "ก่อนพ่น"</div>';
-  } else {
-    var act=r.activity||'';
-    h='<div class="grp"><label>กิจกรรม</label><select id="p3-activity" onchange="p3TogglePlant();p3Preview()"><option value="">— เลือก —</option>'+p3Opts(P3Core.LP_ACTS,act)+'</select></div>'
-     +'<div id="p3-plant-box"><div class="g2"><div class="grp"><label>เมล็ด / เมตร</label><input type="number" inputmode="decimal" id="p3-spm" value="'+v(r.seedsPerMeter)+'" oninput="p3Preview()"></div>'
-     +'<div class="grp"><label>ระยะแถว (ซม.)</label><input type="number" inputmode="decimal" id="p3-row" value="'+v(r.rowSpacingCm!=null?r.rowSpacingCm:cfg.rowSpacingCm)+'" oninput="p3Preview()"></div></div>'
-     +'<div class="grp"><label>พันธุ์ (Variety)</label><input type="text" id="p3-variety" value="'+v(r.variety)+'"></div></div>';
-  }
-  document.getElementById('p3-fields').innerHTML=h;
-  if(p3Type==='landprep_plant') p3TogglePlant();
-  if(p3Type==='scout') p3PestChanged(true);
-}
-function p3PestChanged(silent){
-  var p=srV('p3-pest'), b=document.getElementById('p3-pestOther-box'), l=document.getElementById('p3-pct-lbl');
-  if(b) b.style.display=p==='other'?'':'none';
-  if(l) l.textContent=p3PctLabel(p);
-  if(!silent) p3Preview();
-}
-function p3TogglePlant(){ var a=srV('p3-activity'), b=document.getElementById('p3-plant-box'); if(b) b.style.display=(a==='plant'||a==='replant')?'':'none'; }
-
-function p3Collect(){
-  var r={type:p3Type, plot:'P3', date:srV('p3-date'), recorder:srV('p3-who'), note:srV('p3-note').trim(), photos:p3FormPhotos.slice()};
-  if(p3Type==='fertilizer'){ r.product=srV('p3-product'); r.totalKg=p3Num('p3-totalKg'); r.method=srV('p3-fmethod'); }
-  else if(p3Type==='irrigation'){
-    r.method=srV('p3-imethod'); r.waterMm=p3Num('p3-waterMm'); r.rainMm=p3Num('p3-rainMm');
-    r.tensiometer={}; [['cm20','p3-t20'],['cm40','p3-t40'],['cm60','p3-t60']].forEach(function(x){ var n=p3Num(x[1]); if(n!==null) r.tensiometer[x[0]]=n; });
-  } else if(p3Type==='scout'){
-    r.pest=srV('p3-pest'); r.pestOther=r.pest==='other'?srV('p3-pestOther').trim():'';
-    r.pctFound=p3Num('p3-pct'); r.samplePoints=p3Num('p3-points');
-    r.timing=srV('p3-timing'); r.decision=srV('p3-decision');
-  } else {
-    r.activity=srV('p3-activity');
-    if(r.activity==='plant'||r.activity==='replant'){ r.seedsPerMeter=p3Num('p3-spm'); r.rowSpacingCm=p3Num('p3-row'); r.variety=srV('p3-variety').trim(); }
-  }
-  return r;
-}
-function p3Preview(){
-  var box=document.getElementById('p3-calc'); if(!box) return;
-  var r=p3Collect(), cfg=p3Cfg(), lines=[];
-  if(r.date){ var d=P3Core.dap(r.date,cfg); lines.push('📅 DAP <b>'+d+'</b> · ระยะ <b>'+srE(P3Core.stage(d))+'</b>'); }
-  if(r.type==='fertilizer' && r.totalKg){
-    var c=P3Core.fertCalc(r.totalKg,P3Core.findFert(r.product,p3Ferts()),cfg);
-    lines.push('⚖️ <b>'+p3Fmt(c.kgPerHa)+'</b> กก./ฮ. · <b>'+p3Fmt(c.kgPerRai)+'</b> กก./ไร่ <span class="sr-sub">(÷ '+p3Fmt(cfg.plotAreaHa)+' ฮ. / '+p3Fmt(cfg.plotAreaRai)+' ไร่)</span>');
-    if(r.product){
-      if(c.N===null) lines.push('<span class="sr-sub">ไม่ทราบสูตร N-P-K — ไม่นับธาตุอาหาร</span>');
-      else lines.push('🌱 ต่อไร่: N <b>'+p3Fmt(c.N,3)+'</b> · P₂O₅ <b>'+p3Fmt(c.P2O5,3)+'</b> · K₂O <b>'+p3Fmt(c.K2O,3)+'</b> กก.');
-    }
-  }
-  if(r.type==='irrigation' && (r.waterMm||r.rainMm)) lines.push('💧 รวมรายการนี้ '+p3Fmt((r.waterMm||0)+(r.rainMm||0),1)+' มม.');
-  if(r.type==='scout' && r.date && r.pest){
-    var ev=P3Core.scoutEval(r,cfg);
-    lines.push('🎯 เกณฑ์ '+(ev.threshold===null?'—':'<b>'+p3Fmt(ev.threshold)+'%</b> <span class="sr-sub">(DAP '+(ev.dap<=40?'≤':'>')+' 40)</span>'));
-    if(r.pctFound!==null) lines.push('ผล: <span class="sr-tag '+P3_RESULT_CLS[ev.result]+'">'+P3Core.RESULTS[ev.result]+'</span>'+(ev.result==='reached'?' <span class="sr-sub">พิจารณาขอพ่น (SR-01)</span>':''));
-  }
-  if(r.type==='landprep_plant' && r.seedsPerMeter && r.rowSpacingCm) lines.push('🌱 ≈ <b>'+p3Fmt(P3Core.seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+'</b> เมล็ด/ไร่');
-  box.innerHTML=lines.join('<br>')||'<span class="sr-sub">กรอกข้อมูลเพื่อดูผลคำนวณ</span>';
-}
-function p3Save(){
-  if(_p3Busy){ toast('⏳ รอย่อรูปให้เสร็จก่อน'); return; }
-  var r=p3Collect(), err=P3Core.validate(r,p3Cfg(),todayISO()), eb=document.getElementById('p3-err');
-  if(err.length){ eb.innerHTML='⚠️ '+err.map(srE).join('<br>⚠️ '); eb.style.display='block'; return; }
-  eb.style.display='none';
-  var now=new Date().toISOString();
-  if(p3EditId){
-    var i=p3Recs.findIndex(function(x){ return x.id===p3EditId; });
-    if(i<0){ toast('❌ ไม่พบรายการที่แก้ไข'); p3Reset(); return; }
-    var o=p3Recs[i];
-    r.id=o.id; r.createdAt=o.createdAt; r.source=o.source||'manual'; r.time=o.time||'';
-    r.updatedAt=now; r.editCount=(o.editCount||0)+1;
-    p3Recs[i]=r;
-  } else {
-    r.id=uid('P3'); r.time=nowHM(); r.source='manual'; r.createdAt=now; r.updatedAt=now;
-    p3Recs.push(r);
-  }
-  try{ localStorage.setItem(P3_WHO_KEY,r.recorder); }catch(e){}
-  p3Persist();
-  p3PhotoDel(p3RemovedPhotoIds);            // รูปเดิมที่ถูกเอาออกตอนแก้ไข
-  p3NewPhotoIds=[]; p3RemovedPhotoIds=[];   // รูปใหม่เป็นของเรคอร์ดแล้ว
-  p3CloudPush(r);
-  if(r.photos.some(function(p){ return !p.driveUrl; })) setTimeout(p3UploadPending,1500);
-  toast(p3EditId?'✅ แก้ไขแล้ว':'✅ บันทึกแล้ว');
-  var keepType=p3Type; p3Reset(); p3SetType(keepType);
-}
-function p3Edit(id){
-  var r=p3Recs.find(function(x){ return x.id===id; }); if(!r || P3Core.FORM_TYPES.indexOf(r.type)<0) return;
-  p3EditId=id;
-  document.getElementById('p3-edit-id').textContent=id;
-  document.getElementById('p3-edit-banner').style.display='block';
-  document.getElementById('p3-save-btn').textContent='✓ บันทึกการแก้ไข';
-  srSet('p3-date',r.date); srSet('p3-note',r.note||'');
-  if(r.recorder) srSet('p3-who',r.recorder);
-  p3DiscardUnsavedPhotos();
-  p3FormPhotos=(r.photos||[]).map(function(p){ return Object.assign({},p); });
-  p3RenderFormPhotos();
-  p3SetType(r.type,r);
-  window.scrollTo(0,0);
-}
-function p3Delete(id){
-  var r=p3Recs.find(function(x){ return x.id===id; }); if(!r) return;
-  if(!window.confirm('ลบรายการ '+P3Core.TYPES[r.type]+' วันที่ '+srFmtDate(r.date)+' ?')) return;
-  p3Recs=p3Recs.filter(function(x){ return x.id!==id; });
-  if(p3Deleted.indexOf(id)<0) p3Deleted.push(id);
-  p3Persist();
-  p3PhotoDel((r.photos||[]).map(function(p){ return p.id; }));
-  p3CloudDelete(id);
-  if(p3EditId===id) p3Reset(); else p3RenderAll();
-  toast('🗑 ลบแล้ว');
-}
-function p3ImportSeed(){
-  var seed=P3Core.seedRecords(), have={};
-  p3Recs.forEach(function(r){ have[r.id]=1; });
-  var add=seed.filter(function(r){ return !have[r.id] && p3Deleted.indexOf(r.id)<0; });
-  if(!add.length){ toast('ข้อมูลตั้งต้นถูกนำเข้าแล้ว'); return; }
-  if(!window.confirm('นำเข้าข้อมูลจริง 7–19 พ.ย. 2026 จำนวน '+add.length+' รายการ (ให้น้ำ เตรียมดิน/ปลูก ใส่ปุ๋ย สำรวจ) ?')) return;
-  p3Recs=p3Recs.concat(add); p3Persist(); p3RenderAll();
-  add.forEach(p3CloudPush);
-  toast('✅ นำเข้า '+add.length+' รายการ');
-}
-
-// ---------- แสดงผล ----------
-function p3Describe(r){
-  var cfg=p3Cfg();
-  if(r.type==='fertilizer'){
-    var c=P3Core.fertCalc(r.totalKg,P3Core.findFert(r.product,p3Ferts()),cfg);
-    return '<b>'+srE(r.product)+'</b> รวม '+p3Fmt(r.totalKg,1)+' กก. ('+srE(P3Core.FERT_METHODS[r.method]||r.method)+')'
-      +'<br><span class="sr-sub">'+p3Fmt(c.kgPerHa)+' กก./ฮ. · '+p3Fmt(c.kgPerRai)+' กก./ไร่'
-      +(c.N===null?' · ไม่นับธาตุอาหาร':(c.N?' · N '+p3Fmt(c.N):'')+(c.P2O5?' · P₂O₅ '+p3Fmt(c.P2O5):'')+(c.K2O?' · K₂O '+p3Fmt(c.K2O):''))+'</span>';
-  }
-  if(r.type==='irrigation'){
-    var tm=r.tensiometer||{}, ts=['cm20','cm40','cm60'].filter(function(k){ return tm[k]!=null; }).map(function(k){ return k.slice(2)+' ซม. '+tm[k]; });
-    return '<b>'+srE(P3Core.IRR_METHODS[r.method]||r.method)+'</b> '+p3Fmt(r.waterMm,1)+' มม.'+(r.rainMm?' · ฝน '+p3Fmt(r.rainMm,1)+' มม.':'')
-      +(ts.length?'<br><span class="sr-sub">Tensiometer (kPa): '+ts.join(' · ')+'</span>':'');
-  }
-  if(r.type==='spray'){
-    return '<b>'+srE(P3Core.SPRAY_TYPES[r.sprayType]||r.sprayType||'')+'</b>'+(r.items||[]).map(function(it){
-      var pr=P3Core.sprayPerRai(it.rate,it.rateUnit,cfg);
-      return '<br><span class="sr-sub">· '+srE(it.product)+' '+p3Fmt(it.rate)+' '+srE(it.rateUnit)+(pr?' = '+p3Fmt(pr.value,1)+' '+pr.unit:'')+'</span>';
-    }).join('');
-  }
-  if(r.type==='scout'){
-    var ev=P3Core.scoutEval(r,cfg);
-    return '<b>'+srE(p3PestName(r))+' '+p3Fmt(r.pctFound)+'%</b> <span class="sr-tag '+P3_RESULT_CLS[ev.result]+'">'+P3Core.RESULTS[ev.result]+'</span>'
-      +'<br><span class="sr-sub">'+srE(P3Core.TIMINGS[r.timing]||r.timing)+(ev.threshold!==null?' · เกณฑ์ '+p3Fmt(ev.threshold)+'%':'')
-      +(r.samplePoints?' · '+r.samplePoints+' จุด':'')+' · ตัดสินใจ: '+srE(P3Core.DECISIONS[r.decision]||r.decision)+'</span>';
-  }
-  var s='<b>'+srE(P3Core.LP_ACTS[r.activity]||r.activity)+'</b>';
-  if(r.seedsPerMeter) s+=' '+p3Fmt(r.seedsPerMeter)+' เมล็ด/ม. · แถว '+p3Fmt(r.rowSpacingCm)+' ซม.'+(r.variety?' · '+srE(r.variety):'')
-    +'<br><span class="sr-sub">≈ '+p3Fmt(P3Core.seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ไร่</span>';
-  return s;
-}
-function p3RenderAll(){ p3RenderSync(); p3RenderReminders(); p3RenderSummary(); p3RenderList(); p3Preview(); p3UpdateBadge(); p3RenderReport(); }
-
-// ---------- RP-01: สรุปแปลง → คัดลอก / ส่ง LINE (ผ่าน Apps Script เดิม, token อยู่ฝั่งเซิร์ฟเวอร์) ----------
-function p3ReportDate(){ return srV('p3-sum-date')||todayISO(); }
-function p3ReportText(){ return P3Core.summaryText({recs:p3Recs, mxDates:p3MxDates(), cfg:p3Cfg(), ferts:p3Ferts(), date:p3ReportDate()}); }
-function p3RenderReport(){
-  var ta=document.getElementById('p3-report'); if(!ta) return;
-  ta.value=p3ReportText();
-  var date=p3ReportDate(), pend=0;
-  p3Recs.forEach(function(r){ if(r.date===date) (r.photos||[]).forEach(function(p){ if(!p.driveUrl) pend++; }); });
-  document.getElementById('p3-report-msg').innerHTML=pend?'📷 รูปของวันนี้ยังอัปโหลดไม่ครบ '+pend+' รูป — ลิงก์รูปในข้อความจะไม่ครบ (รอซิงก์ก่อนส่ง)':'';
-}
-function p3CopyReport(){
-  var t=p3ReportText();
-  function done(){ toast('📋 คัดลอกแล้ว — วางใน LINE ได้เลย'); }
-  function fallback(){ var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ toast('❌ คัดลอกไม่ได้ — กดค้างที่ข้อความเพื่อคัดลอกเอง'); } document.body.removeChild(ta); }
-  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done,fallback); else fallback();
-}
-var _p3Sending=false;
-function p3SendReport(){
-  if(_p3Sending) return;
-  if(!p3CloudOk()){ toast('⚠️ ต้องออนไลน์เพื่อส่ง LINE — ใช้ "คัดลอกข้อความ" แทนได้'); return; }
-  var date=p3ReportDate();
-  if(!window.confirm('ส่งสรุปแปลง P3 วันที่ '+srFmtDate(date)+' เข้า LINE ?')) return;
-  var text=p3ReportText(), key=uid('SUM'), tries=0, btn=document.getElementById('p3-send-btn');
-  _p3Sending=true; if(btn) btn.disabled=true; toast('⏳ กำลังส่ง…');
-  // 1) ฝากข้อความไว้ที่ Apps Script (POST, ข้อความยาวเกิน URL ได้)  2) สั่งส่งด้วย JSONP เพื่ออ่านผลกลับ
-  cloudWrite({action:'stageP3Summary', key:key, text:text});
-  function finish(msg){ _p3Sending=false; if(btn) btn.disabled=false; toast(msg); }
-  function ask(){
-    cloudJSONP({action:'sendP3Summary', key:key}, function(res){
-      if(res && res.ok && res.sent) finish('✅ ส่งสรุป P3 เข้า LINE แล้ว');
-      else if(res && res.ok && res.reason==='not-ready' && tries++<4) setTimeout(ask,2500);
-      else if(res && res.ok && res.reason==='no-line') finish('⚠️ ยังไม่ได้ตั้งค่า LINE ใน Apps Script');
-      else if(res && res.ok && res.reason==='not-ready') finish('❌ ส่งไม่สำเร็จ (เซิร์ฟเวอร์ไม่ได้รับข้อความ) — ลองใหม่ หรือคัดลอกไปวางเอง');
-      else finish('❌ ส่งไม่สำเร็จ'+(res&&res.code?' (LINE '+res.code+')':'')+' — ลองใหม่ หรือคัดลอกไปวางเอง');
-    });
-  }
-  setTimeout(ask,2000);
-}
-function p3DueText(x){
-  if(x.status==='overdue') return '<b style="color:var(--danger)">เลยกำหนด '+x.daysOver+' วัน</b>';
-  if(x.status==='due_today') return '<b style="color:var(--warn)">ครบวันนี้</b>';
-  return '<span class="sr-sub">อีก '+x.daysLeft+' วัน</span>';
-}
-function p3RenderReminders(){
-  var box=document.getElementById('p3-rem'); if(!box) return;
-  var rm=p3Rem(), L=[];
-  L.push('📝 กรอกข้อมูลครั้งถัดไป <b>'+srFmtDate(rm.dataEntry.due)+'</b> · '+p3DueText(rm.dataEntry));
-  L.push('🐛 นับหนอนครั้งถัดไป <b>'+srFmtDate(rm.weekly.due)+'</b> · '+p3DueText(rm.weekly));
-  var done=0;
-  rm.sprays.forEach(function(s){
-    if(s.status==='done'){ done++; return; }
-    L.push('🔍 สำรวจหลังพ่น '+srFmtDate(s.sprayDate)+' → ครบ <b>'+srFmtDate(s.due)+'</b> · '
-      +(s.status==='overdue'?'<b style="color:var(--danger)">เลยกำหนด '+s.daysOver+' วัน</b>':(s.dueToday?'<b style="color:var(--warn)">ครบวันนี้</b>':'<span class="sr-sub">รอสำรวจ (นับได้ถึง '+srFmtDate(s.windowTo)+')</span>')));
-  });
-  if(done) L.push('<span class="sr-sub">✓ สำรวจหลังพ่นแล้ว '+done+' รอบ</span>');
-  var bad=rm.overdueCount>0;
-  box.innerHTML='<div class="sr-box on" style="'+(bad?'border:1.5px solid var(--danger);background:rgba(192,48,42,.07)':'')+'">'
-    +'<b>⏰ งานครบกำหนด</b>'+(bad?' <span class="sr-tag bad">เลยกำหนด '+rm.overdueCount+'</span>':' <span class="sr-tag ok">ตามกำหนด</span>')
-    +'<br>'+L.join('<br>')+'</div>';
-}
-function p3RenderSummary(){
-  var box=document.getElementById('p3-sum'); if(!box) return;
-  var cfg=p3Cfg(), t=todayISO(), d=P3Core.dap(t,cfg), cum=P3Core.cumulative(p3Recs,t,p3Ferts(),cfg);
-  box.innerHTML='🌽 <b>P3 · DAP '+d+' · ระยะ '+srE(P3Core.stage(d))+'</b> <span class="sr-sub">(ปลูก '+srFmtDate(cfg.plantDate)+')</span>'
-    +'<br>สะสม (กก./ไร่): N <b>'+p3Fmt(cum.N)+'</b> · P₂O₅ <b>'+p3Fmt(cum.P2O5)+'</b> · K₂O <b>'+p3Fmt(cum.K2O)+'</b>'
-    +'<br>น้ำ+ฝนสะสม <b>'+p3Fmt(cum.totalMm,1)+'</b> มม. <span class="sr-sub">(น้ำ '+p3Fmt(cum.waterMm,1)+' · ฝน '+p3Fmt(cum.rainMm,1)+')</span>';
-  var ls=P3Core.latestScouts(p3Recs,t);
-  box.innerHTML+='<br>🔍 สำรวจล่าสุด'+(ls.length ? ' <span class="sr-sub">('+srFmtDate(ls[0].date)+')</span>'+ls.map(function(r){ var ev=P3Core.scoutEval(r,cfg);
-      return '<br>&nbsp;· <b>'+srE(p3PestName(r))+' '+p3Fmt(r.pctFound)+'%</b> <span class="sr-tag '+P3_RESULT_CLS[ev.result]+'">'+P3Core.RESULTS[ev.result]+'</span>'; }).join('')
-    : ': <span class="sr-sub">ยังไม่มี</span>');
-}
-function p3RenderList(){
-  var box=document.getElementById('p3-list'); if(!box) return;
-  var seedBox=document.getElementById('p3-seed-box'), seed=P3Core.seedRecords(), have={};
-  p3Recs.forEach(function(r){ have[r.id]=1; });
-  var missing=seed.filter(function(r){ return !have[r.id] && p3Deleted.indexOf(r.id)<0; }).length;
-  seedBox.innerHTML = missing>0 ? '<button class="abtn" style="color:var(--acc);margin:0 0 10px" onclick="p3ImportSeed()">⬇️ นำเข้าข้อมูลจริง 7–19 พ.ย. 2026 ('+missing+' รายการ)</button>' : '';
-  var cfg=p3Cfg(), ferts=p3Ferts(), byDate={};
-  p3Recs.forEach(function(r){ (byDate[r.date]=byDate[r.date]||[]).push(r); });
-  var dates=Object.keys(byDate).sort().reverse();
-  if(!dates.length){ box.innerHTML='<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีบันทึก</div>'; return; }
-  box.innerHTML=dates.map(function(dt){
-    var d=P3Core.dap(dt,cfg), cum=P3Core.cumulative(p3Recs,dt,ferts,cfg);
-    var items=byDate[dt].sort(function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); });
-    return '<div class="sr-card"><div class="sr-top"><b>'+srFmtDate(dt)+'</b><span class="sr-sub">DAP '+d+' · '+srE(P3Core.stage(d))+'</span></div>'
-      +items.map(function(r){
-        return '<div class="sr-ev"><div style="display:flex;justify-content:space-between;gap:8px"><div>'+P3_ICONS[r.type]+' '+srE(P3Core.TYPES[r.type])+' · '+p3Describe(r)
-          +(r.note?'<br><span class="sr-sub">📝 '+srE(r.note)+'</span>':'')
-          +((r.photos&&r.photos.length)?'<div class="p3-ph">'+r.photos.map(p3ThumbImg).join('')+'</div>':'')
-          +'<br><span class="sr-sub">'+srE(r.recorder||'')+(r.source==='seed'?' · ข้อมูลตั้งต้น':'')+(r.editCount?' · แก้ไข '+r.editCount+' ครั้ง':'')+'</span></div>'
-          +'<div style="display:flex;flex-direction:column;gap:4px;flex:none">'
-          +(P3Core.FORM_TYPES.indexOf(r.type)>=0?'<button class="sr-btn ghost" style="min-width:0;padding:6px 9px;color:var(--acc);border-color:rgba(26,107,54,.35)" onclick="p3Edit(\''+r.id+'\')">✏️</button>':'')
-          +'<button class="sr-btn ghost" style="min-width:0;padding:6px 9px" onclick="p3Delete(\''+r.id+'\')">🗑</button></div></div></div>';
-      }).join('')
-      +'<div class="sr-sub" style="margin-top:6px">สะสม ณ วันที่นี้: N '+p3Fmt(cum.N)+' · P₂O₅ '+p3Fmt(cum.P2O5)+' · K₂O '+p3Fmt(cum.K2O)+' กก./ไร่ · น้ำ+ฝน '+p3Fmt(cum.totalMm,1)+' มม.</div></div>';
-  }).join('');
-  p3Hydrate(box);
-}
-function p3UpdateBadge(){
-  var b=document.getElementById('p3-home-badge'); if(!b) return;
-  var n=p3Rem().overdueCount;
-  b.innerHTML='PL-01 · DAP '+P3Core.dap(todayISO(),p3Cfg())+(n?P3_DOT+' '+n:'');
-  b.title=n?('งานเลยกำหนด '+n+' รายการ'):'';
-  b.style.background=n?'rgba(192,48,42,.14)':'rgba(26,107,54,.15)';
-  b.style.color=n?'var(--danger)':'var(--acc)';
-}
-
-// ---------- Settings ----------
-var P3_SET_FIELDS=['cropStartDate','plantDate','rowSpacingCm','plotAreaHa','raiPerHa','dataEntryEveryDays','scoutAfterSprayDays','scoutGraceDays','scoutEveryDays'];
-function p3RenderSettings(){
-  var cfg=p3Cfg();
-  P3_SET_FIELDS.forEach(function(k){ srSet('p3s-'+k,cfg[k]); });
-  p3SetRaiPreview(); p3RenderFerts();
-}
-function p3SetRaiPreview(){
-  var ha=parseFloat(srV('p3s-plotAreaHa')), rph=parseFloat(srV('p3s-raiPerHa')), el=document.getElementById('p3s-rai');
-  if(el) el.textContent=(ha>0&&rph>0)?p3Fmt(ha*rph)+' ไร่':'—';
-}
-function p3SaveSettings(){
-  var n={}, bad=[];
-  P3_SET_FIELDS.forEach(function(k){
-    var v=srV('p3s-'+k);
-    if(k==='plantDate'||k==='cropStartDate'){ if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) bad.push(k==='plantDate'?'วันปลูก':'วันเริ่มฤดู'); else n[k]=v; }
-    else { var x=parseFloat(v); if(isNaN(x)||x<=0) bad.push(k); else n[k]=x; }
-  });
-  if(!bad.length && n.cropStartDate>n.plantDate) bad.push('วันเริ่มฤดูต้องไม่หลังวันปลูก');
-  if(bad.length){ toast('❌ ค่าไม่ถูกต้อง: '+bad.join(', ')); return; }
-  var pin=window.prompt('Admin PIN (P3 Settings):',''); if(pin===null) return;
-  if(pin!==ADMIN_PIN){ toast('❌ Wrong PIN'); return; }
-  var old=p3Cfg();
-  if(n.plantDate!==old.plantDate && !window.confirm('เปลี่ยนวันปลูกจาก '+srFmtDate(old.plantDate)+' เป็น '+srFmtDate(n.plantDate)+' ?\nDAP และระยะของทุกรายการจะเปลี่ยนตาม')) return;
-  p3CfgUser=n;
-  try{ localStorage.setItem(P3_CFG_KEY,JSON.stringify(n)); }catch(e){ toast('⚠️ เก็บค่าไม่ได้'); return; }
-  p3RenderSettings(); p3UpdateBadge();
-  toast('✅ บันทึกค่าแปลง P3 แล้ว');
-}
-function p3RenderFerts(){
-  var box=document.getElementById('p3s-ferts'); if(!box) return;
-  var used={}; p3Recs.forEach(function(r){ if(r.type==='fertilizer') used[r.product]=1; });
-  var pc=function(x){ return x===null||x===undefined?'–':x; };
-  box.innerHTML=p3Ferts().map(function(f,i){
-    return '<div class="crow" style="align-items:center;padding:4px 0;border-bottom:1px dashed rgba(26,107,54,.15)"><span><b>'+srE(f.name)+'</b> <span style="color:var(--muted)">'+pc(f.n)+'-'+pc(f.p)+'-'+pc(f.k)+'</span></span>'
-      +(used[f.name]?'<span style="color:var(--muted);font-size:10px">ใช้งานอยู่</span>':'<button onclick="p3RemoveFert('+i+')" style="background:none;border:none;color:var(--danger);font-size:14px;cursor:pointer">✕</button>')+'</div>';
-  }).join('');
-}
-function p3SaveFerts(list){ p3FertsUser=list; try{ localStorage.setItem(P3_FERT_KEY,JSON.stringify(list)); }catch(e){ toast('⚠️ เก็บทะเบียนไม่ได้'); } p3RenderFerts(); }
-function p3AddFert(){
-  var name=srV('p3s-fname').trim(); if(!name){ toast('ใส่ชื่อปุ๋ย'); return; }
-  var list=p3Ferts().slice();
-  if(list.some(function(f){ return f.name.toLowerCase()===name.toLowerCase(); })){ toast('มีชื่อนี้ในทะเบียนแล้ว'); return; }
-  var g=function(id){ var v=srV(id); if(v==='') return null; var x=parseFloat(v); return (isNaN(x)||x<0||x>100)?NaN:x; };
-  var f={name:name,n:g('p3s-fn'),p:g('p3s-fp'),k:g('p3s-fk')};
-  if([f.n,f.p,f.k].some(function(x){ return x!==null&&isNaN(x); })){ toast('❌ % ต้องอยู่ระหว่าง 0–100'); return; }
-  if([f.n,f.p,f.k].some(function(x){ return x===null; })) f.n=f.p=f.k=null;   // สูตรไม่ครบ = ไม่ทราบสูตร
-  list.push(f); p3SaveFerts(list);
-  ['p3s-fname','p3s-fn','p3s-fp','p3s-fk'].forEach(function(id){ srSet(id,''); });
-  toast('✅ เพิ่ม '+name);
-}
-function p3RemoveFert(i){
-  var list=p3Ferts().slice(), f=list[i]; if(!f) return;
-  if(!window.confirm('ลบ '+f.name+' ออกจากทะเบียน ?')) return;
-  list.splice(i,1); p3SaveFerts(list);
-}
-// ---------- รูปประกอบ: ย่อในเครื่อง → IndexedDB (เรคอร์ดเก็บแค่ meta) ----------
-var P3_IDB='mf_p3_photos', P3_IDB_STORE='photos', _p3Db=null, _p3Urls={}, _p3Persisted=false;
-var p3FormPhotos=[], p3NewPhotoIds=[], p3RemovedPhotoIds=[], _p3Busy=false;
-function p3Db(){
-  if(_p3Db) return _p3Db;
-  _p3Db=new Promise(function(res,rej){
-    try{
-      if(!window.indexedDB){ rej(new Error('no-idb')); return; }
-      var q=indexedDB.open(P3_IDB,1);
-      q.onupgradeneeded=function(){ q.result.createObjectStore(P3_IDB_STORE,{keyPath:'id'}); };
-      q.onsuccess=function(){ res(q.result); };
-      q.onerror=function(){ rej(q.error); };
-    }catch(e){ rej(e); }
-  });
-  _p3Db.catch(function(){ _p3Db=null; });
-  return _p3Db;
-}
-function p3IdbTx(mode,fn){
-  return p3Db().then(function(db){ return new Promise(function(res,rej){
-    var tx=db.transaction(P3_IDB_STORE,mode), req=fn(tx.objectStore(P3_IDB_STORE));
-    tx.oncomplete=function(){ res(req&&req.result!==undefined?req.result:undefined); };
-    tx.onerror=function(){ rej(tx.error); }; tx.onabort=function(){ rej(tx.error||new Error('abort')); };
-  }); });
-}
-function p3PhotoPut(rec){ return p3IdbTx('readwrite',function(st){ return st.put(rec); }); }
-function p3PhotoGet(id){ return p3IdbTx('readonly',function(st){ return st.get(id); }); }
-function p3PhotoKeys(){ return p3IdbTx('readonly',function(st){ return st.getAllKeys(); }); }
-function p3PhotoDel(ids){
-  ids=[].concat(ids||[]).filter(Boolean);
-  ids.forEach(function(id){ if(_p3Urls[id]){ URL.revokeObjectURL(_p3Urls[id]); delete _p3Urls[id]; } });
-  if(!ids.length) return Promise.resolve();
-  return p3IdbTx('readwrite',function(st){ ids.forEach(function(id){ st.delete(id); }); }).catch(function(){});
-}
-function p3PhotoUrl(id){
-  if(_p3Urls[id]) return Promise.resolve(_p3Urls[id]);
-  return p3PhotoGet(id).then(function(r){ return (r&&r.blob)?(_p3Urls[id]=URL.createObjectURL(r.blob)):null; }).catch(function(){ return null; });
-}
-// ลบรูปที่ไม่มีเรคอร์ดใดอ้างถึง (เช่น ถ่ายแล้วไม่ได้กดบันทึก)
-function p3SweepPhotos(){
-  var used={}; p3Recs.forEach(function(r){ (r.photos||[]).forEach(function(p){ used[p.id]=1; }); });
-  p3NewPhotoIds.forEach(function(id){ used[id]=1; });
-  p3PhotoKeys().then(function(keys){ p3PhotoDel((keys||[]).filter(function(k){ return !used[k]; })); }).catch(function(){});
-}
-function p3Resize(file){
-  return new Promise(function(res,rej){
-    var url=URL.createObjectURL(file), img=new Image();
-    img.onload=function(){
-      var s=P3Core.fitSize(img.naturalWidth,img.naturalHeight);
-      if(!s){ URL.revokeObjectURL(url); rej(new Error('size')); return; }
-      var c=document.createElement('canvas'); c.width=s.w; c.height=s.h;
-      c.getContext('2d').drawImage(img,0,0,s.w,s.h);   // เบราว์เซอร์หมุนรูปตาม EXIF ให้แล้ว
-      URL.revokeObjectURL(url);
-      c.toBlob(function(b){ b?res({blob:b,w:s.w,h:s.h}):rej(new Error('encode')); },'image/jpeg',P3Core.PHOTO.quality);
-    };
-    img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('decode')); };
-    img.src=url;
-  });
-}
-function p3PickPhotos(input){
-  var files=Array.prototype.slice.call(input.files||[]); input.value='';
-  if(!files.length || _p3Busy) return;
-  var room=P3Core.PHOTO.max-p3FormPhotos.length;
-  if(room<=0){ toast('แนบได้ไม่เกิน '+P3Core.PHOTO.max+' รูป'); return; }
-  if(files.length>room) toast('เลือกได้อีก '+room+' รูป — ใช้ '+room+' รูปแรก');
-  files=files.slice(0,room);
-  if(!_p3Persisted && navigator.storage && navigator.storage.persist){ _p3Persisted=true; navigator.storage.persist().catch(function(){}); }
-  _p3Busy=true; p3RenderFormPhotos();
-  files.reduce(function(chain,f){
-    return chain.then(function(){
-      return p3Resize(f).then(function(x){
-        var id=uid('PH');
-        return p3PhotoPut({id:id, blob:x.blob, w:x.w, h:x.h, createdAt:new Date().toISOString()}).then(function(){
-          p3NewPhotoIds.push(id);
-          p3FormPhotos.push({id:id, takenAt:new Date(f.lastModified||Date.now()).toISOString(), caption:'', localKey:id, driveUrl:null, w:x.w, h:x.h, bytes:x.blob.size});
-          p3RenderFormPhotos();
-        });
-      }).catch(function(e){ toast(e&&e.message==='no-idb'?'⚠️ เครื่องนี้เก็บรูปไม่ได้':'⚠️ เปิดรูป '+(f.name||'')+' ไม่ได้'); });
-    });
-  },Promise.resolve()).then(function(){ _p3Busy=false; p3RenderFormPhotos(); });
-}
-function p3RemoveFormPhoto(id){
-  p3FormPhotos=p3FormPhotos.filter(function(p){ return p.id!==id; });
-  var i=p3NewPhotoIds.indexOf(id);
-  if(i>=0){ p3NewPhotoIds.splice(i,1); p3PhotoDel(id); }        // ยังไม่ได้บันทึก → ลบเลย
-  else if(p3RemovedPhotoIds.indexOf(id)<0) p3RemovedPhotoIds.push(id);   // ของเดิม → ลบตอนกดบันทึก
-  p3RenderFormPhotos();
-}
-function p3DiscardUnsavedPhotos(){ if(p3NewPhotoIds.length) p3PhotoDel(p3NewPhotoIds); p3NewPhotoIds=[]; p3RemovedPhotoIds=[]; p3FormPhotos=[]; }
-function p3ThumbImg(p){ return '<img data-p3ph="'+srE(p.id)+'"'+(p.driveUrl?' data-drive="'+srE(p.driveUrl)+'"':'')+' alt="" onclick="p3ViewPhoto(\''+srE(p.id)+'\')">'; }
-function p3RenderFormPhotos(){
-  var box=document.getElementById('p3-photos'); if(!box) return;
-  var n=p3FormPhotos.length, max=P3Core.PHOTO.max;
-  box.innerHTML='<div class="p3-fph">'+p3FormPhotos.map(function(p){
-      return '<div class="t">'+p3ThumbImg(p)+'<button type="button" onclick="p3RemoveFormPhoto(\''+srE(p.id)+'\')">✕</button></div>'; }).join('')
-    +(n<max?'<label>'+(_p3Busy?'⏳<span>กำลังย่อรูป…</span>':'📷<span>เพิ่มรูป</span><input type="file" accept="image/*" multiple style="display:none" onchange="p3PickPhotos(this)">')+'</label>':'')
-    +'</div><div class="sr-info">'+n+'/'+max+' รูป · ย่อเหลือด้านยาว '+P3Core.PHOTO.maxSide+' px ก่อนเก็บในเครื่อง</div>';
-  p3Hydrate(box);
-}
-function p3Hydrate(root){
-  (root||document).querySelectorAll('img[data-p3ph]:not([src])').forEach(function(img){
-    var id=img.getAttribute('data-p3ph');
-    p3PhotoUrl(id).then(function(u){
-      if(u) img.src=u;
-      else if(img.getAttribute('data-drive')) img.src=img.getAttribute('data-drive');
-      else { img.title='รูปไม่อยู่ในเครื่องนี้'; img.style.opacity='.35'; img.src='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="12" y="16" font-size="12" text-anchor="middle">🖼</text></svg>'); }
-    });
-  });
-}
-function p3ViewPhoto(id){
-  var src=document.querySelector('img[data-p3ph="'+id+'"]'), u=src&&src.src;
-  if(!u) return;
-  document.getElementById('p3-pv-img').src=u;
-  var rec=p3Recs.find(function(r){ return (r.photos||[]).some(function(p){ return p.id===id; }); });
-  document.getElementById('p3-pv-cap').textContent=rec?(srFmtDate(rec.date)+' · '+P3Core.TYPES[rec.type]):'';
-  document.getElementById('p3-pv').classList.add('on');
-}
-function p3ClosePhoto(){ document.getElementById('p3-pv').classList.remove('on'); }
-
-// ---------- แถวชีต (ใช้ทั้ง Sync ขึ้น Google Sheet และ Export Excel) ----------
-var P3_PL_HEAD=['Date','DAP','Stage','Type','Detail','Product','Total (kg)','kg/Ha','kg/Rai','N (kg/Rai)','P2O5 (kg/Rai)','K2O (kg/Rai)','Method','Water (mm)','Rain (mm)','Tensio 20cm (kPa)','Tensio 40cm (kPa)','Tensio 60cm (kPa)','Activity','Seeds/m','Row (cm)','Seeds/Rai','Recorder','Note','Photos','Source','ID','UpdatedAt'];
-var P3_SC_HEAD=['Date','DAP','Stage','Pest','Found (%)','Threshold (%)','Result','Timing','Decision','Sample points','Recorder','Note','Photos','ID','UpdatedAt'];
-function p3R3(x){ return (x===null||x===undefined||isNaN(x))?'':Math.round(x*1000)/1000; }
-function p3V(x){ return x===null||x===undefined?'':x; }
-function p3PhotoCell(r){ var p=r.photos||[]; if(!p.length) return ''; var u=p.filter(function(x){ return x.driveUrl; }).map(function(x){ return x.driveUrl; }); return u.length===p.length?u.join(' '):(p.length+' รูป'+(u.length?' ('+u.length+' อัปโหลดแล้ว) '+u.join(' '):'')); }
-function p3SheetRow(r){
-  var cfg=p3Cfg(), d=P3Core.dap(r.date,cfg), st=P3Core.stage(d);
-  if(r.type==='scout'){
-    var ev=P3Core.scoutEval(r,cfg);
-    return {sheet:'SC-01', head:P3_SC_HEAD, row:[r.date,d,st,p3PestName(r),p3V(r.pctFound),p3V(ev.threshold),P3Core.RESULTS[ev.result],P3Core.TIMINGS[r.timing]||r.timing||'',P3Core.DECISIONS[r.decision]||r.decision||'',p3V(r.samplePoints),r.recorder||'',r.note||'',p3PhotoCell(r),r.id,r.updatedAt||'']};
-  }
-  var c=r.type==='fertilizer'?P3Core.fertCalc(r.totalKg,P3Core.findFert(r.product,p3Ferts()),cfg):null, tm=r.tensiometer||{};
-  var detail='';
-  if(r.type==='spray') detail=(P3Core.SPRAY_TYPES[r.sprayType]||'')+': '+(r.items||[]).map(function(it){ var pr=P3Core.sprayPerRai(it.rate,it.rateUnit,cfg); return it.product+' '+it.rate+' '+it.rateUnit+(pr?' ('+p3R3(pr.value)+' '+pr.unit+')':''); }).join(' + ');
-  else if(r.type==='landprep_plant') detail=P3Core.LP_ACTS[r.activity]||r.activity||'';
-  else if(r.type==='irrigation') detail=(P3Core.IRR_METHODS[r.method]||r.method||'')+' '+p3V(r.waterMm)+' มม.';
-  else if(r.type==='fertilizer') detail=(r.product||'')+' '+p3V(r.totalKg)+' กก.';
-  var plant=r.type==='landprep_plant'&&r.seedsPerMeter;
-  return {sheet:'PL-01', head:P3_PL_HEAD, row:[r.date,d,P3Core.stage(d),P3Core.TYPES[r.type]||r.type,detail,
-    r.type==='fertilizer'?r.product:'', c?p3V(r.totalKg):'', c?p3R3(c.kgPerHa):'', c?p3R3(c.kgPerRai):'', c?p3R3(c.N):'', c?p3R3(c.P2O5):'', c?p3R3(c.K2O):'',
-    r.type==='fertilizer'?(P3Core.FERT_METHODS[r.method]||r.method||''):(r.type==='irrigation'?(P3Core.IRR_METHODS[r.method]||r.method||''):''),
-    r.type==='irrigation'?p3V(r.waterMm):'', r.type==='irrigation'?p3V(r.rainMm):'', p3V(tm.cm20), p3V(tm.cm40), p3V(tm.cm60),
-    r.type==='landprep_plant'?(P3Core.LP_ACTS[r.activity]||r.activity||''):'', plant?r.seedsPerMeter:'', plant?p3V(r.rowSpacingCm):'', plant?Math.round(P3Core.seedsPerRai(r.seedsPerMeter,r.rowSpacingCm)):'',
-    r.recorder||'', r.note||'', p3PhotoCell(r), r.source||'', r.id, r.updatedAt||'']};
-}
-// Export Excel: เพิ่ม 2 ชีตต่อท้ายไฟล์ Chemical Control Records
-function p3ExportSheets(){
-  var sorted=p3Recs.slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date))||String(a.createdAt).localeCompare(String(b.createdAt)); });
-  var pl=[P3_PL_HEAD], sc=[P3_SC_HEAD];
-  sorted.forEach(function(r){ var x=p3SheetRow(r); (x.sheet==='SC-01'?sc:pl).push(x.row); });
-  return [['P3 กิจกรรม PL-01',pl],['P3 สำรวจ SC-01',sc]];
-}
-
-// ---------- Sync กับ Google Sheet (Script URL เดิม) ----------
-var P3_CLOUD=true, P3_SYNC_MS=300000, P3_UP_RETRY_MS=180000, P3_UP_PER_RUN=3;
-var _p3SyncBusy=false, _p3LastSync='', _p3UpTried={}, _p3PullTimer=null;
-function p3CloudOk(){ return P3_CLOUD && USE_CLOUD && navigator.onLine; }
-function p3CloudPush(r){ if(!p3CloudOk()) return; var x=p3SheetRow(r); cloudWrite({action:'upsertP3', record:r, sheet:x.sheet, head:x.head, row:x.row}); }
-function p3CloudDelete(id){ if(p3CloudOk()) cloudWrite({action:'deleteP3', id:id}); }
-function p3CloudSync(cb){
-  if(!p3CloudOk() || _p3SyncBusy){ p3RenderSync(); if(cb) cb(); return; }
-  _p3SyncBusy=true; p3RenderSync();
-  cloudJSONP({action:'getP3'}, function(res){
-    _p3SyncBusy=false;
-    if(res && res.ok && Array.isArray(res.data)){
-      var changed=false, dropPhotos=[];
-      (res.deletedIds||[]).forEach(function(id){ if(p3Deleted.indexOf(id)<0) p3Deleted.push(id); });
-      p3Recs=p3Recs.filter(function(r){ if(p3Deleted.indexOf(r.id)<0) return true; dropPhotos=dropPhotos.concat((r.photos||[]).map(function(p){ return p.id; })); changed=true; return false; });
-      var byId={}; p3Recs.forEach(function(r){ byId[r.id]=r; });
-      var cloudIds={};
-      res.data.forEach(function(c){
-        if(!c || !c.id || p3Deleted.indexOf(c.id)>=0) return;
-        cloudIds[c.id]=1;
-        var l=byId[c.id];
-        if(!l){ p3Recs.push(c); changed=true; }
-        else if(String(c.updatedAt||'')>String(l.updatedAt||'')){ p3Recs[p3Recs.indexOf(l)]=c; changed=true; }
-        else if(String(c.updatedAt||'')<String(l.updatedAt||'')) p3CloudPush(l);
-      });
-      p3Recs.forEach(function(l){ if(!cloudIds[l.id]) p3CloudPush(l); });   // ยังไม่มีบนคลาวด์ → ส่งขึ้น
-      // ลิงก์ Drive ของรูปที่อัปโหลดแล้ว
-      var ph=res.photos||{};
-      p3Recs.forEach(function(r){ (r.photos||[]).forEach(function(p){ if(ph[p.id] && p.driveUrl!==ph[p.id].url){ p.driveUrl=ph[p.id].url; p.fileId=ph[p.id].fileId; changed=true; } }); });
-      if(dropPhotos.length) p3PhotoDel(dropPhotos);
-      if(changed) p3Persist();
-      _p3LastSync=nowHM();
-      if(changed && document.getElementById('fw-p3').classList.contains('on')) p3RenderAll(); else p3UpdateBadge();
-      p3UploadPending();
-    }
-    p3RenderSync();
-    if(cb) cb();
-  });
-}
-function p3PendingPhotos(){
-  var out=[]; p3Recs.forEach(function(r){ (r.photos||[]).forEach(function(p){ if(!p.driveUrl) out.push({rec:r, p:p}); }); });
-  return out;
-}
-function p3BlobToB64(blob){ return new Promise(function(res,rej){ var fr=new FileReader(); fr.onload=function(){ res(String(fr.result).split(',')[1]||''); }; fr.onerror=function(){ rej(fr.error); }; fr.readAsDataURL(blob); }); }
-function p3UploadPending(){
-  if(!p3CloudOk()) return;
-  var now=Date.now(), list=p3PendingPhotos().filter(function(x){ return !_p3UpTried[x.p.id] || now-_p3UpTried[x.p.id]>P3_UP_RETRY_MS; }).slice(0,P3_UP_PER_RUN);
-  if(!list.length) return;
-  list.reduce(function(chain,x){
-    return chain.then(function(){
-      return p3PhotoGet(x.p.id).then(function(st){
-        if(!st||!st.blob) return;                          // รูปไม่อยู่ในเครื่องนี้ (ถ่ายจากเครื่องอื่น)
-        _p3UpTried[x.p.id]=Date.now();
-        return p3BlobToB64(st.blob).then(function(b64){
-          cloudWrite({action:'uploadP3Photo', id:x.p.id, recordId:x.rec.id, date:x.rec.date, mime:st.blob.type||'image/jpeg', data:b64});
-        });
-      }).catch(function(){});
-    });
-  },Promise.resolve()).then(function(){
-    // อัปโหลดเป็นแบบส่งแล้วไม่รอผล → ดึงลิงก์ Drive กลับมาอีกครั้งในอีก 30 วิ
-    if(_p3PullTimer) clearTimeout(_p3PullTimer);
-    _p3PullTimer=setTimeout(function(){ _p3PullTimer=null; p3CloudSync(); },30000);
-    p3RenderSync();
-  });
-}
-function p3RenderSync(){
-  var el=document.getElementById('p3-sync'); if(!el) return;
-  var pend=p3PendingPhotos().length;
-  el.innerHTML=!USE_CLOUD?'☁️ ปิดการซิงก์':(!navigator.onLine?'📴 ออฟไลน์ — บันทึกในเครื่อง จะซิงก์เมื่อออนไลน์':
-    (_p3SyncBusy?'⏳ กำลังซิงก์…':'☁️ ซิงก์ล่าสุด '+(_p3LastSync||'—')))
-    +(pend?' · 📷 รูปรออัปโหลด '+pend:'')
-    +' · <span style="text-decoration:underline;cursor:pointer" onclick="p3CloudSync()">ซิงก์ตอนนี้</span>';
-}
-if(P3_CLOUD){
-  setTimeout(function(){ p3CloudSync(); },5000);
-  setInterval(function(){ p3CloudSync(); },P3_SYNC_MS);
-  window.addEventListener('online',function(){ setTimeout(function(){ p3CloudSync(); },1500); });
-}
-
-try{ p3UpdateBadge(); }catch(e){}
 </script>
 </body>
 </html>

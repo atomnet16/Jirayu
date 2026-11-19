@@ -6,7 +6,7 @@
 
 | ส่วน | เวอร์ชันเดิม (ก่อน SR) | เวอร์ชันปัจจุบัน |
 |---|---|---|
-| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | `v14.8.lb` · cache `chemcontrol-v48` (ผู้รับเหมาเริ่มต้น Thim, แสดงชื่อเต็มผู้ดูแล) · รุ่นก่อนหน้า v14.6.lb cache v46 |
+| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | `v14.9.lb` · cache `chemcontrol-v49` (LB-01 แก้ย้อนหลังไม่จำกัด + ยืนยัน Sheet) · รุ่นก่อนหน้า v14.8.lb = commit `dd75aaf` cache v48 (Thim เริ่มต้น + ชื่อเต็ม) · v14.6.lb cache v46 |
 | Apps Script | Version 51 (Oct 8, 2026) | Version 59 (ชื่อเต็มผู้ดูแลใน LINE) · (58 = แสดง error, 57 = LB v2, 56 = ใช้ LINE ร่วมกับ Rainfall, 55 = เพิ่ม LB-01, 54 = ก่อน LB-01) |
 
 จุดย้อนของ LB-01 รุ่นแรก (ก่อนปรับเป็นผู้ดูแล/สถานที่/กะ): แอป commit `0822e43` + Apps Script Version 56
