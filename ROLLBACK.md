@@ -6,8 +6,8 @@
 
 | ส่วน | เวอร์ชันเดิม (ก่อน SR) | เวอร์ชันปัจจุบัน |
 |---|---|---|
-| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | `v14.9.lb` · cache `chemcontrol-v49` (LB-01 แก้ย้อนหลังไม่จำกัด + ยืนยัน Sheet) · รุ่นก่อนหน้า v14.8.lb = commit `dd75aaf` cache v48 (Thim เริ่มต้น + ชื่อเต็ม) · v14.6.lb cache v46 |
-| Apps Script | Version 51 (Oct 8, 2026) | Version 59 (ชื่อเต็มผู้ดูแลใน LINE) · (58 = แสดง error, 57 = LB v2, 56 = ใช้ LINE ร่วมกับ Rainfall, 55 = เพิ่ม LB-01, 54 = ก่อน LB-01) |
+| แอป (GitHub Pages) | commit `cbc6cf2` · `v14.0.ld` · cache `chemcontrol-v39` | `v14.9.23.p3+lb` · cache `chemcontrol-v71` (LB-01 OT หลายกลุ่มต่อกิจกรรม) · รุ่นก่อนหน้า `v14.9.22.p3+lb` = commit `e1c40aa` cache v70 (P3 + LB-01 แก้ย้อนหลัง) · `v14.9.lb` = commit `4b85e6a` cache v49 (LB-01 แก้ย้อนหลังไม่จำกัด + ยืนยัน Sheet) · รุ่นก่อนหน้า v14.8.lb = commit `dd75aaf` cache v48 (Thim เริ่มต้น + ชื่อเต็ม) · v14.6.lb cache v46 |
+| Apps Script | Version 51 (Oct 8, 2026) | Version 62 (LB-01 OT หลายกลุ่ม + คอลัมน์ OTDetail; 60–61 = งาน P3 ที่ทำแยก — ย้อน LB กลับ v59 จะเสียงาน P3) · 59 = ชื่อเต็มผู้ดูแลใน LINE · (58 = แสดง error, 57 = LB v2, 56 = ใช้ LINE ร่วมกับ Rainfall, 55 = เพิ่ม LB-01, 54 = ก่อน LB-01) |
 
 จุดย้อนของ LB-01 รุ่นแรก (ก่อนปรับเป็นผู้ดูแล/สถานที่/กะ): แอป commit `0822e43` + Apps Script Version 56
 
