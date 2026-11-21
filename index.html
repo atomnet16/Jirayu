@@ -1193,7 +1193,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.24.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.25.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -2980,12 +2980,12 @@ function srBuildSheets(){
     var all=sanitizeAllChems(m.allChems||{});
     mx.push([m.id,m.date||'',m.time||'',m.mixer||'',m.plot||'',m.sprayer||'',m.cropType||'',m.season||'',Object.keys(all).map(function(k){ return k+' '+all[k]; }).join(' | '),m.note||'',link[m.id]||'']);
   });
-  var lb=[['Date','RecordID','Recorder','Place','Activity','Shift','Supervisor','Contractor','Workers','Hours','ShortReason','OT Workers','OT Hours (avg)','Man-hours','OT man-hours','Man-days','OT detail']];
+  var lb=[['Date','RecordID','Recorder','Place','Activity','Shift','Supervisor','Contractor','Workers','Hours','ShortReason','OT Workers','OT Hours (avg)','Man-hours','OT man-hours','Man-days','OT detail','Part-day detail']];
   var lbDay={};
   (typeof lbRecs!=='undefined'?lbRecs:[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(r){
     (r.rows||[]).forEach(function(x){
       var c=lbCalc(x);
-      lb.push([r.date,r.id,r.who||'',x.plot,x.act,x.shift||'Day',x.sup||'',x.con||'',x.workers,x.hours,x.short||'',lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0),lbOtGroups(x).length?lbR1(c.otMH/lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0)):0,lbR1(c.manH),lbR1(c.otMH),Math.round(c.manD*100)/100,lbOtGroups(x).map(function(g){ return g.n+'x'+g.h; }).join(' + ')]);
+      lb.push([r.date,r.id,r.who||'',x.plot,x.act,x.shift||'Day',x.sup||'',x.con||'',x.workers,x.hours,x.short||'',lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0),lbOtGroups(x).length?lbR1(c.otMH/lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0)):0,lbR1(c.manH),lbR1(c.otMH),Math.round(c.manD*100)/100,lbOtGroups(x).map(function(g){ return g.n+'x'+g.h; }).join(' + '),lbPartGroups(x).map(function(g){ return g.n+'x'+g.h; }).join(' + ')]);
       var k=r.date+'|'+x.plot, s=lbDay[k]||(lbDay[k]={date:r.date,place:x.plot,workers:0,night:0,acts:0,manH:0,otMH:0,manD:0});
       s.workers+=c.workers; if(x.shift==='Night') s.night+=c.workers; s.acts++; s.manH+=c.manH; s.otMH+=c.otMH; s.manD+=c.manD;
     });
@@ -3030,7 +3030,13 @@ function lbLoad(k){ try{ var a=JSON.parse(localStorage.getItem(k)||'[]'); return
 var lbRecs=lbLoad(LB_KEY), lbDeleted=lbLoad(LB_DEL_KEY), lbRows=[], lbSeq=0, lbEditId=null;
 function lbPersist(){ try{ localStorage.setItem(LB_KEY,JSON.stringify(lbRecs)); localStorage.setItem(LB_DEL_KEY,JSON.stringify(lbDeleted)); }catch(e){ toast('⚠️ เก็บข้อมูลในเครื่องไม่ได้'); } }
 function lbFind(id){ for(var i=0;i<lbRecs.length;i++) if(lbRecs[i].id===id) return lbRecs[i]; return null; }
-function lbNewRow(){ return {id:lbSeq++,plot:'',act:'',other:'',sup:'',con:LB_DEF_CON,shift:'Day',workers:'',hours:String(LB_STD_H),short:'',ot:[],flag:[]}; }
+function lbNewRow(){ return {id:lbSeq++,plot:'',act:'',other:'',sup:'',con:LB_DEF_CON,shift:'Day',workers:'',hours:String(LB_STD_H),short:'',ot:[],part:[],flag:[]}; }
+// คนทำงานไม่เต็มวัน: part=[{n:คน,h:ชม.(<8)}] → คนเทียบเท่า = n×h÷8 (1 คน 4 ชม. = 0.5 คน)
+function lbPartGroups(x){
+  var a=Array.isArray(x.part)?x.part:[];
+  return a.map(function(g){ return {n:lbNum(g.n),h:lbNum(g.h)}; }).filter(function(g){ return g.n>0||g.h>0; });
+}
+function lbPartText(x){ return lbPartGroups(x).map(function(g){ return g.n+' คน × '+g.h+' ชม.'; }).join(' + '); }
 // OT หลายกลุ่มต่อกิจกรรม: ot=[{n:คน,h:ชม.}] ; ข้อมูลเก่ามีแค่ otW/otH → อ่านเป็น 1 กลุ่ม (ใช้ได้ทั้งแถวในฟอร์มและแถวที่บันทึกแล้ว)
 function lbOtGroups(x){
   var a=Array.isArray(x.ot)?x.ot:((parseFloat(x.otW)>0||parseFloat(x.otH)>0)?[{n:x.otW,h:x.otH}]:[]);
@@ -3041,9 +3047,11 @@ function lbOtText(x){ return lbOtGroups(x).map(function(g){ return g.n+' คน 
 function lbRowOf(id){ for(var i=0;i<lbRows.length;i++) if(lbRows[i].id===id) return lbRows[i]; return null; }
 function lbNum(x){ x=parseFloat(x); return isNaN(x)?0:x; }
 function lbR1(x){ return Math.round(x*10)/10; }
+// แถวในฟอร์ม: workers = คนเต็มวัน ; แถวที่บันทึกแล้วที่มี part: fullW/fullH = กลุ่มเต็มวัน, workers = จำนวนคนรวม, hours = ชม.เฉลี่ย (ให้ Apps Script รุ่นเดิมคำนวณ คน×ชม. ได้ถูก)
 function lbCalc(r){
-  var w=lbNum(r.workers), h=r.hours===''||r.hours==null?LB_STD_H:lbNum(r.hours);
-  return {workers:w, manH:w*h, otMH:lbOtMH(r), manD:w*h/LB_STD_H};
+  var sv=r.fullW!==undefined, w=lbNum(sv?r.fullW:r.workers), hv=sv?r.fullH:r.hours, h=hv===''||hv==null?LB_STD_H:lbNum(hv);
+  var pg=lbPartGroups(r), pn=pg.reduce(function(s,g){ return s+g.n; },0), pm=pg.reduce(function(s,g){ return s+g.n*g.h; },0);
+  return {workers:w+pn, partN:pn, partFte:pm/LB_STD_H, manH:w*h+pm, otMH:lbOtMH(r), manD:(w*h+pm)/LB_STD_H};
 }
 function lbActName(r){ return r.act===LB_OTHER ? String(r.other||'').trim() : r.act; }
 // ผู้ดูแล: รับชื่อเล่นหรือชื่อเต็ม (ไม่สนตัวพิมพ์) → {s,f} หรือ null
@@ -3096,11 +3104,18 @@ function lbRenderRows(){
       +'<div class="g2"><div class="grp"><label>กิจกรรม</label><select onchange="lbSet('+r.id+',\'act\',this.value,true)">'+opts(LB_ACTS.concat([LB_OTHER]),r.act,'— เลือก —')+'</select></div>'
       +'<div class="grp"><label>กะ</label><select onchange="lbSet('+r.id+',\'shift\',this.value)">'+LB_SHIFTS.map(function(s){ return '<option'+(s===r.shift?' selected':'')+'>'+s+'</option>'; }).join('')+'</select></div></div>'
       +(r.act===LB_OTHER?'<div class="grp"><label>ชื่อกิจกรรม</label><input type="text" value="'+srE(r.other)+'" placeholder="พิมพ์ชื่อกิจกรรม" oninput="lbSet('+r.id+',\'other\',this.value)"></div>':'')
-      +'<div class="g2"><div class="grp"><label>จำนวนแรงงาน (คน)</label><input type="number" inputmode="numeric" min="1" value="'+srE(r.workers)+'" placeholder="เช่น 10" oninput="lbSet('+r.id+',\'workers\',this.value)"></div>'
+      +'<div class="g2"><div class="grp"><label>จำนวนแรงงาน เต็มวัน (คน)</label><input type="number" inputmode="numeric" min="1" value="'+srE(r.workers)+'" placeholder="เช่น 10" oninput="lbSet('+r.id+',\'workers\',this.value)"></div>'
       +'<div class="grp"><label>ผู้ดูแล</label><select onchange="lbSet('+r.id+',\'sup\',this.value)">'+supOpts(r.sup)+'</select></div></div>'
       +'<div class="g2"><div class="grp"><label>ผู้รับเหมา (ถ้ามี)</label><select onchange="lbSet('+r.id+',\'con\',this.value)">'+opts(LB_CONTRACTORS,r.con,'— ไม่ระบุ —')+'</select></div>'
       +'<div class="grp"><label>ชม.ทำงาน (ปกติ '+LB_STD_H+')</label><input type="number" inputmode="decimal" step="0.5" min="0" max="12" value="'+srE(r.hours)+'" oninput="lbSet('+r.id+',\'hours\',this.value)"></div></div>'
       +'<div class="grp" id="lb-shortwrap-'+r.id+'" style="'+(h<LB_STD_H?'':'display:none')+'"><label>เหตุผลที่เลิกก่อนเวลา</label><select onchange="lbSet('+r.id+',\'short\',this.value)">'+opts(LB_SHORT,r.short,'— เลือก —')+'</select></div>'
+      +'<div class="grp"><label>ทำงานไม่เต็มวัน (คนละกลุ่ม เช่น 1 คน × 4 ชม. = 0.5 คน)</label>'
+      +(r.part||[]).map(function(g,gi){ return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">'
+        +'<input type="number" inputmode="numeric" min="1" value="'+srE(g.n)+'" placeholder="คน" style="flex:1;min-width:60px" oninput="lbPartSet('+r.id+','+gi+',\'n\',this.value)"><span>คน ×</span>'
+        +'<input type="number" inputmode="decimal" step="0.5" min="0.5" max="7.5" value="'+srE(g.h)+'" placeholder="ชม." style="flex:1;min-width:60px" oninput="lbPartSet('+r.id+','+gi+',\'h\',this.value)"><span>ชม.</span>'
+        +'<b id="lb-pe-'+r.id+'-'+gi+'" style="min-width:70px;color:var(--teal,#0f766e)"></b>'
+        +'<button type="button" class="cc-rm" onclick="lbPartRem('+r.id+','+gi+')">✕</button></div>'; }).join('')
+      +'<button type="button" class="sr-btn ghost" onclick="lbPartAdd('+r.id+')">＋ เพิ่มกลุ่มไม่เต็มวัน</button></div>'
       +'<div class="grp"><label>OT (แยกกลุ่มได้ เช่น 2 คน × 2 ชม. และ 8 คน × 1 ชม.)</label>'
       +(r.ot||[]).map(function(g,gi){ return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">'
         +'<input type="number" inputmode="numeric" min="1" value="'+srE(g.n)+'" placeholder="คน" style="flex:1" oninput="lbOtSet('+r.id+','+gi+',\'n\',this.value)"><span>คน ×</span>'
@@ -3123,6 +3138,9 @@ function lbSet(id,k,v,rerender){
 function lbOtSet(id,gi,k,v){ var r=lbRowOf(id); if(!r||!r.ot||!r.ot[gi]) return; r.ot[gi][k]=v; lbRenderCalc(); }
 function lbOtAdd(id){ var r=lbRowOf(id); if(!r) return; if(!Array.isArray(r.ot)) r.ot=[]; r.ot.push({n:'',h:'1'}); lbRenderRows(); }
 function lbOtRem(id,gi){ var r=lbRowOf(id); if(!r||!r.ot) return; r.ot.splice(gi,1); lbRenderRows(); }
+function lbPartSet(id,gi,k,v){ var r=lbRowOf(id); if(!r||!r.part||!r.part[gi]) return; r.part[gi][k]=v; lbRenderCalc(); }
+function lbPartAdd(id){ var r=lbRowOf(id); if(!r) return; if(!Array.isArray(r.part)) r.part=[]; r.part.push({n:'',h:'4'}); lbRenderRows(); }
+function lbPartRem(id,gi){ var r=lbRowOf(id); if(!r||!r.part) return; r.part.splice(gi,1); lbRenderRows(); }
 function lbAddRow(){
   var last=lbRows[lbRows.length-1], n=lbNewRow();
   if(last){ n.sup=last.sup; n.plot=last.plot; n.shift=last.shift; }          // ช่วยกรอกเร็ว
@@ -3134,7 +3152,8 @@ function lbRenderCalc(){
   lbRows.forEach(function(r){
     var c=lbCalc(r), el=document.getElementById('lb-ri-'+r.id);
     t.workers+=c.workers; if(r.shift==='Night') t.night+=c.workers; t.manH+=c.manH; t.otMH+=c.otMH; t.manD+=c.manD;
-    if(el) el.innerHTML = c.workers>0 ? (c.workers+' คน · '+srNum(c.manD,2)+' แรง-วัน'+(c.otMH>0?' · OT '+srNum(c.otMH,1)+' คน·ชม.':'')) : '';
+    (r.part||[]).forEach(function(g,gi){ var pe=document.getElementById('lb-pe-'+r.id+'-'+gi), v=lbNum(g.n)*lbNum(g.h)/LB_STD_H; if(pe) pe.textContent = v>0 ? '= '+srNum(v,2)+' คน' : ''; });
+    if(el) el.innerHTML = c.workers>0 ? (c.workers+' คน'+(c.partN>0?' (ไม่เต็มวัน '+c.partN+' คน = '+srNum(c.partFte,2)+' คนเทียบเท่า)':'')+' · '+srNum(c.manD,2)+' แรง-วัน'+(c.otMH>0?' · OT '+srNum(c.otMH,1)+' คน·ชม.':'')) : '';
   });
   document.getElementById('lb-total').innerHTML='รวมฟอร์มนี้: <b>'+t.workers+' คน</b>'+(t.night>0?' (กะดึก '+t.night+')':'')+' · <b>'+srNum(t.manD,2)+' แรง-วัน</b>'+(t.otMH>0?' · OT '+srNum(t.otMH,1)+' คน·ชม.':'');
 }
@@ -3149,9 +3168,20 @@ function lbValidate(){
     var w=parseFloat(r.workers), h=r.hours===''?LB_STD_H:parseFloat(r.hours);
     if(!String(r.plot||'').trim()) return n+'ใส่สถานที่';
     if(!lbActName(r)) return n+'เลือก/พิมพ์ชื่อกิจกรรม';
-    if(!(w>0) || Math.round(w)!==w) return n+'จำนวนแรงงานต้องเป็นจำนวนเต็มมากกว่า 0';
-    if(isNaN(h) || h<0 || h>12) return n+'ชม.ทำงานต้องอยู่ระหว่าง 0–12';
-    if(h<LB_STD_H && !r.short) return n+'เลือกเหตุผลที่เลิกก่อนเวลา';
+    var pg=lbPartGroups(r), pN=0;
+    for(var pi=0;pi<pg.length;pi++){
+      var pq=pg[pi], pn_=n+'ไม่เต็มวัน กลุ่ม '+(pi+1)+': ';
+      if((pq.n>0)!==(pq.h>0)) return pn_+'ใส่ทั้งจำนวนคนและชม. (หรือลบกลุ่มนี้)';
+      if(Math.round(pq.n)!==pq.n) return pn_+'จำนวนคนต้องเป็นจำนวนเต็ม';
+      if(pq.h<0.5 || pq.h>=LB_STD_H) return pn_+'ชม.ต้องอยู่ระหว่าง 0.5–7.5 (ถ้าทำครบ '+LB_STD_H+' ชม. ให้นับเป็นคนเต็มวัน)';
+      pN+=pq.n;
+    }
+    if(isNaN(w)) w=0;
+    if(w<0 || Math.round(w)!==w || (w===0 && !(pN>0))) return n+'จำนวนแรงงานต้องเป็นจำนวนเต็มมากกว่า 0 (หรือใส่กลุ่มไม่เต็มวัน)';
+    if(w>0){
+      if(isNaN(h) || h<0 || h>12) return n+'ชม.ทำงานต้องอยู่ระหว่าง 0–12';
+      if(h<LB_STD_H && !r.short) return n+'เลือกเหตุผลที่เลิกก่อนเวลา';
+    }
     var og=lbOtGroups(r), sumN=0;
     for(var gi=0;gi<og.length;gi++){
       var g=og[gi], gn=n+'OT กลุ่ม '+(gi+1)+': ';
@@ -3160,7 +3190,7 @@ function lbValidate(){
       if(g.h<0.5 || g.h>6) return gn+'ชม. OT ต้องอยู่ระหว่าง 0.5–6';
       sumN+=g.n;
     }
-    if(sumN>w) return n+'คน OT รวมทุกกลุ่ม ('+sumN+') ต้องไม่เกินจำนวนแรงงาน ('+w+')';
+    if(sumN>w) return n+'คน OT รวมทุกกลุ่ม ('+sumN+') ต้องไม่เกินจำนวนแรงงานเต็มวัน ('+w+')';
     
     
     
@@ -3174,8 +3204,15 @@ function lbSave(){
     rows:lbRows.map(function(r){ var h=r.hours===''?LB_STD_H:parseFloat(r.hours), s=lbSupFind(r.sup);
       // ot = กลุ่มละเอียด ; otW/otH = ยอดรวมคน + ชม.เฉลี่ยถ่วงน้ำหนัก (ให้ Apps Script รุ่นเก่าคำนวณ คน·ชม. OT ได้ถูก)
       var og=lbOtGroups(r), otN=og.reduce(function(a,g){ return a+g.n; },0), otMHr=og.reduce(function(a,g){ return a+g.n*g.h; },0);
-      return {plot:lbPlaceNorm(r.plot), act:lbActName(r), sup:s?s.f:'', supS:s?s.s:'', con:r.con||LB_DEF_CON, shift:r.shift||'Day', workers:parseFloat(r.workers), hours:h,
-      short:h<LB_STD_H?r.short:'', ot:og, otW:otN, otH:otN>0?Math.round(otMHr/otN*1000)/1000:0}; }),
+      var pg=lbPartGroups(r), fw=lbNum(r.workers), cc=lbCalc(r), why=(fw>0&&h<LB_STD_H)?r.short:'';
+      var row={plot:lbPlaceNorm(r.plot), act:lbActName(r), sup:s?s.f:'', supS:s?s.s:'', con:r.con||LB_DEF_CON, shift:r.shift||'Day', workers:fw, hours:h,
+      short:h<LB_STD_H?r.short:'', ot:og, otW:otN, otH:otN>0?Math.round(otMHr/otN*1000)/1000:0};
+      if(pg.length){   // มีกลุ่มไม่เต็มวัน: workers=คนรวม, hours=ชม.เฉลี่ย (คน×ชม. = ชม.รวมถูกต้อง), short=ข้อความรายละเอียด (แสดงใน LINE/Sheet)
+        row.fullW=fw; row.fullH=h; row.part=pg; row.why=why;
+        row.workers=cc.workers; row.hours=Math.round(cc.manH/cc.workers*10000)/10000;
+        row.short='ไม่เต็มวัน '+lbPartText(r)+(why?' · '+why:'');
+      }
+      return row; }),
     createdAt:old?old.createdAt:now, updatedAt:now, editCount:old?((old.editCount||0)+1):0};
   if(old) lbRecs[lbRecs.indexOf(old)]=rec; else lbRecs.push(rec);
   lbPersist(); lbCloudPush(rec); lbUpdateBadge();
@@ -3215,7 +3252,7 @@ function lbEdit(id){
   srSet('lb-date',r.date); srSet('lb-who',r.who);
   lbRows=r.rows.map(function(x){
     var known=LB_ACTS.indexOf(x.act)>=0;
-    return {id:lbSeq++,plot:x.plot,act:known?x.act:LB_OTHER,other:known?'':x.act,sup:x.supS||lbSupShort(x.sup),con:x.con||'',shift:x.shift||'Day',workers:String(x.workers),hours:String(x.hours),short:x.short||'',ot:lbOtGroups(x).map(function(g){ return {n:String(g.n),h:String(g.h)}; }),flag:[]};
+    return {id:lbSeq++,plot:x.plot,act:known?x.act:LB_OTHER,other:known?'':x.act,sup:x.supS||lbSupShort(x.sup),con:x.con||'',shift:x.shift||'Day',workers:x.fullW!==undefined?(x.fullW>0?String(x.fullW):''):String(x.workers),hours:String(x.fullW!==undefined?x.fullH:x.hours),short:(x.fullW!==undefined?x.why:x.short)||'',part:lbPartGroups(x).map(function(g){ return {n:String(g.n),h:String(g.h)}; }),ot:lbOtGroups(x).map(function(g){ return {n:String(g.n),h:String(g.h)}; }),flag:[]};
   });
   lbRenderRows();
   document.getElementById('lb-edit-id').textContent=id;
@@ -3357,7 +3394,7 @@ function lbRenderList(){
   box.innerHTML = list.length ? list.map(function(r){
     return '<div class="sr-card"><div class="sr-top"><b>'+srE(r.id)+'</b><span class="sr-sub">'+srFmtDate(r.date)+' · '+srE(lbSupShort(r.who)||r.who)+(r.editCount?' · แก้ไข '+r.editCount+' ครั้ง':'')+'</span></div>'
       +r.rows.map(function(x){ var c=lbCalc(x);
-        return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+(x.shift==='Night'?' · 🌙 กะดึก':'')+'<br><span class="sr-sub">'+x.workers+' คน'+(x.hours!==LB_STD_H?' × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':''):'')+(lbOtMH(x)>0?' | OT '+lbOtText(x):'')+(x.supS||x.sup?' · ดูแล: '+srE(lbSupFull(x.sup||x.supS)):'')+(x.con?' · '+srE(x.con):'')+'</span></div>'; }).join('')
+        return '<div class="sr-ev">📍 <b>'+srE(x.plot)+'</b> · '+srE(x.act)+(x.shift==='Night'?' · 🌙 กะดึก':'')+'<br><span class="sr-sub">'+(x.fullW!==undefined?((x.fullW>0?x.fullW+' คน'+(x.fullH!==LB_STD_H?' × '+x.fullH+' ชม.'+(x.why?' ('+srE(x.why)+')':''):'')+' + ':'')+'ไม่เต็มวัน '+lbPartText(x)+' = '+srNum(c.manD,2)+' คนเทียบเท่า'):(x.workers+' คน'+(x.hours!==LB_STD_H?' × '+x.hours+' ชม.'+(x.short?' ('+srE(x.short)+')':''):'')))+(lbOtMH(x)>0?' | OT '+lbOtText(x):'')+(x.supS||x.sup?' · ดูแล: '+srE(lbSupFull(x.sup||x.supS)):'')+(x.con?' · '+srE(x.con):'')+'</span></div>'; }).join('')
       +'<div class="sr-btns"><button class="sr-btn ghost" onclick="lbEdit(\''+r.id+'\')">✏️ แก้ไข</button><button class="sr-btn ghost" onclick="lbDelete(\''+r.id+'\')">🗑 ลบ</button></div></div>';
   }).join('') : '<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีบันทึกของ'+(date===todayISO()?'วันนี้':'วันที่ '+srFmtDate(date))+'</div>';
 }
