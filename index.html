@@ -1193,7 +1193,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.25.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.26.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -2980,12 +2980,12 @@ function srBuildSheets(){
     var all=sanitizeAllChems(m.allChems||{});
     mx.push([m.id,m.date||'',m.time||'',m.mixer||'',m.plot||'',m.sprayer||'',m.cropType||'',m.season||'',Object.keys(all).map(function(k){ return k+' '+all[k]; }).join(' | '),m.note||'',link[m.id]||'']);
   });
-  var lb=[['Date','RecordID','Recorder','Place','Activity','Shift','Supervisor','Contractor','Workers','Hours','ShortReason','OT Workers','OT Hours (avg)','Man-hours','OT man-hours','Man-days','OT detail','Part-day detail']];
+  var lb=[['Date','RecordID','Recorder','Place','Activity','Activity_EN','Shift','Supervisor','Contractor','Workers','Hours','ShortReason','OT Workers','OT Hours (avg)','Man-hours','OT man-hours','Man-days','OT detail','Part-day detail']];
   var lbDay={};
   (typeof lbRecs!=='undefined'?lbRecs:[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(r){
     (r.rows||[]).forEach(function(x){
       var c=lbCalc(x);
-      lb.push([r.date,r.id,r.who||'',x.plot,x.act,x.shift||'Day',x.sup||'',x.con||'',x.workers,x.hours,x.short||'',lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0),lbOtGroups(x).length?lbR1(c.otMH/lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0)):0,lbR1(c.manH),lbR1(c.otMH),Math.round(c.manD*100)/100,lbOtGroups(x).map(function(g){ return g.n+'x'+g.h; }).join(' + '),lbPartGroups(x).map(function(g){ return g.n+'x'+g.h; }).join(' + ')]);
+      lb.push([r.date,r.id,r.who||'',x.plot,x.act,lbActEn(x.act),x.shift||'Day',x.sup||'',x.con||'',x.workers,x.hours,x.short||'',lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0),lbOtGroups(x).length?lbR1(c.otMH/lbOtGroups(x).reduce(function(a,g){ return a+g.n; },0)):0,lbR1(c.manH),lbR1(c.otMH),Math.round(c.manD*100)/100,lbOtGroups(x).map(function(g){ return g.n+'x'+g.h; }).join(' + '),lbPartGroups(x).map(function(g){ return g.n+'x'+g.h; }).join(' + ')]);
       var k=r.date+'|'+x.plot, s=lbDay[k]||(lbDay[k]={date:r.date,place:x.plot,workers:0,night:0,acts:0,manH:0,otMH:0,manD:0});
       s.workers+=c.workers; if(x.shift==='Night') s.night+=c.workers; s.acts++; s.manH+=c.manH; s.otMH+=c.otMH; s.manD+=c.manD;
     });
@@ -3023,6 +3023,9 @@ var LB_SUPS=[['Ning','SUTHISA SUDSALAI'],['Nirut','NIRUT PHAYACHAI'],['M','ARIYA
 var LB_PLACES=['Office','Silo'];
 var LB_ACTS=['แม่ครัวกัมพูชา','แม่ครัวไทย','แม่บ้าน','อบข้าวโพด','ระบบน้ำ','ช่วยช่าง','ขายข้าวโพด','เตรียมปูน','ผสมยา','ถอนหญ้า','ใส่ปุ๋ย','ตัดแต่งกิ่ง','ปลูก / ซ่อมปลูก','เก็บเกี่ยว','เก็บขยะ / ทำความสะอาดแปลง','ขนย้าย'];
 var LB_OTHER='อื่น ๆ (พิมพ์เอง)';
+// ชื่อกิจกรรมภาษาอังกฤษ (ใช้ใน Excel ; ชุดเดียวกับ LB_ACT_EN ใน Apps Script) — กิจกรรมที่พิมพ์เองและไม่อยู่ในตาราง: ถ้าเป็นอังกฤษอยู่แล้วใช้ตามนั้น ไม่งั้นเว้นว่าง
+var LB_ACT_EN={'แม่ครัวกัมพูชา':'Cambodian cook','แม่ครัวไทย':'Thai cook','แม่บ้าน':'Housekeeper','อบข้าวโพด':'Corn drying','ระบบน้ำ':'Irrigation system','ช่วยช่าง':'Mechanic assistant','ขายข้าวโพด':'Corn sales','เตรียมปูน':'Lime preparation','ผสมยา':'Chemical mixing','ถอนหญ้า':'Weeding','ใส่ปุ๋ย':'Fertilizing','ตัดแต่งกิ่ง':'Pruning','ปลูก / ซ่อมปลูก':'Planting / replanting','ปลูก':'Planting','เก็บเกี่ยว':'Harvesting','เก็บขยะ / ทำความสะอาดแปลง':'Litter picking / field cleaning','ขนย้าย':'Hauling','กวาดกองข้าวโพด':'Corn pile sweeping','ถอนต้น':'Plant pulling','กลบโคน':'Earthing up','เก็บฝัก':'Cob picking','เก็บฝักข้าวโพด':'Corn cob picking','ทำรุ่น':'Making rows'};
+function lbActEn(a){ a=String(a||'').trim(); if(!a) return ''; if(LB_ACT_EN[a]) return LB_ACT_EN[a]; return /^[\x20-\x7E]+$/.test(a)?a:''; }
 var LB_SHORT=['ฝนตก','งานเสร็จก่อนเวลา','อื่น ๆ'];
 var LB_SHIFTS=['Day','Night'];
 var LB_STD_H=8, LB_BACK_DAYS=7;
