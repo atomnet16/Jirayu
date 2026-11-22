@@ -1193,7 +1193,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.27.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.28.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3433,6 +3433,12 @@ function lbSendLine(){
 function lbCloudOk(){ return LB_CLOUD && USE_CLOUD && navigator.onLine; }
 function lbCloudPush(rec){ if(lbCloudOk()) cloudWrite({action:'upsertLabor', record:rec}); }
 function lbCloudDelete(id){ if(lbCloudOk()) cloudWrite({action:'deleteLabor', id:id}); }
+// กลับมาที่แอป (สลับแอป/ปลดล็อกจอ) ขณะเปิดหน้า LB-01 → ดึงข้อมูลล่าสุด (รวมที่แก้ใน Google Sheet) ; ไม่ดึงระหว่างแก้ไขรายการ
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState!=='visible' || lbEditId) return;
+  var b=document.getElementById('lb-list'); if(!b || !b.offsetParent) return;
+  lbCloudPull(function(){ lbRenderList(); lbUpdateBadge(); });
+});
 function lbCloudPull(cb){
   if(!lbCloudOk()){ if(cb) cb(); return; }
   cloudJSONP({action:'getLabor'}, function(res){
