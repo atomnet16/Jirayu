@@ -545,7 +545,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   </div>
   <div id="lb-edit-banner" style="display:none;background:rgba(240,180,41,.18);border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:10px">✏️ กำลังแก้ไข <b id="lb-edit-id"></b> · <span style="text-decoration:underline;cursor:pointer" onclick="lbReset()">ยกเลิกการแก้ไข</span></div>
   <div class="g2">
-    <div class="grp"><label>วันที่ (Date) — กด ‹ › เพื่อดู/แก้วันที่ผ่านมา</label><div style="display:flex;gap:6px;align-items:center"><button type="button" class="sr-btn ghost" style="flex:0 0 44px;padding:8px 0" onclick="lbStepDay(-1)">‹</button><input type="date" id="lb-date" onchange="lbRenderList()" style="flex:1"><button type="button" class="sr-btn ghost" style="flex:0 0 44px;padding:8px 0" onclick="lbStepDay(1)">›</button></div></div>
+    <div class="grp"><label>วันที่ (Date) — กด ‹ › เพื่อดู/แก้วันที่ผ่านมา</label><div style="display:flex;gap:6px;align-items:center"><button type="button" class="sr-btn ghost" style="flex:0 0 44px;padding:8px 0" onclick="lbStepDay(-1)">‹</button><input type="date" id="lb-date" onchange="lbRenderList()" style="flex:1"><button type="button" class="sr-btn ghost" style="flex:0 0 44px;padding:8px 0" onclick="lbStepDay(1)">›</button></div><div id="lb-hist" style="margin-top:8px"></div></div>
     <div class="grp"><label>ผู้บันทึก (Recorder)</label><select id="lb-who"></select></div>
   </div>
   <datalist id="lb-places"></datalist>
@@ -561,7 +561,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   </div>
   <div id="lb-total" class="sr-box on" style="margin-bottom:10px"></div>
   <button class="sbtn" id="lb-save-btn" style="background:var(--blue)" onclick="lbSave()">✓ บันทึกคนงาน</button>
-  <div class="sec" style="margin-top:16px">รายการของวันที่เลือก</div>
+  <div class="sec" style="margin-top:16px" id="lb-day-sec">รายการของวันที่เลือก</div>
   <div id="lb-day-sum"></div>
   <div class="sec" style="margin-top:16px">📊 สรุปตามผู้รับเหมา</div>
   <div id="lb-con-sum"></div>
@@ -1193,7 +1193,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.29.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.30.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3395,9 +3395,30 @@ function lbConReport(date){
     +'ชม. = ชม.ทำงานรวมทุกคน (คน × ชม.) · OT (คน·ชม.) = ชม. OT รวมทุกคน เช่น 2 คน × 2 ชม. = 4</div>';
   return head+'<div class="sr-box on" style="padding:8px">'+h+'</div>';
 }
+// ดูย้อนหลัง: ปุ่มลัดวันที่ที่มีบันทึก (ล่าสุดก่อน) → กดแล้วแสดงรายการของวันนั้น พร้อมปุ่มแก้ไข/ลบ (แก้แล้วส่งขึ้น Google Sheet อัตโนมัติ)
+var lbHistAll=false;
+function lbGoDate(d){
+  if(lbEditId){ toast('กำลังแก้ไขรายการอยู่ — บันทึกหรือยกเลิกก่อนเปลี่ยนวัน'); return; }
+  srSet('lb-date',d); lbRenderList();
+  var s=document.getElementById('lb-day-sec'); if(s && s.scrollIntoView) s.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function lbRenderHist(date){
+  var el=document.getElementById('lb-hist'); if(!el) return;
+  var by={}; lbRecs.forEach(function(r){ var s=by[r.date]||(by[r.date]={n:0,w:0}); s.n++; r.rows.forEach(function(x){ s.w+=lbCalc(x).workers; }); });
+  var ds=Object.keys(by).sort().reverse(); if(!ds.length){ el.innerHTML=''; return; }
+  var show=lbHistAll?ds:ds.slice(0,8);
+  el.innerHTML='<div style="font-size:11px;color:var(--muted);margin-bottom:4px">📅 วันที่มีบันทึก — กดเพื่อดู/แก้ย้อนหลัง</div><div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +show.map(function(d){ var on=d===date;
+      return '<button type="button" onclick="lbGoDate(\''+d+'\')" style="padding:6px 10px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;'
+        +(on?'background:#1b5e3a;color:#fff;border:1.5px solid #1b5e3a':'background:#fff;color:#1b5e3a;border:1.5px solid #cfd8d3')+'">'
+        +srFmtDate(d).slice(0,5)+(d.slice(0,4)!==todayISO().slice(0,4)?'/'+d.slice(2,4):'')+' · '+by[d].w+' คน</button>'; }).join('')
+    +(ds.length>8?'<button type="button" onclick="lbHistAll=!lbHistAll;lbRenderList()" style="padding:6px 10px;border-radius:16px;font-size:12px;cursor:pointer;background:transparent;color:var(--muted);border:1.5px dashed #cfd8d3">'+(lbHistAll?'ย่อ':'ดูทั้งหมด ('+ds.length+' วัน)')+'</button>':'')
+    +'</div>';
+}
 function lbRenderList(){
   var box=document.getElementById('lb-list'); if(!box) return;
   var date=srV('lb-date')||todayISO();
+  lbRenderHist(date);
   var cb=document.getElementById('lb-con-sum'); if(cb) cb.innerHTML=lbConReport(date);
   var list=lbRecs.filter(function(r){ return r.date===date; }).sort(function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); });
   var sum=lbDaySummary(date), keys=Object.keys(sum), tw=0, tn=0;
