@@ -1193,7 +1193,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.26.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.27.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3082,6 +3082,7 @@ function lbPlaceNorm(s){
 function lbOpen(){
   document.getElementById('lb-who').innerHTML=srOptions(SR_PEOPLE,'','— ជ្រើស —');
   document.getElementById('lb-places').innerHTML=LB_PLACES.concat(PLOTS).map(function(p){ return '<option value="'+srE(p)+'">'; }).join('');
+  lbRepMode='day';   // เปิดหน้า LB-01 = สรุปรายวันเสมอ
   lbReset();
   lbCloudPull(function(){ lbRenderList(); lbUpdateBadge(); });
 }
@@ -3371,18 +3372,27 @@ function lbConReport(date){
       T.w+=c.workers; T.h+=c.manH; T.o+=c.otMH; n++;
     });
   });
-  var tab=function(m,t){ return '<button type="button" class="sr-btn'+(lbRepMode===m?'':' ghost')+'" style="flex:1;padding:6px 0" onclick="lbRepSet(\''+m+'\')">'+t+'</button>'; };
-  var head='<div style="display:flex;gap:6px;margin-bottom:6px">'+tab('day','รายวัน '+srFmtDate(date))+tab('month','รายเดือน '+pre)+'</div>';
+  // ปุ่มสลับ: ที่เลือก = พื้นเขียวเข้มตัวขาว ; ไม่เลือก = พื้นขาวตัวเทา (กำหนดสีเองทั้งคู่ ไม่พึ่ง class)
+  var tab=function(m,t){ var on=lbRepMode===m; return '<button type="button" aria-pressed="'+on+'" style="flex:1;padding:8px 4px;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;'
+    +(on?'background:#1b5e3a;color:#fff;border:1.5px solid #1b5e3a':'background:#fff;color:#6b7c72;border:1.5px solid #cfd8d3')+'" onclick="lbRepSet(\''+m+'\')">'+(on?'✓ ':'')+t+'</button>'; };
+  var TH_M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'], mName=TH_M[parseInt(pre.slice(5,7),10)-1]+' '+pre.slice(0,4);
+  var days={}; if(month) lbRecs.forEach(function(r){ if(String(r.date).slice(0,7)===pre) days[r.date]=1; });
+  var dk=Object.keys(days).sort();
+  var title=month ? '📆 สรุปทั้งเดือน '+mName+' — ยอดสะสม '+dk.length+' วันที่มีบันทึก'+(dk.length?' ('+dk.map(function(d){ return parseInt(d.slice(8),10); }).join(', ')+')':'')
+                  : '📅 สรุปเฉพาะวันที่ '+srFmtDate(date);
+  var head='<div style="display:flex;gap:6px;margin-bottom:6px">'+tab('day','รายวัน')+tab('month','รายเดือน')+'</div>'
+    +'<div style="font-weight:800;font-size:13px;margin:2px 0 6px">'+title+'</div>';
   if(!n) return head+'<div class="card" style="text-align:center;color:var(--muted);font-size:13px">ยังไม่มีข้อมูล</div>';
   var cell='padding:3px 4px;text-align:right', f=function(v){ return String(lbR1(v)); };
-  var h='<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="color:var(--muted);font-size:11px"><td style="padding:3px 4px">'+(month?'ผู้รับเหมา / กิจกรรม':'ผู้รับเหมา / กิจกรรม')+'</td><td style="'+cell+'">'+(month?'คน-วัน':'คน')+'</td><td style="'+cell+'">ชม.</td><td style="'+cell+'">OT ชม.</td></tr>';
+  var h='<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="color:var(--muted);font-size:11px"><td style="padding:3px 4px">'+(month?'ผู้รับเหมา / กิจกรรม':'ผู้รับเหมา / กิจกรรม')+'</td><td style="'+cell+'">'+(month?'คน-วัน':'คน')+'</td><td style="'+cell+'">ชม.</td><td style="'+cell+'">OT (คน·ชม.)</td></tr>';
   Object.keys(by).sort().forEach(function(k){ var s=by[k];
     h+='<tr style="background:rgba(0,0,0,.05);font-weight:700"><td style="padding:4px">'+srE(k)+'</td><td style="'+cell+'">'+f(s.w)+'</td><td style="'+cell+'">'+f(s.h)+'</td><td style="'+cell+'">'+(s.o>0?f(s.o):'-')+'</td></tr>';
     Object.keys(s.acts).sort(function(a,b){ return s.acts[b].w-s.acts[a].w; }).forEach(function(a){ var q=s.acts[a];
       h+='<tr><td style="padding:2px 4px 2px 12px;color:var(--muted)">'+srE(a)+'</td><td style="'+cell+'">'+f(q.w)+'</td><td style="'+cell+'">'+f(q.h)+'</td><td style="'+cell+'">'+(q.o>0?f(q.o):'-')+'</td></tr>'; });
   });
   h+='<tr style="font-weight:700;border-top:2px solid var(--border,#ccc)"><td style="padding:4px">รวม</td><td style="'+cell+'">'+f(T.w)+'</td><td style="'+cell+'">'+f(T.h)+'</td><td style="'+cell+'">'+(T.o>0?f(T.o):'-')+'</td></tr></table>'
-    +'<div class="sr-sub" style="margin-top:4px">ชม. = ชม.ทำงานรวมทุกคน (คน × ชม.) · OT ชม. = ชม. OT รวมทุกคน</div>';
+    +'<div class="sr-sub" style="margin-top:4px">'+(month?'⚠️ ยอดสะสมทั้งเดือน (รวมหลายวัน) — คน-วัน = จำนวนคนของทุกวันรวมกัน · ':'')
+    +'ชม. = ชม.ทำงานรวมทุกคน (คน × ชม.) · OT (คน·ชม.) = ชม. OT รวมทุกคน เช่น 2 คน × 2 ชม. = 4</div>';
   return head+'<div class="sr-box on" style="padding:8px">'+h+'</div>';
 }
 function lbRenderList(){
