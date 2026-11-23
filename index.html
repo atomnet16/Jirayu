@@ -710,7 +710,8 @@ var P3Core = (function(){
     {name:'Urea 46-0-0', n:46, p:0,  k:0},
     {name:'KCl 0-0-60',  n:0,  p:0,  k:60},
     {name:'15-15-15',    n:15, p:15, k:15},
-    {name:'16-20-0',     n:16, p:20, k:0}
+    {name:'16-20-0',     n:16, p:20, k:0},
+    {name:'21-0-0',      n:21, p:0,  k:0}
   ];
   var STAGES = [[-Infinity,'ก่อนปลูก'],[0,'ปลูก'],[1,'ก่อนงอก'],[5,'VE'],[8,'V2'],[15,'V4'],[21,'V6'],[28,'V8'],[36,'V10'],[43,'V12+'],[53,'VT'],[59,'R1'],[66,'R2'],[76,'R3'],[86,'R4'],[96,'R5'],[106,'R6']];
   var TYPES = {fertilizer:'ใส่ปุ๋ย', irrigation:'ให้น้ำ', landprep_plant:'เตรียมดิน/ปลูก', scout:'สำรวจศัตรูพืช', population:'นับต้น (Population)', spray:'พ่นสาร'};
@@ -1193,7 +1194,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.30.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.31.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3528,6 +3529,13 @@ var p3Recs=p3LoadJ(P3_KEY,[]); if(!Array.isArray(p3Recs)) p3Recs=[];
 var p3Deleted=p3LoadJ(P3_DEL_KEY,[]); if(!Array.isArray(p3Deleted)) p3Deleted=[];
 var p3CfgUser=p3LoadJ(P3_CFG_KEY,{});
 var p3FertsUser=p3LoadJ(P3_FERT_KEY,null);
+// ย้ายครั้งเดียว: เครื่องที่เคยแก้ทะเบียนปุ๋ยเองจะไม่เห็นปุ๋ยใหม่ในค่าเริ่มต้น → เติม 21-0-0 ให้ (ถ้าไม่มี) แล้วจำว่าเติมแล้ว ไม่เติมซ้ำถ้าผู้ใช้ลบเอง
+try{
+  if(Array.isArray(p3FertsUser) && p3FertsUser.length && !localStorage.getItem('mf_p3_ferts_m1')){
+    if(!p3FertsUser.some(function(f){ return f.name==='21-0-0'; })){ p3FertsUser=p3FertsUser.concat([{name:'21-0-0', n:21, p:0, k:0}]); localStorage.setItem(P3_FERT_KEY,JSON.stringify(p3FertsUser)); }
+    localStorage.setItem('mf_p3_ferts_m1','1');
+  }
+}catch(e){}
 var p3Type='fertilizer', p3EditId=null;
 var P3_ICONS={fertilizer:'🧪', irrigation:'💧', landprep_plant:'🚜', scout:'🔍', population:'🌱', spray:'🚿'};
 function p3Dae(date){ return P3Core.dae(date,p3Cfg()); }   // DAE = DAP − 4 (แสดงแทน DAP ทุกที่)
