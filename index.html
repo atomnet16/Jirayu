@@ -1194,7 +1194,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.31.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.32.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -4020,7 +4020,7 @@ function p3RenderPick(){
         +'<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:2px 4px">'+(P3_ICONS[p.type]||'📱')+' '+p3ThDate(p.date)+(p.type==='phone'?' · จากมือถือ':'')+'</span></div>';
     }).join('')+'</div>'
     +'<div class="sr-btns" style="margin-top:12px"><button class="sr-btn" style="background:var(--acc)" onclick="p3PickGo()">'+(n?'สร้าง'+label+' ('+n+' รูป)':'สร้าง'+label+' (ไม่ใส่รูป)')+'</button>'
-    +'<button class="sr-btn ghost" onclick="p3PickClear()">ไม่ใส่รูป</button><button class="sr-btn ghost" onclick="p3ClosePick()">ยกเลิก</button></div>';
+    +''+(n?'<button class="sr-btn ghost" onclick="p3PickNone()">สร้างโดยไม่ใส่รูป</button>':'')+'<button class="sr-btn ghost" onclick="p3ClosePick()">ยกเลิก</button></div>';
   p3Hydrate(document.getElementById('p3-pick-body'));
 }
 function p3PickToggle(id){
@@ -4051,7 +4051,7 @@ function p3PickAddFiles(input){
     if(skipped) toast('เลือกครบ '+P3Core.PHOTO.max+' รูปแล้ว — รูปที่เกินอยู่ในรายการ แตะสลับได้');
   });
 }
-function p3PickClear(){ p3PickSel=[]; p3RenderPick(); }
+function p3PickClear(){ p3PickSel=[]; p3RenderPick(); } function p3PickNone(){ p3PickSel=[]; p3PickGo(); }
 function p3ClosePick(){ document.getElementById('p3-pick').style.display='none'; }
 function p3PickGo(){ var kind=p3PickKind, ids=p3PickSel.slice(); p3ClosePick(); p3MakeReport(kind,ids); }
 // ids: รหัสรูปที่เลือก (ไม่ส่ง = เปิดหน้าเลือกรูปก่อน)
