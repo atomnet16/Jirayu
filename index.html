@@ -1194,7 +1194,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.32.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.33.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3278,18 +3278,23 @@ function lbDelete(id){
 // ---------- นำเข้าจากข้อความ ----------
 // รับ 2 รูปแบบ: (ก) รายงานเดิม "ชื่องาน 2 คน - Office /Ning" , "อบข้าวโพด 7(Day)+6(Night) คน - Silo/Nirut"
 //               (ข) บล็อกจาก Claude "กิจกรรม | คน | สถานที่ | ผู้ดูแล | กะ"
-function lbParseCount(expr){
-  var parts=String(expr||'').split('+'), out=[], flags=[];
+// ข้อความในวงเล็บ: กะ (Day/Night) หรือผู้รับเหมา (Da/Th) — ใส่ได้หลายอัน และอยู่ก่อนหรือหลังคำว่า "คน" ก็ได้
+function lbTagsOf(s){ return (String(s||'').match(/\([^)]*\)/g)||[]).map(function(t){ return t.slice(1,-1).trim(); }).filter(function(t){ return t!==''; }); }
+function lbApplyTag(item,raw,flags){
+  var tag=String(raw).toLowerCase();
+  if(/night|ดึก/.test(tag)) item.shift='Night';
+  else if(/^(day|เช้า|กลางวัน)$/.test(tag)) item.shift='Day';
+  else if(tag==='da' || tag==='vanda') item.con='Vanda';
+  else if(tag==='th' || tag==='thim') item.con='Thim';
+  else if(flags.indexOf('ไม่รู้จัก "('+raw+')"')<0) flags.push('ไม่รู้จัก "('+raw+')"');
+}
+function lbParseCount(expr,after){
+  var parts=String(expr||'').split('+'), out=[], flags=[], tail=lbTagsOf(after);
   parts.forEach(function(p,i){
-    var m=p.match(/(\d+)\s*(?:\(([^)]*)\))?/); if(!m) return;
-    var item={n:parseInt(m[1],10),shift:'Day',con:LB_DEF_CON}, tag=String(m[2]||'').trim().toLowerCase();
-    if(tag){
-      if(/night|ดึก/.test(tag)) item.shift='Night';
-      else if(/^(day|เช้า)$/.test(tag)) item.shift='Day';
-      else if(tag==='da' || tag==='vanda') item.con='Vanda';
-      else if(tag==='th' || tag==='thim') item.con='Thim';
-      else flags.push('ไม่รู้จัก "('+m[2]+')"');
-    } else if(i>0 && parts.length>1) { flags.push('กะของ "+'+m[1]+'" ไม่ระบุ (ใช้ Day)'); }
+    var m=p.match(/(\d+)/); if(!m) return;
+    var item={n:parseInt(m[1],10),shift:'Day',con:LB_DEF_CON}, tags=lbTagsOf(p);
+    if(!tags.length && !tail.length && i>0) flags.push('กะของ "+'+m[1]+'" ไม่ระบุ (ใช้ Day)');
+    tags.concat(tail).forEach(function(t){ lbApplyTag(item,t,flags); });
     out.push(item);
   });
   return {items:out,flags:flags};
@@ -3311,10 +3316,10 @@ function lbParseText(text){
       sup=supCell; if(/night|ดึก/i.test(shiftCell)){ cnt.items.forEach(function(i){ i.shift='Night'; }); }
       var tagInPlace=line.match(/\?\s*\(([^)]*)\)/); if(tagInPlace){ var tg=tagInPlace[1].toLowerCase(); if(tg==='da'||tg==='vanda') cnt.items.forEach(function(i){ i.con='Vanda'; }); }
     } else {
-      var m=line.match(/^(.+?)\s+(\d[\d+()\sA-Za-z฀-๿]*?)\s*คน\s*[-–—]\s*(.+)$/);
+      var m=line.match(/^(.+?)\s+(\d[\d+()\sA-Za-z฀-๿]*?)\s*คน\s*((?:\([^)]*\)\s*)*)[-–—]\s*(.+)$/);
       if(!m){ warns.push('อ่านไม่ได้: "'+line+'"'); return; }
-      act=m[1].trim(); cnt=lbParseCount(m[2]);
-      var toks=m[3].split('/').map(function(x){ return x.trim(); }).filter(function(x){ return x!==''; });
+      act=m[1].trim(); cnt=lbParseCount(m[2],m[3]);
+      var toks=m[4].split('/').map(function(x){ return x.trim(); }).filter(function(x){ return x!==''; });
       if(toks.length>1 && lbSupFind(toks[toks.length-1])){ sup=toks.pop(); }
       place=toks.join('/');
     }
