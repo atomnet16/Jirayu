@@ -1194,7 +1194,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.33.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.34.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3022,6 +3022,12 @@ var LB_DEF_CON='Thim'; // ไม่ระบุผู้รับเหมา = 
 // ผู้ดูแล: [ชื่อเล่น (ใช้ใน LINE), ชื่อเต็ม (เก็บในข้อมูล)]
 var LB_SUPS=[['Ning','SUTHISA SUDSALAI'],['Nirut','NIRUT PHAYACHAI'],['M','ARIYAPAS PATTANAPORNPAISARN'],['Cheata','So Cheata'],['Jirayu','JIRAYU NANTALAKHA'],['Tee','Academy'],['Bo','KRISSANAPON INTAYUNG'],['Aw','Kridsada']];
 var LB_PLACES=['Office','Silo'];
+var LB_MORE_PLOTS=['Pivot 12']; // แปลงที่มีเฉพาะใน LB-01 (ไม่เพิ่มใน PLOTS กลางของฟอร์มอื่น)
+function lbPlots(){
+  var a=PLOTS.slice(), at=a.indexOf('Pivot 11')+1;
+  LB_MORE_PLOTS.forEach(function(p){ if(a.indexOf(p)<0){ a.splice(at,0,p); at++; } });
+  return a;
+}
 var LB_ACTS=['แม่ครัวกัมพูชา','แม่ครัวไทย','แม่บ้าน','อบข้าวโพด','ระบบน้ำ','ช่วยช่าง','ขายข้าวโพด','เตรียมปูน','ผสมยา','ถอนหญ้า','ใส่ปุ๋ย','ตัดแต่งกิ่ง','ปลูก / ซ่อมปลูก','เก็บเกี่ยว','เก็บขยะ / ทำความสะอาดแปลง','ขนย้าย'];
 var LB_OTHER='อื่น ๆ (พิมพ์เอง)';
 // ชื่อกิจกรรมภาษาอังกฤษ (ใช้ใน Excel ; ชุดเดียวกับ LB_ACT_EN ใน Apps Script) — กิจกรรมที่พิมพ์เองและไม่อยู่ในตาราง: ถ้าเป็นอังกฤษอยู่แล้วใช้ตามนั้น ไม่งั้นเว้นว่าง
@@ -3068,21 +3074,21 @@ function lbSupFull(x){ var f=lbSupFind(x); return f?f.f:String(x||''); }
 function lbSupShort(full){ var f=lbSupFind(full); return f?f.s:String(full||''); }
 function lbKnownPlace(p){
   var l=String(p||'').toLowerCase();
-  return LB_PLACES.concat(PLOTS,extraPlots).some(function(x){ return x.toLowerCase()===l; });
+  return LB_PLACES.concat(lbPlots(),extraPlots).some(function(x){ return x.toLowerCase()===l; });
 }
 // "P5/1" → "Pivot 5/1", "office" → "Office"; ชื่ออื่นคงเดิม
 function lbPlaceNorm(s){
   s=String(s||'').trim().replace(/\s*\/\s*/g,'/');
   var m=s.match(/^P\s*(\d+)(?:\/(\d))?$/i);
   if(m) s='Pivot '+m[1]+(m[2]?'/'+m[2]:'');
-  var all=LB_PLACES.concat(PLOTS,extraPlots);
+  var all=LB_PLACES.concat(lbPlots(),extraPlots);
   for(var i=0;i<all.length;i++) if(all[i].toLowerCase()===s.toLowerCase()) return all[i];
   return s;
 }
 
 function lbOpen(){
   document.getElementById('lb-who').innerHTML=srOptions(SR_PEOPLE,'','— ជ្រើស —');
-  document.getElementById('lb-places').innerHTML=LB_PLACES.concat(PLOTS).map(function(p){ return '<option value="'+srE(p)+'">'; }).join('');
+  document.getElementById('lb-places').innerHTML=LB_PLACES.concat(lbPlots()).map(function(p){ return '<option value="'+srE(p)+'">'; }).join('');
   lbRepMode='day';   // เปิดหน้า LB-01 = สรุปรายวันเสมอ
   lbReset();
   lbCloudPull(function(){ lbRenderList(); lbUpdateBadge(); });
