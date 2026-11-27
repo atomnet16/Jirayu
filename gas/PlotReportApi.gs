@@ -82,7 +82,8 @@ function cuBuild_() {
     return {
       r: e.row, d: e.date ? Utilities.formatDate(e.date, tz, 'yyyy-MM-dd') : '',
       p: e.plot, c: e.crop, s: e.period, m: e.sprayer, t: e.activity,
-      x: e.chems.map(function (c) { return [c.name, c.unit, Math.round(c.qty * 1000) / 1000]; })
+      x: e.chems.map(function (c) { return [c.name, c.unit, Math.round(c.qty * 1000) / 1000]; }),
+      h: Math.round(e.rent * 100) / 100     // ค่าจ้าง/ค่าเช่า (USD) จากคอลัมน์ Rental costs — 0 = ไม่มี
     };
   });
   return { ok: true, updated: Utilities.formatDate(new Date(), tz, "yyyy-MM-dd'T'HH:mm"), events: events };
@@ -173,6 +174,8 @@ function cuParseEvents(data, periods) {
   }
   var cDate = col('Date'), cPlot = col('Plot'), cCrop = col('Crop'), cPer = col('Crop period'),
       cSpr = col('Type Sprayer'), cAct = col('Activity'), cAction = col('Action Day');
+  var cRent = -1;                                       // คอลัมน์ H: "Rental costs (USD)" (หรือชื่อเดิม "Rental costs / Fuel costs (USD)")
+  for (var hc = 0; hc < h.length; hc++) if (/^rental cost/i.test(h[hc])) { cRent = hc; break; }
   var chemStart = cAction >= 0 ? cAction + 1 : 16;      // สารเคมีเริ่มหลังคอลัมน์ Action Day
   var chems = [];
   for (var c = chemStart; c < h.length; c++) {
@@ -195,7 +198,8 @@ function cuParseEvents(data, periods) {
       period: cuResolvePeriod(cPer >= 0 ? row[cPer] : '', date, periods),
       sprayer: cSpr >= 0 ? String(row[cSpr] || '').trim() : '',
       activity: cAct >= 0 ? String(row[cAct] || '').trim() : '',
-      chems: used
+      chems: used,
+      rent: cRent >= 0 ? cuNum(row[cRent]) : 0
     });
   }
   return out;
