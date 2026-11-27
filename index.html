@@ -132,6 +132,36 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 .cu-bar{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 0 14px;margin-top:6px;background:linear-gradient(to top,var(--bg) 70%,rgba(212,237,216,0))}
 .cu-bar button{border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
 .cu-bar button:disabled{opacity:.6}
+.cu-bar button{font-size:14px;padding:14px 8px}
+/* CU-01 สรุป 1 แผ่น (A4 → PNG, เรนเดอร์นอกจอ) */
+.cus{width:794px;height:1123px;background:#fff;color:#1f2a24;padding:30px 34px 26px;display:flex;flex-direction:column;line-height:1.3;font-family:'Hanuman','Noto Sans Khmer',sans-serif}
+.cus.land{width:1123px;height:794px}
+.cus-hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1A6B36;padding-bottom:10px}
+.cus-hd .k{font-size:10.5px;letter-spacing:1.5px;color:#5b7564;font-weight:700}
+.cus-hd h1{font-size:22px;font-weight:900;color:#1A6B36;margin-top:2px}
+.cus-hd .per{font-size:13px;color:#33493c;margin-top:2px}
+.cus-hd .pl{text-align:right}.cus-hd .pl span{font-size:11px;color:#5b7564;display:block}.cus-hd .pl b{font-size:34px;font-weight:900;color:#1A6B36;line-height:1}
+.cus-body{flex:1;margin-top:14px;overflow:hidden}
+.cus-fit{transform-origin:top left}
+.cus-sec{font-size:13px;font-weight:900;color:#1A6B36;border-left:4px solid #1A6B36;padding-left:8px;margin-bottom:7px}
+.cus-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.cus table{border-collapse:collapse;width:100%;table-layout:fixed;font-variant-numeric:tabular-nums}
+.cus-log th{background:#1A6B36;color:#fff;font-size:11px;padding:5px 6px;text-align:left}
+.cus-log td{padding:4px 6px;border-bottom:1px solid #e3ebe5;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cus-log tr:nth-child(odd) td{background:#f8fbf9}
+.cus-log td.no{font-weight:900;color:#1A6B36}
+.cus-log td.m{text-align:right;font-weight:700}
+.cus-log tr.sum td{background:#eef6f0;font-weight:900;color:#1A6B36;border-top:2px solid #1A6B36}
+.cus-mx{margin-bottom:14px}
+.cus-mx th,.cus-mx td{border:1px solid #d5e2d9;padding:4px 3px;text-align:center;font-size:11.5px}
+.cus-mx th{background:#1A6B36;color:#fff;font-size:11px}
+.cus-mx th .n{font-size:13px;font-weight:900;display:block}.cus-mx th .d{font-size:10.5px;display:block;white-space:nowrap}
+.cus-mx th.l{text-align:left;padding-left:6px}.cus-mx th.t{background:#0F4F28}
+.cus-mx td.nm{text-align:left;font-weight:700;padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cus-mx td.u{color:#5b7564;font-size:10.5px}.cus-mx td.v{font-weight:600}.cus-mx td.e{color:#c8d6cc}
+.cus-mx td.tot{background:#eef6f0;font-weight:900;color:#1A6B36}
+.cus-mx tr:nth-child(even) td:not(.tot){background:#f8fbf9}
+.cus-ft{text-align:right;font-size:10px;color:#7a8a80;border-top:1px solid #d5e2d9;padding-top:6px;margin-top:6px}
 
 /* MAP PICKER */
 .map-modal{display:none;position:fixed;inset:0;background:rgba(10,30,15,0.55);z-index:400;align-items:center;justify-content:center}
@@ -617,8 +647,9 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   </div>
   <div id="cu-body"><div class="cu-empty">⏳ กำลังโหลดข้อมูล…</div></div>
   <div class="cu-bar">
-    <button style="flex:.55;background:#fff;color:var(--acc);border:1.5px solid var(--acc)" onclick="cuLoad(true)">🔄 รีเฟรช</button>
-    <button id="cu-png-btn" style="flex:1;background:var(--acc);color:#fff" onclick="cuExportPng()">🖼 Export PNG</button>
+    <button style="flex:none;width:54px;background:#fff;color:var(--acc);border:1.5px solid var(--acc)" onclick="cuLoad(true)" title="รีเฟรช">🔄</button>
+    <button id="cu-png-btn" style="flex:1;background:#fff;color:var(--acc);border:1.5px solid var(--acc)" onclick="cuExportPng()">🖼 PNG รายครั้ง</button>
+    <button id="cu-sum-btn" style="flex:1.15;background:var(--acc);color:#fff" onclick="cuExportSummary()">📄 สรุป 1 แผ่น</button>
   </div>
   <div id="cu-upd" style="font-size:11px;color:var(--muted);text-align:center"></div>
 </div>
@@ -1247,7 +1278,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.36.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.37.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -4293,6 +4324,86 @@ function cuPngHtml(R,only){
       +R.tot.map(function(t,i){ var bg=i%2?'background:#f6faf7;':''; return '<tr><td style="'+TD+';'+bg+'text-align:left;font-weight:700">'+cuEsc(t.n)+'</td><td style="'+TD+';'+bg+'font-weight:800">'+cuFn(t.q)+'</td><td style="'+TD+';'+bg+'">'+cuEsc(t.u)+'</td></tr>'; }).join('')+'</table>';
   }
   return h+'<div style="text-align:right;margin-top:24px;font-size:12.5px;color:#7a8a80">สร้างเมื่อ '+ts+'</div></div>';
+}
+/** สรุป 1 แผ่น A4: ① บันทึกการพ่น ② เมทริกซ์สาร×ครั้ง + รวมทั้งฤดู ③ ค่าจ้าง Drone (เฉพาะเมื่อคอลัมน์ H มีค่า)
+ *  พ่นเกิน 12 ครั้ง → แนวนอน; เนื้อหาล้นจะย่อให้พอดีแผ่น */
+function cuSummaryHtml(R){
+  var n=new Date(), ts=n.getDate()+' '+CU_MON[n.getMonth()]+' '+n.getFullYear()+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  var fd=function(s){ var p=String(s).split('-'); return p.length===3?(+p[2]+' '+CU_MON[+p[1]-1]+' '+p[0].slice(2)):s; };
+  var fdS=function(s){ var p=String(s).split('-'); return p.length===3?(+p[2]+' '+CU_MON[+p[1]-1]):s; };
+  var fq=function(v){ return (Math.round(v*100)/100).toLocaleString('en-US',{maximumFractionDigits:2}); };
+  var fu=function(v){ return '$'+(+v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  var land=R.ev.length>12, ch={}, ord=[];
+  R.ev.forEach(function(e){ e.x.forEach(function(x){ var k=x[0]+'|'+x[1]; if(!ch[k]){ ch[k]={n:x[0],u:x[1],q:{},t:0}; ord.push(k); } ch[k].q[e.no]=(ch[k].q[e.no]||0)+x[2]; ch[k].t+=x[2]; }); });
+  var chems=ord.map(function(k){ return ch[k]; });
+  var h='<div class="cus'+(land?' land':'')+'"><div class="cus-hd"><div><div class="k">MEGA FARM • SPRAYER OPERATION</div><h1>สรุปการใช้สารเคมีรายแปลง</h1>'
+    +'<div class="per">Crop period: <b>'+cuEsc(R.s)+'</b></div></div><div class="pl"><span>แปลง</span><b>'+cuEsc(R.p)+'</b></div></div><div class="cus-body"><div class="cus-fit">';
+  var logT=function(rows){ return '<table class="cus-log"><colgroup><col style="width:60px"><col style="width:110px"><col></colgroup><tr><th>ครั้งที่</th><th>วันที่</th><th>Activity</th></tr>'
+    +rows.map(function(e){ return '<tr><td class="no">#'+e.no+'</td><td>'+fd(e.d)+'</td><td>'+cuEsc(e.t||'-')+'</td></tr>'; }).join('')+'</table>'; };
+  var half=Math.ceil(R.ev.length/2);
+  h+='<div class="cus-sec">① บันทึกการพ่นแต่ละครั้ง</div>'+(R.ev.length>8?'<div class="cus-two">'+logT(R.ev.slice(0,half))+logT(R.ev.slice(half))+'</div>':logT(R.ev))
+    +'<div class="cus-sec" style="margin-top:16px">② ปริมาณสารเคมีที่ใช้แต่ละครั้ง และรวมทั้งฤดู</div>';
+  var PER=land?22:12;
+  for(var i=0;i<R.ev.length;i+=PER){
+    var cols=R.ev.slice(i,i+PER), last=i+PER>=R.ev.length;
+    var used=chems.filter(function(c){ return last||cols.some(function(e){ return c.q[e.no]; }); });
+    h+='<table class="cus-mx"><colgroup><col style="width:124px"><col style="width:34px">'+cols.map(function(){ return '<col>'; }).join('')+(last?'<col style="width:62px">':'')+'</colgroup>'
+      +'<tr><th class="l">สารเคมี</th><th>หน่วย</th>'+cols.map(function(e){ return '<th><span class="n">#'+e.no+'</span><span class="d">'+fdS(e.d)+'</span></th>'; }).join('')+(last?'<th class="t">รวม<br>ทั้งฤดู</th>':'')+'</tr>'
+      +used.map(function(c){ return '<tr><td class="nm">'+cuEsc(c.n)+'</td><td class="u">'+cuEsc(c.u)+'</td>'
+        +cols.map(function(e){ var v=c.q[e.no]; return v?'<td class="v">'+fq(v)+'</td>':'<td class="e">·</td>'; }).join('')+(last?'<td class="tot">'+fq(c.t)+'</td>':'')+'</tr>'; }).join('')+'</table>';
+  }
+  var paid=R.ev.filter(function(e){ return e.h>0; });
+  if(paid.length){
+    var sum=paid.reduce(function(a,e){ return a+e.h; },0);
+    var payT=function(rows,withSum){ return '<table class="cus-log"><colgroup><col style="width:60px"><col style="width:100px"><col><col style="width:110px"></colgroup>'
+      +'<tr><th>ครั้งที่</th><th>วันที่</th><th>Activity</th><th style="text-align:right">ค่าจ้าง (USD)</th></tr>'
+      +rows.map(function(e){ return '<tr><td class="no">#'+e.no+'</td><td>'+fd(e.d)+'</td><td>'+cuEsc(e.t||'-')+'</td><td class="m">'+fu(e.h)+'</td></tr>'; }).join('')
+      +(withSum?'<tr class="sum"><td colspan="3">รวมค่าจ้าง Drone ('+paid.length+' ครั้ง)</td><td class="m">'+fu(sum)+'</td></tr>':'')+'</table>'; };
+    var ph=Math.ceil(paid.length/2);
+    h+='<div class="cus-sec" style="margin-top:4px">③ ค่าจ้าง Drone</div>'
+      +(paid.length>8   // เกิน 8 รายการ → 2 คอลัมน์ + แถบยอดรวม
+        ?'<div class="cus-two">'+payT(paid.slice(0,ph))+payT(paid.slice(ph))+'</div><table class="cus-log" style="margin-top:4px"><tr class="sum"><td>รวมค่าจ้าง Drone ('+paid.length+' ครั้ง)</td><td class="m">'+fu(sum)+'</td></tr></table>'
+        :payT(paid,true));
+  }
+  return h+'</div></div><div class="cus-ft">สร้างเมื่อ '+ts+'</div></div>';
+}
+function cuFitSummary(root){   // ย่อเนื้อหาเมื่อล้นแผ่น (วัดซ้ำเพราะความสูงเปลี่ยนตามความกว้างหลังสเกล)
+  var body=root.querySelector('.cus-body'), fit=root.querySelector('.cus-fit'), k=1;
+  for(var it=0;it<10;it++){
+    fit.style.transform='scale('+k+')'; fit.style.width=(100/k)+'%';
+    var r=body.clientHeight/(fit.scrollHeight*k);
+    if((r<=1&&r>=0.97)||(k>=1&&r>1)) break;
+    k=Math.min(1,k*r*0.985);
+  }
+  if(fit.scrollHeight*k>body.clientHeight){ k=k*body.clientHeight/(fit.scrollHeight*k)*0.99; fit.style.transform='scale('+k+')'; fit.style.width=(100/k)+'%'; }
+}
+function cuExportSummary(){
+  if(_cuBusy||!cuData||!cuSt.plot) return;
+  var R=cuBuild(cuSt.plot,cuSt.period); if(!R.ev.length){ toast('ไม่มีข้อมูลให้สร้างรายงาน'); return; }
+  var btn=document.getElementById('cu-sum-btn'), old=btn.innerHTML, host=null;
+  function busy(on){ _cuBusy=on; btn.disabled=on; btn.innerHTML=on?'⏳ กำลังสร้าง…':old; }
+  busy(true);
+  p3LoadScript(P3_LIBS.h2c,function(){ return !!window.html2canvas; }).then(function(){
+    host=document.createElement('div'); host.style.cssText='position:fixed;left:-10000px;top:0';
+    host.innerHTML=cuSummaryHtml(R); document.body.appendChild(host);
+    return (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){
+      cuFitSummary(host);
+      return window.html2canvas(host.firstChild,{scale:2,backgroundColor:'#fff',useCORS:true,logging:false}); });
+  }).then(function(canvas){
+    return new Promise(function(res,rej){ canvas.toBlob(function(b){ b?res(b):rej(new Error('encode')); },'image/png'); });
+  }).then(function(blob){
+    var name='Summary_'+R.p.replace(/[\\\/:*?"<>| ]+/g,'-')+'_'+R.s.replace(/[\\\/:*?"<>| ]+/g,'-').replace(/-+/g,'-')+'.png';
+    var file=new File([blob],name,{type:'image/png'});
+    busy(false);
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      return navigator.share({files:[file],title:'สรุป '+R.p+' · '+R.s}).then(function(){ toast('✅ แชร์รูปแล้ว'); },function(e){
+        if(e&&e.name==='AbortError') return; p3DownloadBlob(blob,name); });
+    }
+    p3DownloadBlob(blob,name);
+  }).catch(function(e){
+    busy(false);
+    toast(e&&(e.message==='load'||e.message==='timeout')?'⚠️ โหลดตัวสร้างรูปไม่ได้ — ต้องออนไลน์ครั้งแรก':'❌ สร้างรายงานไม่สำเร็จ');
+  }).then(function(){ if(host&&host.parentNode) host.parentNode.removeChild(host); });
 }
 function cuExportPng(only){
   if(_cuBusy||!cuData||!cuSt.plot) return;
