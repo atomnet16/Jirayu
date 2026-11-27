@@ -107,6 +107,37 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 .chem-card .cc-rm{flex:none;width:32px;background:rgba(192,48,42,0.1);border:1.5px solid var(--danger);color:var(--danger);border-radius:7px;font-size:14px;font-weight:700;cursor:pointer}
 .rate-row{display:grid;grid-template-columns:1fr 100px;gap:6px}
 
+/* CU-01 รายงานการใช้สารรายแปลง */
+.cu-pick{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:14px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
+.cu-pick select{font-size:17px;font-weight:700}
+.cu-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.cu-chips::-webkit-scrollbar{display:none}
+.cu-chip{flex:none;font-size:13px;padding:8px 12px;border-radius:999px;border:1.5px solid rgba(26,107,54,0.2);background:rgba(255,255,255,0.7);color:var(--text);cursor:pointer;white-space:nowrap;font-weight:600}
+.cu-chip.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.cu-chip small{opacity:.75;margin-left:4px}
+.cu-sec{font-size:13px;font-weight:800;color:var(--acc);margin:14px 2px 8px;display:flex;justify-content:space-between;align-items:center}
+.cu-sec span:last-child{font-size:11px;font-weight:600;color:var(--muted)}
+.cu-ev{background:var(--card);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border:1px solid var(--bdr);border-radius:14px;margin-bottom:9px;overflow:hidden;box-shadow:0 2px 8px rgba(26,107,54,0.08)}
+.cu-evh{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.cu-no{flex:none;width:42px;height:42px;border-radius:12px;background:var(--acc);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:17px;line-height:1}
+.cu-no small{font-size:9px;font-weight:400;opacity:.85;margin-bottom:2px}
+.cu-mid{flex:1;min-width:0}
+.cu-d{font-weight:800;font-size:15px}
+.cu-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.cu-tag{font-size:11px;padding:1px 7px;border-radius:6px;background:rgba(26,107,54,0.12);color:var(--acc)}
+.cu-tag.t{background:rgba(15,122,104,0.12);color:var(--teal)}.cu-tag.b{background:rgba(26,92,181,0.12);color:var(--blue)}
+.cu-cnt{flex:none;text-align:right;font-size:11px;color:var(--muted)}.cu-cnt b{display:block;font-size:16px;color:var(--text)}
+.cu-evb{display:none;padding:0 12px 12px}.cu-ev.open .cu-evb{display:block}
+.cu-tb{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.cu-tb th{font-size:11px;color:var(--muted);font-weight:700;text-align:right;padding:6px 4px;border-bottom:1px solid rgba(26,107,54,0.18)}
+.cu-tb td{padding:7px 4px;border-bottom:1px dashed rgba(26,107,54,0.15);text-align:right}
+.cu-tb th:first-child,.cu-tb td:first-child{text-align:left;font-weight:700}
+.cu-mini{font-size:12px;border:1px solid var(--acc);color:var(--acc);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:700;margin-top:8px;float:right}
+.cu-empty{padding:22px 10px;text-align:center;color:var(--muted);font-size:13px}
+.cu-bar{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 0 14px;margin-top:6px;background:linear-gradient(to top,var(--bg) 70%,rgba(212,237,216,0))}
+.cu-bar button{border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+.cu-bar button:disabled{opacity:.6}
+
 /* MAP PICKER */
 .map-modal{display:none;position:fixed;inset:0;background:rgba(10,30,15,0.55);z-index:400;align-items:center;justify-content:center}
 .map-modal.on{display:flex}
@@ -314,6 +345,12 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
       <div class="fk">ចំការ P3</div>
       <div class="fe">บันทึกแปลง P3 (Pivot 3)</div>
       <span class="badge" id="p3-home-badge" style="background:rgba(26,107,54,.15);color:var(--acc)">PL-01</span>
+    </div>
+    <div class="fcard ctr" onclick="showForm('cu'); cuOpen();">
+      <div style="width:78px;height:78px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:2px">📋</div>
+      <div class="fk">របាយការណ៍ចំការ</div>
+      <div class="fe">รายงานการใช้สารรายแปลง</div>
+      <span class="badge" style="background:rgba(26,107,54,.15);color:var(--acc)">CU-01</span>
     </div>
   </div>
   <button onclick="doRefresh()" style="width:100%;background:rgba(91,164,245,.12);border:1px solid rgba(91,164,245,.35);color:var(--blue);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:13px">
@@ -568,6 +605,27 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   <div class="sec" style="margin-top:16px">รายการบันทึก</div>
   <div id="lb-list"></div>
   <button class="sbtn" style="background:var(--teal);margin-top:6px" onclick="lbSendLine()">📤 ส่งสรุปวันนี้เข้า LINE</button>
+</div>
+
+<!-- CU-01 · รายงานการใช้สารรายแปลง (อ่านจาก Sprayer APP Now › DATA AN) -->
+<div class="fw" id="fw-cu">
+  <div class="fhdr">
+    <button class="back" onclick="hideForm()">← ត្រឡប់</button>
+    <div class="ftitle">📋 รายงานรายแปลง</div>
+    <span class="badge" style="background:rgba(26,107,54,.15);color:var(--acc)">CU-01</span>
+  </div>
+  <div class="cu-pick">
+    <label>แปลง (Plot)</label>
+    <select id="cu-plot" onchange="cuOnPlot()"></select>
+    <label style="margin-top:12px">Crop period</label>
+    <div class="cu-chips" id="cu-chips"></div>
+  </div>
+  <div id="cu-body"><div class="cu-empty">⏳ กำลังโหลดข้อมูล…</div></div>
+  <div class="cu-bar">
+    <button style="flex:.55;background:#fff;color:var(--acc);border:1.5px solid var(--acc)" onclick="cuLoad(true)">🔄 รีเฟรช</button>
+    <button id="cu-png-btn" style="flex:1;background:var(--acc);color:#fff" onclick="cuExportPng()">🖼 Export PNG</button>
+  </div>
+  <div id="cu-upd" style="font-size:11px;color:var(--muted);text-align:center"></div>
 </div>
 
 <!-- P3 · บันทึกแปลง (PL-01) -->
@@ -1194,10 +1252,12 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.34.p3+lb'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.35.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
+// CU-01: Web App แยก (gas/PlotReportApi.gs) อ่าน DATA AN ในไฟล์ Sprayer APP Now — ไม่ใช้ SCRIPT_URL เดิม
+var CU_SCRIPT_URL = '';
 // รอบ auto-sync — ยิ่งถี่ยิ่งเสี่ยงโดน Google จำกัดการส่งผลลัพธ์ (ตอบเป็นหน้า error ของ Drive)
 // 60 วิพอสำหรับงานหน้าแปลง เพราะบันทึกเสร็จมี sync ทันทีอยู่แล้ว + sync ตอนสลับกลับมาที่แอป
 var SYNC_INTERVAL = 60000;
@@ -4119,6 +4179,156 @@ function p3DownloadBlob(blob,name){
   var a=document.createElement('a'), u=URL.createObjectURL(blob); a.href=u; a.download=name; document.body.appendChild(a); a.click();
   setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(u); },4000);
   toast('📄 บันทึกไฟล์ '+name+' แล้ว');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CU-01 · รายงานการใช้สารรายแปลง (เลือกแปลง + Crop period → รายครั้ง + สรุปรวม, Export PNG)
+// ข้อมูล: CU_SCRIPT_URL ?action=plotData → {ok, updated, events:[{r,d,p,c,s,m,t,x:[[สาร,หน่วย,ปริมาณ]]}]}
+// ═══════════════════════════════════════════════════════════
+var CU_ALL='ทั้งหมด', CU_CACHE_KEY='cu-cache';
+var cuData=null, cuSt={plot:'', period:''}, _cuBusy=false, _cuLoading=false;
+var CU_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function cuEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function cuFd(s){ if(!s) return '–'; var p=String(s).split('-'); return p.length===3?(+p[2]+' '+CU_MON[+p[1]-1]+' '+p[0]):s; }
+function cuFn(n){ return (+n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function cuOpen(){
+  if(!cuData){ try{ var c=JSON.parse(localStorage.getItem(CU_CACHE_KEY)||'null'); if(c&&c.events) cuData=c; }catch(e){} }
+  if(cuData) cuInit();
+  cuLoad(false);
+}
+function cuLoad(fresh){
+  if(_cuLoading) return;
+  if(!CU_SCRIPT_URL){ if(!cuData) document.getElementById('cu-body').innerHTML='<div class="cu-empty">⚠️ ยังไม่ได้ตั้งค่า CU_SCRIPT_URL (Web App ของ Sprayer APP Now)</div>'; return; }
+  _cuLoading=true;
+  var upd=document.getElementById('cu-upd'); upd.textContent='⏳ กำลังโหลดข้อมูลล่าสุด…';
+  var cbName='gcu'+Date.now(), s=document.createElement('script'), done=false;
+  function fin(data){
+    if(done) return; done=true; _cuLoading=false; clearTimeout(timer); delete window[cbName];
+    try{ document.head.removeChild(s); }catch(e){}
+    if(data&&data.ok&&data.events){ cuSetData(data); try{ localStorage.setItem(CU_CACHE_KEY,JSON.stringify(data)); }catch(e){} if(fresh) toast('✅ โหลดข้อมูลล่าสุดแล้ว'); }
+    else { cuShowUpd(cuData?' · ⚠️ ออฟไลน์ ใช้ข้อมูลที่บันทึกไว้':''); if(!cuData) document.getElementById('cu-body').innerHTML='<div class="cu-empty">⚠️ โหลดข้อมูลไม่ได้ — ตรวจสอบอินเทอร์เน็ตแล้วกด 🔄 รีเฟรช</div>'; }
+  }
+  var timer=setTimeout(function(){ fin(null); },JSONP_TIMEOUT);
+  window[cbName]=fin; s.onerror=function(){ fin(null); };
+  s.src=CU_SCRIPT_URL+'?action=plotData'+(fresh?'&fresh=1':'')+'&callback='+cbName+'&t='+Date.now();
+  document.head.appendChild(s);
+}
+function cuSetData(data){ cuData=data; cuInit(); }
+function cuShowUpd(extra){ document.getElementById('cu-upd').textContent=cuData&&cuData.updated?('ข้อมูล ณ '+cuFd(cuData.updated.slice(0,10))+' '+cuData.updated.slice(11,16)+(extra||'')):(extra||''); }
+function cuPlots(){ var s={}; cuData.events.forEach(function(e){ s[e.p]=(s[e.p]||0)+1; });
+  return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'en',{numeric:true,sensitivity:'base'}); }).map(function(p){ return [p,s[p]]; }); }
+function cuPeriodsOf(p){ var f={},c={}; cuData.events.forEach(function(e){ if(e.p!==p) return; if(!(e.s in f)||e.d<f[e.s]) f[e.s]=e.d; c[e.s]=(c[e.s]||0)+1; });
+  return Object.keys(f).sort(function(a,b){ return f[a]<f[b]?-1:1; }).map(function(s){ return [s,c[s]]; }); }
+function cuInit(){
+  var sel=document.getElementById('cu-plot'), ps=cuPlots();
+  sel.innerHTML=ps.map(function(x){ return '<option value="'+cuEsc(x[0])+'">'+cuEsc(x[0])+'  ('+x[1]+' ครั้ง)</option>'; }).join('');
+  var keep=ps.some(function(x){ return x[0]===cuSt.plot; });
+  if(!keep) cuSt.plot=ps.length?ps[0][0]:'';
+  sel.value=cuSt.plot;
+  var per=cuPeriodsOf(cuSt.plot);
+  if(!keep||!(cuSt.period===CU_ALL||per.some(function(x){ return x[0]===cuSt.period; }))) cuSt.period=per.length?per[per.length-1][0]:CU_ALL;
+  cuRenderChips(per); cuRender(); cuShowUpd();
+}
+function cuOnPlot(){
+  cuSt.plot=document.getElementById('cu-plot').value;
+  var per=cuPeriodsOf(cuSt.plot); cuSt.period=per.length?per[per.length-1][0]:CU_ALL;
+  cuRenderChips(per); cuRender();
+}
+function cuPickPeriod(v){ cuSt.period=v; cuRenderChips(); cuRender(); }
+function cuRenderChips(per){
+  per=per||cuPeriodsOf(cuSt.plot);
+  var all=per.reduce(function(a,x){ return a+x[1]; },0), box=document.getElementById('cu-chips');
+  box.innerHTML=per.concat([[CU_ALL,all]]).map(function(x){
+    return '<button class="cu-chip'+(x[0]===cuSt.period?' on':'')+'" data-v="'+cuEsc(x[0])+'" onclick="cuPickPeriod(this.getAttribute(\'data-v\'))">'+cuEsc(x[0])+'<small>'+x[1]+'</small></button>'; }).join('');
+  var on=box.querySelector('.cu-chip.on'); if(on) box.scrollLeft=Math.max(0,on.offsetLeft-box.clientWidth+on.offsetWidth+8);
+}
+/** แปลง+ฤดู → รายการพ่นเรียงวันที่ (ใส่เลขครั้ง) + ยอดรวมสารตามลำดับที่ใช้ครั้งแรก */
+function cuBuild(p,s){
+  var ev=cuData.events.filter(function(e){ return e.p===p&&(s===CU_ALL||e.s===s); })
+    .sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:a.r-b.r; })
+    .map(function(e,i){ var o={}; for(var k in e) o[k]=e[k]; o.no=i+1; return o; });
+  var tot={}, ord=[];
+  ev.forEach(function(e){ e.x.forEach(function(x){ var k=x[0]+'|'+x[1]; if(!tot[k]){ tot[k]={n:x[0],u:x[1],q:0}; ord.push(k); } tot[k].q+=x[2]; }); });
+  return {p:p, s:s, ev:ev, tot:ord.map(function(k){ return tot[k]; })};
+}
+function cuRender(){
+  var body=document.getElementById('cu-body');
+  if(!cuData||!cuSt.plot){ body.innerHTML='<div class="cu-empty">ไม่มีข้อมูล</div>'; return; }
+  var R=cuBuild(cuSt.plot,cuSt.period), h='';
+  if(!R.ev.length){ body.innerHTML='<div class="cu-ev cu-empty">ไม่มีข้อมูลการพ่นในฤดูกาลนี้</div>'; return; }
+  h+='<div class="cu-sec"><span>① การพ่นแต่ละครั้ง</span><span>แตะเพื่อดูรายละเอียด</span></div>';
+  R.ev.forEach(function(e,i){
+    h+='<div class="cu-ev'+(i===0?' open':'')+'"><div class="cu-evh" onclick="this.parentNode.classList.toggle(\'open\')">'
+      +'<div class="cu-no"><small>ครั้งที่</small>'+e.no+'</div>'
+      +'<div class="cu-mid"><div class="cu-d">'+cuFd(e.d)+'</div><div class="cu-tags">'
+      +(e.t?'<span class="cu-tag">'+cuEsc(e.t)+'</span>':'')+(e.m?'<span class="cu-tag t">'+cuEsc(e.m)+'</span>':'')
+      +(cuSt.period===CU_ALL?'<span class="cu-tag b">'+cuEsc(e.s)+'</span>':'')+'</div></div>'
+      +'<div class="cu-cnt"><b>'+e.x.length+'</b>สาร</div></div>'
+      +'<div class="cu-evb">'+(e.x.length?'<table class="cu-tb"><tr><th>สารเคมี</th><th>ปริมาณ</th><th>หน่วย</th></tr>'
+        +e.x.map(function(x){ return '<tr><td>'+cuEsc(x[0])+'</td><td>'+cuFn(x[2])+'</td><td>'+cuEsc(x[1])+'</td></tr>'; }).join('')+'</table>'
+        :'<div class="cu-empty">ไม่มีบันทึกสารเคมี</div>')
+      +'<button class="cu-mini" onclick="cuExportPng('+e.no+')">🖼 PNG ครั้งนี้</button><div style="clear:both"></div></div></div>';
+  });
+  h+='<div class="cu-sec"><span>② สรุปการใช้สารรวม — '+cuEsc(cuSt.period)+'</span></div>'
+    +'<div class="cu-ev" style="padding:4px 12px 8px"><table class="cu-tb"><tr><th>สารเคมี</th><th>ปริมาณรวม</th><th>หน่วย</th></tr>'
+    +R.tot.map(function(t){ return '<tr><td>'+cuEsc(t.n)+'</td><td><b>'+cuFn(t.q)+'</b></td><td>'+cuEsc(t.u)+'</td></tr>'; }).join('')+'</table></div>';
+  body.innerHTML=h;
+}
+/** HTML ของรูป PNG (กว้าง 1080px พื้นขาว) — only = เลขครั้ง (ไม่ใส่ = ทั้งฤดู) */
+function cuPngHtml(R,only){
+  var list=only?R.ev.filter(function(e){ return e.no===only; }):R.ev, n=new Date();
+  var ts=n.getDate()+' '+CU_MON[n.getMonth()]+' '+n.getFullYear()+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  var TH='background:#1A6B36;color:#fff;font-size:13px;padding:9px 10px;text-align:right', TD='padding:7px 10px;border-bottom:1px solid #e3ebe5;text-align:right';
+  var h='<div style="width:1080px;background:#fff;color:#1f2a24;padding:44px 48px;font-family:inherit;line-height:1.4">'
+    +'<div style="background:#1A6B36;color:#fff;border-radius:14px;padding:22px 28px;display:flex;justify-content:space-between;align-items:flex-end">'
+    +'<div><div style="font-size:15px;opacity:.85">MEGA FARM • SPRAYER OPERATION</div><div style="font-size:30px;font-weight:900">รายงานการใช้สารเคมีรายแปลง'+(only?' — ครั้งที่ '+only:'')+'</div>'
+    +'<div style="font-size:15px;opacity:.85">Crop period: '+cuEsc(R.s)+'</div></div>'
+    +'<div style="text-align:right;font-size:15px">แปลง<div style="font-size:34px;font-weight:900">'+cuEsc(R.p)+'</div></div></div>';
+  function sec(t){ return '<div style="font-size:18px;font-weight:800;color:#1A6B36;border-left:5px solid #1A6B36;padding-left:10px;margin:26px 0 10px">'+t+'</div>'; }
+  h+=sec('รายละเอียดการพ่นแต่ละครั้ง')+'<table style="width:100%;border-collapse:collapse;font-size:15px">'
+    +'<tr><th style="'+TH+';text-align:left;width:280px;border-radius:8px 0 0 0">ครั้งที่ / วันที่</th><th style="'+TH+';text-align:left">สารเคมี</th><th style="'+TH+'">ปริมาณ</th><th style="'+TH+';border-radius:0 8px 0 0">หน่วย</th></tr>';
+  list.forEach(function(e,i){
+    var rows=e.x.length?e.x:[['(ไม่มีบันทึก)','',null]], bg=i%2?'background:#f6faf7;':'';
+    rows.forEach(function(x,j){
+      h+='<tr>'+(j===0?'<td rowspan="'+rows.length+'" style="'+TD+';'+bg+'text-align:left;vertical-align:top;font-weight:800;color:#1A6B36;border-bottom:1px solid #c9d8cd">ครั้งที่ '+e.no+' • '+cuFd(e.d)
+        +'<div style="font-weight:400;color:#5b7564;font-size:12.5px">'+cuEsc([e.t,e.m].filter(Boolean).join(' • '))+'</div></td>':'')
+        +'<td style="'+TD+';'+bg+'text-align:left">'+cuEsc(x[0])+'</td><td style="'+TD+';'+bg+'">'+(x[2]==null?'':cuFn(x[2]))+'</td><td style="'+TD+';'+bg+'">'+cuEsc(x[1])+'</td></tr>';
+    });
+  });
+  h+='</table>';
+  if(!only){
+    h+=sec('สรุปการใช้สารเคมีรวมทั้งฤดูกาล')+'<table style="width:100%;border-collapse:collapse;font-size:15px">'
+      +'<tr><th style="'+TH+';text-align:left;border-radius:8px 0 0 0">สารเคมี</th><th style="'+TH+'">ปริมาณรวม</th><th style="'+TH+';border-radius:0 8px 0 0">หน่วย</th></tr>'
+      +R.tot.map(function(t,i){ var bg=i%2?'background:#f6faf7;':''; return '<tr><td style="'+TD+';'+bg+'text-align:left;font-weight:700">'+cuEsc(t.n)+'</td><td style="'+TD+';'+bg+'font-weight:800">'+cuFn(t.q)+'</td><td style="'+TD+';'+bg+'">'+cuEsc(t.u)+'</td></tr>'; }).join('')+'</table>';
+  }
+  return h+'<div style="text-align:right;margin-top:24px;font-size:12.5px;color:#7a8a80">สร้างเมื่อ '+ts+'</div></div>';
+}
+function cuExportPng(only){
+  if(_cuBusy||!cuData||!cuSt.plot) return;
+  var R=cuBuild(cuSt.plot,cuSt.period); if(!R.ev.length){ toast('ไม่มีข้อมูลให้สร้างรูป'); return; }
+  var btn=document.getElementById('cu-png-btn'), old=btn.innerHTML, host=null;
+  function busy(on){ _cuBusy=on; btn.disabled=on; btn.innerHTML=on?'⏳ กำลังสร้างรูป…':old; }
+  busy(true);
+  p3LoadScript(P3_LIBS.h2c,function(){ return !!window.html2canvas; }).then(function(){
+    host=document.createElement('div'); host.style.cssText='position:fixed;left:-10000px;top:0';
+    host.innerHTML=cuPngHtml(R,only); document.body.appendChild(host);
+    return (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){
+      return window.html2canvas(host.firstChild,{scale:2,backgroundColor:'#fff',useCORS:true,logging:false}); });
+  }).then(function(canvas){
+    return new Promise(function(res,rej){ canvas.toBlob(function(b){ b?res(b):rej(new Error('encode')); },'image/png'); });
+  }).then(function(blob){
+    var name='Report_'+R.p.replace(/[\\\/:*?"<>| ]+/g,'-')+'_'+R.s.replace(/[\\\/:*?"<>| ]+/g,'-').replace(/-+/g,'-')+(only?'_ครั้งที่'+only:'')+'.png';
+    var file=new File([blob],name,{type:'image/png'});
+    busy(false);
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      return navigator.share({files:[file],title:'รายงาน '+R.p+' · '+R.s}).then(function(){ toast('✅ แชร์รูปแล้ว'); },function(e){
+        if(e&&e.name==='AbortError') return; p3DownloadBlob(blob,name); });
+    }
+    p3DownloadBlob(blob,name);
+  }).catch(function(e){
+    busy(false);
+    toast(e&&(e.message==='load'||e.message==='timeout')?'⚠️ โหลดตัวสร้างรูปไม่ได้ — ต้องออนไลน์ครั้งแรก':'❌ สร้างรูปไม่สำเร็จ');
+  }).then(function(){ if(host&&host.parentNode) host.parentNode.removeChild(host); });
 }
 function p3DueText(x){
   if(x.status==='overdue') return '<b style="color:var(--danger)">เลยกำหนด '+x.daysOver+' วัน</b>';
