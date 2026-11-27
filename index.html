@@ -644,6 +644,8 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
     <select id="cu-period" onchange="cuOnPeriod()"></select>
     <label style="margin-top:12px">② แปลง (Plot) ในฤดูนี้</label>
     <select id="cu-plot" onchange="cuOnPlot()"></select>
+    <div id="cu-crop-wrap" style="display:none"><label style="margin-top:12px">③ พืช (Crop) — แปลงนี้มีมากกว่า 1 ชนิด</label>
+    <select id="cu-crop" onchange="cuOnCrop()"></select></div>
   </div>
   <div id="cu-body"><div class="cu-empty">⏳ กำลังโหลดข้อมูล…</div></div>
   <div class="cu-bar">
@@ -1278,7 +1280,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.37.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.38.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -4212,7 +4214,9 @@ function p3DownloadBlob(blob,name){
 // ข้อมูล: CU_SCRIPT_URL ?action=plotData → {ok, updated, events:[{r,d,p,c,s,m,t,x:[[สาร,หน่วย,ปริมาณ]]}]}
 // ═══════════════════════════════════════════════════════════
 var CU_ALL='ทั้งหมด', CU_CACHE_KEY='cu-cache';
-var cuData=null, cuSt={plot:'', period:''}, _cuBusy=false, _cuLoading=false;
+var CU_ALLC='ทุกพืช', CU_NOCROP='(ไม่ระบุพืช)';
+var cuData=null, cuSt={plot:'', period:'', crop:CU_ALLC}, _cuBusy=false, _cuLoading=false;
+function cuCropOf(e){ return e.c||CU_NOCROP; }
 var CU_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function cuEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function cuFd(s){ if(!s) return '–'; var p=String(s).split('-'); return p.length===3?(+p[2]+' '+CU_MON[+p[1]-1]+' '+p[0]):s; }
@@ -4261,18 +4265,36 @@ function cuFillPlots(){
   sel.innerHTML=pl.map(function(x){ return '<option value="'+cuEsc(x[0])+'">'+cuEsc(x[0])+'  ('+x[1]+' ครั้ง)</option>'; }).join('');
   if(!pl.some(function(x){ return x[0]===cuSt.plot; })) cuSt.plot=pl.length?pl[0][0]:'';   // แปลงเดิมไม่มีในฤดูนี้ → เลือกแปลงแรก
   sel.value=cuSt.plot;
+  cuFillCrops();
+}
+/** พืชของแปลง+ฤดูที่เลือก: [[พืช, จำนวนครั้ง]] — มีมากกว่า 1 ชนิดจึงแสดงตัวเลือก (เช่น P1 ปลูก Corn + Soy Bean) */
+function cuCropsIn(p,s){ var c={}; cuData.events.forEach(function(e){ if(e.p===p&&(s===CU_ALL||e.s===s)){ var k=cuCropOf(e); c[k]=(c[k]||0)+1; } });
+  return Object.keys(c).sort(function(a,b){ return c[b]-c[a]||a.localeCompare(b); }).map(function(k){ return [k,c[k]]; }); }
+function cuFillCrops(){
+  var cs=cuCropsIn(cuSt.plot,cuSt.period), wrap=document.getElementById('cu-crop-wrap'), sel=document.getElementById('cu-crop');
+  if(cs.length<2){ cuSt.crop=CU_ALLC; wrap.style.display='none'; sel.innerHTML=''; return; }
+  var all=cs.reduce(function(a,x){ return a+x[1]; },0);
+  sel.innerHTML=cs.concat([[CU_ALLC,all]]).map(function(x){ return '<option value="'+cuEsc(x[0])+'">'+cuEsc(x[0])+'  ('+x[1]+' ครั้ง)</option>'; }).join('');
+  if(!(cuSt.crop===CU_ALLC||cs.some(function(x){ return x[0]===cuSt.crop; }))||cuSt.crop===CU_ALLC) cuSt.crop=cs[0][0];   // ค่าเริ่มต้น = พืชที่พ่นบ่อยที่สุด
+  sel.value=cuSt.crop; wrap.style.display='';
 }
 function cuOnPeriod(){ cuSt.period=document.getElementById('cu-period').value; cuFillPlots(); cuRender(); }
-function cuOnPlot(){ cuSt.plot=document.getElementById('cu-plot').value; cuRender(); }
-/** แปลง+ฤดู → รายการพ่นเรียงวันที่ (ใส่เลขครั้ง) + ยอดรวมสารตามลำดับที่ใช้ครั้งแรก */
-function cuBuild(p,s){
-  var ev=cuData.events.filter(function(e){ return e.p===p&&(s===CU_ALL||e.s===s); })
+function cuOnPlot(){ cuSt.plot=document.getElementById('cu-plot').value; cuFillCrops(); cuRender(); }
+function cuOnCrop(){ cuSt.crop=document.getElementById('cu-crop').value; cuRender(); }
+/** แปลง+ฤดู(+พืช) → รายการพ่นเรียงวันที่ (ใส่เลขครั้งใหม่ตามพืช) + ยอดรวมสารตามลำดับที่ใช้ครั้งแรก */
+function cuBuild(p,s,c){
+  c=c||cuSt.crop||CU_ALLC;
+  var ev=cuData.events.filter(function(e){ return e.p===p&&(s===CU_ALL||e.s===s)&&(c===CU_ALLC||cuCropOf(e)===c); })
     .sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:a.r-b.r; })
     .map(function(e,i){ var o={}; for(var k in e) o[k]=e[k]; o.no=i+1; return o; });
   var tot={}, ord=[];
   ev.forEach(function(e){ e.x.forEach(function(x){ var k=x[0]+'|'+x[1]; if(!tot[k]){ tot[k]={n:x[0],u:x[1],q:0}; ord.push(k); } tot[k].q+=x[2]; }); });
-  return {p:p, s:s, ev:ev, tot:ord.map(function(k){ return tot[k]; })};
+  var crops={}; ev.forEach(function(e){ crops[cuCropOf(e)]=1; });
+  return {p:p, s:s, c:c, crops:Object.keys(crops), ev:ev, tot:ord.map(function(k){ return tot[k]; })};
 }
+/** ข้อความพืชบนหัวรายงาน + ส่วนท้ายชื่อไฟล์ */
+function cuCropLabel(R){ return R.c!==CU_ALLC?R.c:(R.crops.length>1?R.crops.join(', '):''); }
+function cuCropFile(R){ return R.c!==CU_ALLC?'_'+R.c.replace(/[\\\/:*?"<>|() ]+/g,'-').replace(/-+$/,''):''; }
 function cuRender(){
   var body=document.getElementById('cu-body');
   if(!cuData||!cuSt.plot){ body.innerHTML='<div class="cu-empty">ไม่มีข้อมูล</div>'; return; }
@@ -4284,7 +4306,8 @@ function cuRender(){
       +'<div class="cu-no"><small>ครั้งที่</small>'+e.no+'</div>'
       +'<div class="cu-mid"><div class="cu-d">'+cuFd(e.d)+'</div><div class="cu-tags">'
       +(e.t?'<span class="cu-tag">'+cuEsc(e.t)+'</span>':'')+(e.m?'<span class="cu-tag t">'+cuEsc(e.m)+'</span>':'')
-      +(cuSt.period===CU_ALL?'<span class="cu-tag b">'+cuEsc(e.s)+'</span>':'')+'</div></div>'
+      +(cuSt.period===CU_ALL?'<span class="cu-tag b">'+cuEsc(e.s)+'</span>':'')
+      +(R.crops.length>1?'<span class="cu-tag b">'+cuEsc(cuCropOf(e))+'</span>':'')+'</div></div>'
       +'<div class="cu-cnt"><b>'+e.x.length+'</b>สาร</div></div>'
       +'<div class="cu-evb">'+(e.x.length?'<table class="cu-tb"><tr><th>สารเคมี</th><th>ปริมาณ</th><th>หน่วย</th></tr>'
         +e.x.map(function(x){ return '<tr><td>'+cuEsc(x[0])+'</td><td>'+cuFn(x[2])+'</td><td>'+cuEsc(x[1])+'</td></tr>'; }).join('')+'</table>'
@@ -4304,7 +4327,7 @@ function cuPngHtml(R,only){
   var h='<div style="width:1080px;background:#fff;color:#1f2a24;padding:44px 48px;font-family:inherit;line-height:1.4">'
     +'<div style="background:#1A6B36;color:#fff;border-radius:14px;padding:22px 28px;display:flex;justify-content:space-between;align-items:flex-end">'
     +'<div><div style="font-size:15px;opacity:.85">MEGA FARM • SPRAYER OPERATION</div><div style="font-size:30px;font-weight:900">รายงานการใช้สารเคมีรายแปลง'+(only?' — ครั้งที่ '+only:'')+'</div>'
-    +'<div style="font-size:15px;opacity:.85">Crop period: '+cuEsc(R.s)+'</div></div>'
+    +'<div style="font-size:15px;opacity:.85">Crop period: '+cuEsc(R.s)+(cuCropLabel(R)?'  ·  พืช: '+cuEsc(cuCropLabel(R)):'')+'</div></div>'
     +'<div style="text-align:right;font-size:15px">แปลง<div style="font-size:34px;font-weight:900">'+cuEsc(R.p)+'</div></div></div>';
   function sec(t){ return '<div style="font-size:18px;font-weight:800;color:#1A6B36;border-left:5px solid #1A6B36;padding-left:10px;margin:26px 0 10px">'+t+'</div>'; }
   h+=sec('รายละเอียดการพ่นแต่ละครั้ง')+'<table style="width:100%;border-collapse:collapse;font-size:15px">'
@@ -4337,7 +4360,7 @@ function cuSummaryHtml(R){
   R.ev.forEach(function(e){ e.x.forEach(function(x){ var k=x[0]+'|'+x[1]; if(!ch[k]){ ch[k]={n:x[0],u:x[1],q:{},t:0}; ord.push(k); } ch[k].q[e.no]=(ch[k].q[e.no]||0)+x[2]; ch[k].t+=x[2]; }); });
   var chems=ord.map(function(k){ return ch[k]; });
   var h='<div class="cus'+(land?' land':'')+'"><div class="cus-hd"><div><div class="k">MEGA FARM • SPRAYER OPERATION</div><h1>สรุปการใช้สารเคมีรายแปลง</h1>'
-    +'<div class="per">Crop period: <b>'+cuEsc(R.s)+'</b></div></div><div class="pl"><span>แปลง</span><b>'+cuEsc(R.p)+'</b></div></div><div class="cus-body"><div class="cus-fit">';
+    +'<div class="per">Crop period: <b>'+cuEsc(R.s)+'</b>'+(cuCropLabel(R)?'  ·  พืช: <b>'+cuEsc(cuCropLabel(R))+'</b>':'')+'</div></div><div class="pl"><span>แปลง</span><b>'+cuEsc(R.p)+'</b></div></div><div class="cus-body"><div class="cus-fit">';
   var logT=function(rows){ return '<table class="cus-log"><colgroup><col style="width:60px"><col style="width:110px"><col></colgroup><tr><th>ครั้งที่</th><th>วันที่</th><th>Activity</th></tr>'
     +rows.map(function(e){ return '<tr><td class="no">#'+e.no+'</td><td>'+fd(e.d)+'</td><td>'+cuEsc(e.t||'-')+'</td></tr>'; }).join('')+'</table>'; };
   var half=Math.ceil(R.ev.length/2);
@@ -4392,7 +4415,7 @@ function cuExportSummary(){
   }).then(function(canvas){
     return new Promise(function(res,rej){ canvas.toBlob(function(b){ b?res(b):rej(new Error('encode')); },'image/png'); });
   }).then(function(blob){
-    var name='Summary_'+R.p.replace(/[\\\/:*?"<>| ]+/g,'-')+'_'+R.s.replace(/[\\\/:*?"<>| ]+/g,'-').replace(/-+/g,'-')+'.png';
+    var name='Summary_'+R.p.replace(/[\\\/:*?"<>| ]+/g,'-')+'_'+R.s.replace(/[\\\/:*?"<>| ]+/g,'-').replace(/-+/g,'-')+cuCropFile(R)+'.png';
     var file=new File([blob],name,{type:'image/png'});
     busy(false);
     if(navigator.canShare&&navigator.canShare({files:[file]})){
@@ -4419,7 +4442,7 @@ function cuExportPng(only){
   }).then(function(canvas){
     return new Promise(function(res,rej){ canvas.toBlob(function(b){ b?res(b):rej(new Error('encode')); },'image/png'); });
   }).then(function(blob){
-    var name='Report_'+R.p.replace(/[\\\/:*?"<>| ]+/g,'-')+'_'+R.s.replace(/[\\\/:*?"<>| ]+/g,'-').replace(/-+/g,'-')+(only?'_ครั้งที่'+only:'')+'.png';
+    var name='Report_'+R.p.replace(/[\\\/:*?"<>| ]+/g,'-')+'_'+R.s.replace(/[\\\/:*?"<>| ]+/g,'-').replace(/-+/g,'-')+cuCropFile(R)+(only?'_ครั้งที่'+only:'')+'.png';
     var file=new File([blob],name,{type:'image/png'});
     busy(false);
     if(navigator.canShare&&navigator.canShare({files:[file]})){
