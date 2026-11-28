@@ -83,7 +83,8 @@ function cuBuild_() {
       r: e.row, d: e.date ? Utilities.formatDate(e.date, tz, 'yyyy-MM-dd') : '',
       p: e.plot, c: e.crop, s: e.period, m: e.sprayer, t: e.activity,
       x: e.chems.map(function (c) { return [c.name, c.unit, Math.round(c.qty * 1000) / 1000]; }),
-      h: Math.round(e.rent * 100) / 100     // ค่าจ้าง/ค่าเช่า (USD) จากคอลัมน์ Rental costs — 0 = ไม่มี
+      h: Math.round(e.rent * 100) / 100,    // ค่าจ้าง/ค่าเช่า (USD) จากคอลัมน์ I "Rental costs (USD)" — 0 = ไม่มี
+      k: e.kind                              // ประเภทงาน จากคอลัมน์ H "Spread / Spray" — '' = ไม่ระบุ
     };
   });
   return { ok: true, updated: Utilities.formatDate(new Date(), tz, "yyyy-MM-dd'T'HH:mm"), events: events };
@@ -174,8 +175,11 @@ function cuParseEvents(data, periods) {
   }
   var cDate = col('Date'), cPlot = col('Plot'), cCrop = col('Crop'), cPer = col('Crop period'),
       cSpr = col('Type Sprayer'), cAct = col('Activity'), cAction = col('Action Day');
-  var cRent = -1;                                       // คอลัมน์ H: "Rental costs (USD)" (หรือชื่อเดิม "Rental costs / Fuel costs (USD)")
-  for (var hc = 0; hc < h.length; hc++) if (/^rental cost/i.test(h[hc])) { cRent = hc; break; }
+  var cRent = -1, cKind = -1;                           // หาจากชื่อหัวคอลัมน์ (ย้ายตำแหน่งได้): I "Rental costs (USD)", H "Spread / Spray"
+  for (var hc = 0; hc < h.length; hc++) {
+    if (cRent < 0 && /^rental cost/i.test(h[hc])) cRent = hc;
+    if (cKind < 0 && /^spread\s*\/\s*spray/i.test(h[hc])) cKind = hc;
+  }
   var chemStart = cAction >= 0 ? cAction + 1 : 16;      // สารเคมีเริ่มหลังคอลัมน์ Action Day
   var chems = [];
   for (var c = chemStart; c < h.length; c++) {
@@ -199,7 +203,8 @@ function cuParseEvents(data, periods) {
       sprayer: cSpr >= 0 ? String(row[cSpr] || '').trim() : '',
       activity: cAct >= 0 ? String(row[cAct] || '').trim() : '',
       chems: used,
-      rent: cRent >= 0 ? cuNum(row[cRent]) : 0
+      rent: cRent >= 0 ? cuNum(row[cRent]) : 0,
+      kind: cKind >= 0 ? String(row[cKind] || '').trim() : ''
     });
   }
   return out;

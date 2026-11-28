@@ -1368,7 +1368,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.42.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.43.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -4564,7 +4564,7 @@ function cuPngHtml(R,only){
   }
   return h+'<div style="text-align:right;margin-top:24px;font-size:12.5px;color:#7a8a80">สร้างเมื่อ '+ts+'</div></div>';
 }
-/** สรุป 1 แผ่น A4: ① บันทึกการพ่น ② เมทริกซ์สาร×ครั้ง + รวมทั้งฤดู ③ ค่าจ้าง Drone (เฉพาะเมื่อคอลัมน์ H มีค่า)
+/** สรุป 1 แผ่น A4: ① บันทึกการพ่น ② เมทริกซ์สาร×ครั้ง + รวมทั้งฤดู ③ ค่าใช้จ่ายรายครั้ง Spread/Spray (คอลัมน์ H ประเภท, I ค่าใช้จ่าย)
  *  พ่นเกิน 12 ครั้ง → แนวนอน; เนื้อหาล้นจะย่อให้พอดีแผ่น */
 function cuSummaryHtml(R){
   var n=new Date(), ts=n.getDate()+' '+CU_MON[n.getMonth()]+' '+n.getFullYear()+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
@@ -4591,18 +4591,20 @@ function cuSummaryHtml(R){
       +used.map(function(c){ return '<tr><td class="nm">'+cuEsc(c.n)+'</td><td class="u">'+cuEsc(c.u)+'</td>'
         +cols.map(function(e){ var v=c.q[e.no]; return v?'<td class="v">'+fq(v)+'</td>':'<td class="e">·</td>'; }).join('')+(last?'<td class="tot">'+fq(c.t)+'</td>':'')+'</tr>'; }).join('')+'</table>';
   }
-  var paid=R.ev.filter(function(e){ return e.h>0; });
+  // ③ ค่าใช้จ่ายรายครั้ง: H "Spread / Spray" = ประเภทงาน, I "Rental costs (USD)" = ค่าใช้จ่าย — แสดงเมื่อมีค่าในคอลัมน์ใดคอลัมน์หนึ่ง
+  var paid=R.ev.filter(function(e){ return e.h>0||e.k; });
   if(paid.length){
-    var sum=paid.reduce(function(a,e){ return a+e.h; },0);
-    var payT=function(rows,withSum){ return '<table class="cus-log"><colgroup><col style="width:60px"><col style="width:100px"><col><col style="width:110px"></colgroup>'
-      +'<tr><th>ครั้งที่</th><th>วันที่</th><th>Activity</th><th style="text-align:right">ค่าจ้าง (USD)</th></tr>'
-      +rows.map(function(e){ return '<tr><td class="no">#'+e.no+'</td><td>'+fd(e.d)+'</td><td>'+cuEsc(e.t||'-')+'</td><td class="m">'+fu(e.h)+'</td></tr>'; }).join('')
-      +(withSum?'<tr class="sum"><td colspan="3">รวมค่าจ้าง Drone ('+paid.length+' ครั้ง)</td><td class="m">'+fu(sum)+'</td></tr>':'')+'</table>'; };
+    var sum=0, byK={}, kOrd=[];
+    paid.forEach(function(e){ var k=e.k||'(ไม่ระบุ)'; if(!byK[k]){ byK[k]={n:0,s:0}; kOrd.push(k); } byK[k].n++; byK[k].s+=(e.h||0); sum+=(e.h||0); });
+    var payT=function(rows){ return '<table class="cus-log"><colgroup><col style="width:60px"><col style="width:96px"><col><col style="width:104px"></colgroup>'
+      +'<tr><th>ครั้งที่</th><th>วันที่</th><th>ประเภท</th><th style="text-align:right">ค่าใช้จ่าย (USD)</th></tr>'
+      +rows.map(function(e){ return '<tr><td class="no">#'+e.no+'</td><td>'+fd(e.d)+'</td><td>'+cuEsc(e.k||'-')+'</td><td class="m">'+(e.h>0?fu(e.h):'-')+'</td></tr>'; }).join('')+'</table>'; };
     var ph=Math.ceil(paid.length/2);
-    h+='<div class="cus-sec" style="margin-top:4px">③ ค่าจ้าง Drone</div>'
-      +(paid.length>8   // เกิน 8 รายการ → 2 คอลัมน์ + แถบยอดรวม
-        ?'<div class="cus-two">'+payT(paid.slice(0,ph))+payT(paid.slice(ph))+'</div><table class="cus-log" style="margin-top:4px"><tr class="sum"><td>รวมค่าจ้าง Drone ('+paid.length+' ครั้ง)</td><td class="m">'+fu(sum)+'</td></tr></table>'
-        :payT(paid,true));
+    h+='<div class="cus-sec" style="margin-top:4px">③ ค่าใช้จ่ายรายครั้ง (Spread / Spray)</div>'
+      +(paid.length>8?'<div class="cus-two">'+payT(paid.slice(0,ph))+payT(paid.slice(ph))+'</div>':payT(paid))   // เกิน 8 รายการ → 2 คอลัมน์
+      +'<table class="cus-log" style="margin-top:4px"><colgroup><col><col style="width:104px"></colgroup>'
+      +(kOrd.length>1?kOrd.map(function(k){ return '<tr><td>รวม '+cuEsc(k)+' ('+byK[k].n+' ครั้ง)</td><td class="m">'+fu(byK[k].s)+'</td></tr>'; }).join(''):'')
+      +'<tr class="sum"><td>รวมค่าใช้จ่ายทั้งฤดู'+(kOrd.length===1?' — '+cuEsc(kOrd[0]):'')+' ('+paid.length+' ครั้ง)</td><td class="m">'+fu(sum)+'</td></tr></table>';
   }
   return h+'</div></div><div class="cus-ft">สร้างเมื่อ '+ts+'</div></div>';
 }
