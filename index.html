@@ -121,6 +121,8 @@ select{width:100%;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);-w
 .cu-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
 .cu-tag{font-size:11px;padding:1px 7px;border-radius:6px;background:rgba(26,107,54,0.12);color:var(--acc)}
 .cu-tag.t{background:rgba(15,122,104,0.12);color:var(--teal)}.cu-tag.b{background:rgba(26,92,181,0.12);color:var(--blue)}
+.cu-tag.k{background:rgba(181,83,10,0.13);color:var(--orange);font-weight:700}
+.cu-tb tr.cu-sum td{font-weight:900;color:var(--acc);border-top:2px solid var(--acc);border-bottom:none}
 .cu-cnt{flex:none;text-align:right;font-size:11px;color:var(--muted)}.cu-cnt b{display:block;font-size:16px;color:var(--text)}
 .cu-evb{display:none;padding:0 12px 12px}.cu-ev.open .cu-evb{display:block}
 .cu-tb{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
@@ -1368,7 +1370,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.43.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.44.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -4523,7 +4525,8 @@ function cuRender(){
       +'<div class="cu-mid"><div class="cu-d">'+cuFd(e.d)+'</div><div class="cu-tags">'
       +(e.t?'<span class="cu-tag">'+cuEsc(e.t)+'</span>':'')+(e.m?'<span class="cu-tag t">'+cuEsc(e.m)+'</span>':'')
       +(cuSt.period===CU_ALL?'<span class="cu-tag b">'+cuEsc(e.s)+'</span>':'')
-      +(R.crops.length>1?'<span class="cu-tag b">'+cuEsc(cuCropOf(e))+'</span>':'')+'</div></div>'
+      +(R.crops.length>1?'<span class="cu-tag b">'+cuEsc(cuCropOf(e))+'</span>':'')
+      +((e.k||e.h>0)?'<span class="cu-tag k">'+cuEsc([e.k,e.h>0?cuUsd(e.h):''].filter(Boolean).join(' · '))+'</span>':'')+'</div></div>'
       +'<div class="cu-cnt"><b>'+e.x.length+'</b>สาร</div></div>'
       +'<div class="cu-evb">'+(e.x.length?'<table class="cu-tb"><tr><th>สารเคมี</th><th>ปริมาณ</th><th>หน่วย</th></tr>'
         +e.x.map(function(x){ return '<tr><td>'+cuEsc(x[0])+'</td><td>'+cuFn(x[2])+'</td><td>'+cuEsc(x[1])+'</td></tr>'; }).join('')+'</table>'
@@ -4533,7 +4536,23 @@ function cuRender(){
   h+='<div class="cu-sec"><span>② สรุปการใช้สารรวม — '+cuEsc(cuSt.period)+'</span></div>'
     +'<div class="cu-ev" style="padding:4px 12px 8px"><table class="cu-tb"><tr><th>สารเคมี</th><th>ปริมาณรวม</th><th>หน่วย</th></tr>'
     +R.tot.map(function(t){ return '<tr><td>'+cuEsc(t.n)+'</td><td><b>'+cuFn(t.q)+'</b></td><td>'+cuEsc(t.u)+'</td></tr>'; }).join('')+'</table></div>';
+  // ③ ค่าใช้จ่ายรายครั้ง (คอลัมน์ H Spread/Spray + I Rental costs USD)
+  var C=cuCosts(R);
+  if(C.rows.length){
+    h+='<div class="cu-sec"><span>③ ค่าใช้จ่ายรายครั้ง (Spread / Spray)</span></div>'
+      +'<div class="cu-ev" style="padding:4px 12px 8px"><table class="cu-tb"><tr><th>ครั้งที่ / วันที่</th><th>ประเภท</th><th>USD</th></tr>'
+      +C.rows.map(function(e){ return '<tr><td>#'+e.no+' · '+cuFd(e.d)+'</td><td>'+cuEsc(e.k||'-')+'</td><td>'+(e.h>0?cuUsd(e.h):'-')+'</td></tr>'; }).join('')
+      +(C.kinds.length>1?C.kinds.map(function(k){ return '<tr><td colspan="2">รวม '+cuEsc(k)+' ('+C.by[k].n+' ครั้ง)</td><td>'+cuUsd(C.by[k].s)+'</td></tr>'; }).join(''):'')
+      +'<tr class="cu-sum"><td colspan="2">รวมทั้งฤดู'+(C.kinds.length===1?' — '+cuEsc(C.kinds[0]):'')+' ('+C.rows.length+' ครั้ง)</td><td>'+cuUsd(C.sum)+'</td></tr></table></div>';
+  }
   body.innerHTML=h;
+}
+function cuUsd(v){ return '$'+(+v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+/** รายการที่มีประเภท (H) หรือค่าใช้จ่าย (I) + ยอดแยกตามประเภท */
+function cuCosts(R){
+  var rows=R.ev.filter(function(e){ return e.h>0||e.k; }), by={}, kinds=[], sum=0;
+  rows.forEach(function(e){ var k=e.k||'(ไม่ระบุ)'; if(!by[k]){ by[k]={n:0,s:0}; kinds.push(k); } by[k].n++; by[k].s+=(e.h||0); sum+=(e.h||0); });
+  return {rows:rows, by:by, kinds:kinds, sum:sum};
 }
 /** HTML ของรูป PNG (กว้าง 1080px พื้นขาว) — only = เลขครั้ง (ไม่ใส่ = ทั้งฤดู) */
 function cuPngHtml(R,only){
@@ -4552,7 +4571,7 @@ function cuPngHtml(R,only){
     var rows=e.x.length?e.x:[['(ไม่มีบันทึก)','',null]], bg=i%2?'background:#f6faf7;':'';
     rows.forEach(function(x,j){
       h+='<tr>'+(j===0?'<td rowspan="'+rows.length+'" style="'+TD+';'+bg+'text-align:left;vertical-align:top;font-weight:800;color:#1A6B36;border-bottom:1px solid #c9d8cd">ครั้งที่ '+e.no+' • '+cuFd(e.d)
-        +'<div style="font-weight:400;color:#5b7564;font-size:12.5px">'+cuEsc([e.t,e.m].filter(Boolean).join(' • '))+'</div></td>':'')
+        +'<div style="font-weight:400;color:#5b7564;font-size:12.5px">'+cuEsc([e.t,e.m,e.k,e.h>0?cuUsd(e.h):''].filter(Boolean).join(' • '))+'</div></td>':'')
         +'<td style="'+TD+';'+bg+'text-align:left">'+cuEsc(x[0])+'</td><td style="'+TD+';'+bg+'">'+(x[2]==null?'':cuFn(x[2]))+'</td><td style="'+TD+';'+bg+'">'+cuEsc(x[1])+'</td></tr>';
     });
   });
