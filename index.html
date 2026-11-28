@@ -687,6 +687,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   <div id="p3-calc" class="sr-box on"></div>
   <div id="p3-err" style="display:none;background:rgba(192,48,42,.1);border:1px solid rgba(192,48,42,.35);color:var(--danger);border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.6"></div>
   <button class="sbtn" id="p3-save-btn" style="background:var(--acc)" onclick="p3Save()">✓ บันทึกกิจกรรม</button>
+  <div id="p3-charts"></div>
   <div class="sec" id="p3-rp" style="margin-top:16px">📤 สรุปแปลง (RP-01)</div>
   <div class="grp"><label>วันที่สรุป</label><input type="date" id="p3-sum-date" onchange="p3RenderReport()"></div>
   <textarea id="p3-report" readonly rows="14" style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(128,128,128,.4);background:rgba(255,255,255,.5);color:inherit;font-family:inherit;font-size:12.5px;line-height:1.55"></textarea>
@@ -1167,6 +1168,56 @@ var P3Core = (function(){
     return rows;
   }
 
+  // ── ข้อมูลกราฟหน้า PL-01 (แสดงตามกิจกรรมที่เลือก) ──
+  // น้ำ: 1 แถวต่อวันตั้งแต่เริ่มฤดูถึง upTo แยก ให้น้ำ (Pivot/ระบบ) กับ ฝน พร้อมยอดสะสม
+  function waterSeries(recs,cfg,upTo){
+    cfg=cfgWith(cfg); var start=cfg.cropStartDate||cfg.plantDate, by={}, other=false;
+    (recs||[]).forEach(function(r){
+      if(r.type!=='irrigation' || r.date<start || r.date>upTo) return;
+      var x=by[r.date]||(by[r.date]={irr:0,rain:0}); x.irr+=num(r.waterMm)||0; x.rain+=num(r.rainMm)||0;
+      if(r.method!=='pivot' && (num(r.waterMm)||0)>0) other=true;
+    });
+    var days=[], ci=0, cr=0;
+    for(var d=start; d<=upTo; d=addDays(d,1)){
+      var v=by[d]||{irr:0,rain:0}; ci+=v.irr; cr+=v.rain;
+      days.push({date:d, irr:v.irr, rain:v.rain, cumIrr:ci, cumRain:cr});
+    }
+    return {days:days, irr:ci, rain:cr, nonPivot:other};
+  }
+  // นับต้น: 1 จุดต่อวันนับ (วันเดียวกันใช้รายการที่บันทึกทีหลังสุด) + จำนวนเมล็ดที่ปลูกล่าสุดเป็นเส้นเทียบ
+  function popSeries(recs,cfg,upTo){
+    var by={};
+    (recs||[]).filter(function(r){ return r.type==='population' && r.date<=upTo && popEval(r); })
+      .sort(function(a,b){ return String(a.createdAt||'')<String(b.createdAt||'')?-1:String(a.createdAt||'')>String(b.createdAt||'')?1:0; })
+      .forEach(function(r){ var e=popEval(r); by[r.date]={date:r.date, perHa:e.plantsPerHa, perM:e.plantsPerM}; });
+    var seed=(recs||[]).filter(function(r){ return r.type==='landprep_plant' && r.date<=upTo && r.seedsPerMeter && (r.activity==='plant'||r.activity==='replant'); })
+      .sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; }).pop();
+    return {points:Object.keys(by).sort().map(function(d){ return by[d]; }),
+      seed:seed?{date:seed.date, perHa:seedsPerHa(seed.seedsPerMeter,seed.rowSpacingCm)}:null};
+  }
+  // สำรวจแมลง: จุดผลตรวจต่อชนิด + วันฉีดพร้อมอัตราต่อ ฮ. + คู่ก่อน-หลังฉีด (กฎเดียวกับตารางในใบรายงาน)
+  function scoutSeries(recs,cfg,upTo){
+    cfg=cfgWith(cfg); var start=cfg.cropStartDate||cfg.plantDate;
+    var rs=(recs||[]).filter(function(r){ return r.date>=start && r.date<=upTo; });
+    var by={}, keys=[];
+    rs.filter(function(r){ return r.type==='scout' && !NOT_INSECT[r.pest] && num(r.pctFound)!==null; })
+      .sort(function(a,b){ if(a.date!==b.date) return a.date<b.date?-1:1; return String(a.createdAt||'')<String(b.createdAt||'')?-1:String(a.createdAt||'')>String(b.createdAt||'')?1:0; })
+      .forEach(function(r){
+        var label=pestShort(r), k=r.pest==='other'?'other:'+String(r.pestOther||'').trim().toLowerCase():r.pest;
+        if(!by[k]){ by[k]={key:k, label:label, points:[]}; keys.push(k); }
+        by[k].points.push({date:r.date, pct:num(r.pctFound), threshold:scoutEval(r,cfg).threshold});
+      });
+    var order=Object.keys(PESTS); keys.sort(function(a,b){ return order.indexOf(a.split(':')[0])-order.indexOf(b.split(':')[0]); });
+    var sm={};
+    rs.filter(function(r){ return r.type==='spray'; }).forEach(function(r){
+      var a=sm[r.date]||(sm[r.date]=[]);
+      (r.items||[]).forEach(function(it){ var c=sprayItemCalc(it,cfg); if(it.product) a.push({product:it.product, perHa:c?c.perHa:null, unit:c?c.unit:''}); });
+    });
+    var cmp=sprayCompare(recs,cfg,upTo);
+    cmp.forEach(function(x){ x.match=String(x.pest).trim().toLowerCase(); });
+    return {pests:keys.map(function(k){ return by[k]; }), sprays:Object.keys(sm).sort().map(function(d){ return {date:d, items:sm[d]}; }), compare:cmp};
+  }
+
   var RPT_MAX = {sprays:6, scouts:6, perPest:4, ferts:8, days:14, due:6, photos:4, compare:8};
   function reportModel(o){
     var cfg=cfgWith(o.cfg), date=o.date, recs=(o.recs||[]).filter(function(r){ return r.date<=date; }), ferts=o.ferts, mx=o.mxDates||[];
@@ -1224,7 +1275,7 @@ var P3Core = (function(){
       days:days, due:due.slice(0,RPT_MAX.due), dueTotal:due.length, overdue:rm.overdueCount, photos:photos.slice(0,RPT_MAX.photos), photosTotal:photos.length};
   }
 
-  return {DEFAULT_CFG:DEFAULT_CFG, DEFAULT_FERTS:DEFAULT_FERTS, TYPES:TYPES, reportModel:reportModel, sprayCompare:sprayCompare, seedKgOf:seedKgOf, sprayItemCalc:sprayItemCalc, sprayText:sprayText, FERT_METHODS:FERT_METHODS, IRR_METHODS:IRR_METHODS, LP_ACTS:LP_ACTS,
+  return {DEFAULT_CFG:DEFAULT_CFG, DEFAULT_FERTS:DEFAULT_FERTS, TYPES:TYPES, reportModel:reportModel, sprayCompare:sprayCompare, waterSeries:waterSeries, popSeries:popSeries, scoutSeries:scoutSeries, seedKgOf:seedKgOf, sprayItemCalc:sprayItemCalc, sprayText:sprayText, FERT_METHODS:FERT_METHODS, IRR_METHODS:IRR_METHODS, LP_ACTS:LP_ACTS,
     PESTS:PESTS, DECISIONS:DECISIONS, TIMINGS:TIMINGS, RESULTS:RESULTS, threshold:threshold, scoutEval:scoutEval, latestScouts:latestScouts,
     timeline:timeline, chipOf:chipOf, fmtN:fmtN, fmtD:fmtD, pestName:pestName, HARVEST_DAP:HARVEST_DAP,
     fertOf:fertOf, dae:dae, popCalc:popCalc, popEval:popEval, latestPop:latestPop,
@@ -1317,7 +1368,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.41.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.42.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3730,6 +3781,7 @@ function p3SetType(t,rec){
   }).join('');
   p3RenderFields(rec||{});
   p3Preview();
+  p3RenderCharts();
 }
 // ---------- ฟอร์มพ่นสาร: หลายสารต่อครั้ง กรอกปริมาณรวมทั้งแปลง (kg / L) ----------
 var p3SprayRows=[];
@@ -4001,7 +4053,121 @@ function p3Describe(r){
   if(sk) s+='<br><span class="sr-sub">เมล็ดพันธุ์รวม '+p3Fmt(sk.totalKg,1)+' กก. = '+p3Fmt(sk.kgPerHa)+' กก./ฮ. · '+p3Fmt(sk.kgPerRai)+' กก./ไร่</span>';
   return s;
 }
-function p3RenderAll(){ p3RenderSync(); p3RenderReminders(); p3RenderSummary(); p3RenderList(); p3Preview(); p3UpdateBadge(); p3RenderReport(); }
+function p3RenderAll(){ p3RenderSync(); p3RenderReminders(); p3RenderSummary(); p3RenderList(); p3Preview(); p3UpdateBadge(); p3RenderReport(); p3RenderCharts(); }
+
+// ---------- กราฟใน PL-01: แสดงตามกิจกรรมที่เลือก (สำรวจ / ให้น้ำ / นับต้น) ----------
+var P3_CH={blue:'#2a78d6', orange:'#eb6834', aqua:'#1baf7a', grid:'rgba(0,0,0,.12)', ink:'#1b2a1f', mu:'#5b6b60'};
+var p3ChartPest=null;
+function p3SvgText(x,y,s,anchor,color){ return '<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="'+(anchor||'middle')+'" fill="'+(color||P3_CH.mu)+'" font-size="11"'+(color===P3_CH.ink?' stroke="#fff" stroke-width="3" paint-order="stroke"':'')+'>'+srE(s)+'</text>'; }   // ตัวเลขค่ามีขอบขาว อ่านได้แม้ทับเส้น
+function p3SvgLine(x1,y1,x2,y2,color,dash){ return '<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+(color||P3_CH.grid)+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>'; }
+function p3Svg(h,body,label){ return '<svg viewBox="0 0 360 '+h+'" width="100%" role="img" aria-label="'+srE(label)+'" style="display:block">'+body+'</svg>'; }
+function p3Nice(max){ if(!(max>0)) return 1; var p=Math.pow(10,Math.floor(Math.log(max)/Math.LN10)), f=max/p; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p; }
+function p3Swatch(c,t){ return '<span style="display:inline-flex;align-items:center;gap:4px"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+c+'"></i>'+t+'</span>'; }
+function p3ChartCard(title,body){ return '<div class="card" style="margin:12px 0 0;padding:12px"><div style="font-weight:700;font-size:14px;margin-bottom:8px">'+title+'</div>'+body+'</div>'; }
+function p3Legend(items){ return '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-bottom:6px">'+items.join('')+'</div>'; }
+function p3Empty(t){ return '<div class="sr-sub" style="text-align:center;padding:14px 0">'+t+'</div>'; }
+function p3SetChartPest(i){ var s=P3Core.scoutSeries(p3Recs,p3Cfg(),todayISO()); if(s.pests[i]) p3ChartPest=s.pests[i].key; p3RenderCharts(); }
+function p3RenderCharts(){
+  var box=document.getElementById('p3-charts'); if(!box) return;
+  box.innerHTML = p3Type==='scout' ? p3ScoutChart() : p3Type==='irrigation' ? p3WaterChart() : p3Type==='population' ? p3PopChart() : '';
+}
+function p3ScoutChart(){
+  var cfg=p3Cfg(), t=todayISO(), S=P3Core.scoutSeries(p3Recs,cfg,t), title='🐛 สำรวจแมลง เทียบกับการฉีด';
+  if(!S.pests.length) return p3ChartCard(title,p3Empty('ยังไม่มีผลสำรวจแมลง'));
+  var idx=0; S.pests.forEach(function(p,i){ if(p.key===p3ChartPest) idx=i; });
+  var P=S.pests[idx]; p3ChartPest=P.key;
+  var chips='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+S.pests.map(function(p,i){
+    var on=i===idx; return '<button type="button" onclick="p3SetChartPest('+i+')" style="font:inherit;font-size:12px;padding:3px 12px;border-radius:14px;cursor:pointer;border:1px solid '+(on?P3_CH.blue:'rgba(0,0,0,.2)')+';background:'+(on?'rgba(42,120,214,.12)':'transparent')+';color:'+(on?P3_CH.blue:'var(--muted)')+'">'+srE(p.label)+'</button>'; }).join('')+'</div>';
+  // ช่วงกราฟ: 28 วันล่าสุด เริ่มที่ข้อมูลแรกในช่วง (กว้างอย่างน้อย 7 วัน)
+  var lim=P3Core.addDays(t,-27);
+  var pts=P.points.filter(function(p){ return p.date>=lim; }); if(!pts.length) pts=P.points.slice(-6);
+  var sp=S.sprays.filter(function(s){ return s.date>=(pts[0].date<lim?pts[0].date:lim); });
+  var first=pts[0].date; sp.forEach(function(s){ if(s.date<first && P3Core.daysBetween(s.date,pts[0].date)<=7) first=s.date; });
+  sp=sp.filter(function(s){ return s.date>=first; });
+  var last=pts[pts.length-1].date; sp.forEach(function(s){ if(s.date>last) last=s.date; });
+  var span=Math.max(7,P3Core.daysBetween(first,last)), th=pts[pts.length-1].threshold;
+  var max=p3Nice(Math.max.apply(null,pts.map(function(p){ return p.pct; }).concat([th||0,1]))*1.1);
+  var X=function(d){ return 36+P3Core.daysBetween(first,d)/span*304; }, Y=function(v){ return 150-v/max*118; }, b='';
+  [0,max/2,max].forEach(function(v){ b+=p3SvgLine(32,Y(v),350,Y(v))+p3SvgText(26,Y(v)+4,p3Fmt(v,1),'end'); });
+  if(th!==null) b+=p3SvgLine(32,Y(th),350,Y(th),P3_CH.mu,'5 4');
+  var lastX=-99, row=0;
+  sp.forEach(function(s){ var x=X(s.date); row=(x-lastX<44)?1-row:0; lastX=x; b+=p3SvgLine(x,26,x,150,P3_CH.ink,'2 3')+p3SvgText(x,row?22:10,'ฉีด '+(+s.date.slice(8)),'middle',P3_CH.ink); });
+  if(pts.length>1) b+='<polyline fill="none" stroke="'+P3_CH.blue+'" stroke-width="2" stroke-linejoin="round" points="'+pts.map(function(p){ return X(p.date).toFixed(1)+','+Y(p.pct).toFixed(1); }).join(' ')+'"/>';
+  var hi=pts.reduce(function(m,p,i){ return p.pct>pts[m].pct?i:m; },0);
+  pts.forEach(function(p,i){
+    b+='<circle cx="'+X(p.date).toFixed(1)+'" cy="'+Y(p.pct).toFixed(1)+'" r="4.5" fill="'+P3_CH.blue+'" stroke="#fff" stroke-width="2"><title>'+p3ThDate(p.date)+' · '+p3Fmt(p.pct)+'%</title></circle>';
+    if(pts.length<=7||i===0||i===pts.length-1||i===hi) b+=p3SvgText(X(p.date)+(i===0?4:0),Y(p.pct)-9,p3Fmt(p.pct)+'%',i===pts.length-1&&X(p.date)>320?'end':'middle',P3_CH.ink);
+  });
+  var step=Math.max(1,Math.ceil(span/7));
+  b+=p3SvgText(30,166,p3ThDate(first),'start');
+  for(var k=step;k<=span;k+=step){ var dd=P3Core.addDays(first,k); if(X(dd)>84) b+=p3SvgText(X(dd),166,dd.slice(8)==='01'?p3ThDate(dd):String(+dd.slice(8))); }
+  var legend=p3Legend([p3Swatch(P3_CH.blue,'% ต้นที่พบ'),'<span>┆ วันฉีด</span>',th!==null?'<span>- - เกณฑ์ '+p3Fmt(th)+'%</span>':'<span>ไม่มีเกณฑ์</span>']);
+  // การ์ดต่อรอบฉีด (ใหม่ → เก่า สูงสุด 4 รอบ)
+  var match=P.label.trim().toLowerCase();
+  var rows=S.compare.filter(function(x){ return x.match===match; }).slice(-4).reverse();
+  var barMax=Math.max.apply(null,[1].concat(rows.map(function(x){ return Math.max(x.before?x.before.pct:0,x.after?x.after.pct:0); })));
+  function bar(kind,p,none,alpha){
+    if(!p) return '<div class="sr-sub" style="margin-top:4px">'+kind+' · '+none+'</div>';
+    return '<div style="display:grid;grid-template-columns:92px minmax(0,1fr) 48px;gap:8px;align-items:center;font-size:12px;margin-top:4px"><span style="color:var(--muted)">'+kind+' · '+p3ThDate(p.date)+'</span>'
+      +'<span style="height:8px;background:rgba(0,0,0,.07);border-radius:4px"><i style="display:block;height:8px;width:'+(p.pct/barMax*100).toFixed(1)+'%;background:'+P3_CH.blue+';opacity:'+alpha+';border-radius:0 4px 4px 0"></i></span><b style="text-align:right">'+p3Fmt(p.pct)+'%</b></div>';
+  }
+  var cards=rows.map(function(x){
+    var s=S.sprays.filter(function(z){ return z.date===x.sprayDate; })[0]||{items:[]};
+    var tag='<span class="sr-tag" style="background:rgba(0,0,0,.07);color:var(--muted)">เทียบไม่ได้</span>';
+    if(x.reducePct!==null) tag=x.reducePct>0?'<span class="sr-tag ok">ลดลง '+p3Fmt(x.reducePct,1)+'%</span>':x.reducePct<0?'<span class="sr-tag bad">เพิ่มขึ้น '+p3Fmt(-x.reducePct,1)+'%</span>':'<span class="sr-tag warn">ไม่เปลี่ยน</span>';
+    else if(x.diff!==null) tag=x.diff>0?'<span class="sr-tag bad">เพิ่มขึ้น '+p3Fmt(x.diff,1)+' จุด</span>':'<span class="sr-tag warn">ไม่เปลี่ยน</span>';
+    else if(x.waiting) tag='<span class="sr-tag warn">รอตรวจหลังฉีด</span>';
+    return '<div style="border-top:1px solid rgba(0,0,0,.1);padding:8px 0 2px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b style="font-size:13px">🚿 ฉีด '+p3ThDate(x.sprayDate)+'</b>'+tag+'</div>'
+      +'<div class="sr-sub">'+s.items.map(function(it){ return srE(it.product)+(it.perHa!==null?' '+p3Fmt(it.perHa)+' '+srE(it.unit)+'/ฮ.':''); }).join(' · ')+'</div>'
+      +bar('ก่อน',x.before,'ไม่ได้ตรวจ',.45)+bar('หลัง',x.after,x.waiting?'รอตรวจ':'ไม่ได้ตรวจ',1)+'</div>';
+  }).join('');
+  return p3ChartCard(title,chips+legend+p3Svg(172,b,'กราฟ % '+P.label+' เทียบวันฉีด')+(cards||p3Empty('ยังไม่มีรอบฉีดที่จับคู่กับผลตรวจได้ (ภายใน 7 วัน)')));
+}
+function p3WaterChart(){
+  var W=P3Core.waterSeries(p3Recs,p3Cfg(),todayISO()), title='💧 น้ำที่แปลงได้รับ', irrName=W.nonPivot?'ให้น้ำ (ระบบ)':'Pivot';
+  if(!(W.irr+W.rain>0)) return p3ChartCard(title,p3Empty('ยังไม่มีข้อมูลน้ำ'));
+  function tile(l,v){ return '<div><div class="sr-sub">'+l+'</div><div style="font-size:19px;font-weight:700">'+p3Fmt(v,1)+' มม.</div></div>'; }
+  var tiles='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px">'+tile(p3Swatch(P3_CH.blue,irrName),W.irr)+tile(p3Swatch(P3_CH.orange,'น้ำฝน'),W.rain)+tile('รวมสะสม',W.irr+W.rain)+'</div>';
+  // รายวัน: 14 วันล่าสุด (แท่งซ้อน น้ำล่าง ฝนบน)
+  var D=W.days.slice(-14), dmax=p3Nice(Math.max.apply(null,[1].concat(D.map(function(d){ return d.irr+d.rain; })))), slot=314/14, bw=Math.min(15,slot-6);
+  var Y=function(v){ return 108-v/dmax*90; }, b='';
+  [0,dmax/2,dmax].forEach(function(v){ b+=p3SvgLine(32,Y(v),350,Y(v))+p3SvgText(26,Y(v)+4,p3Fmt(v,1),'end'); });
+  D.forEach(function(d,i){
+    var x=36+i*slot, hi=d.irr/dmax*90, hr=d.rain/dmax*90, tip=p3ThDate(d.date)+' · '+irrName+' '+p3Fmt(d.irr,1)+' · ฝน '+p3Fmt(d.rain,1)+' มม.';
+    if(d.irr>0) b+='<rect x="'+x.toFixed(1)+'" y="'+Y(d.irr).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hi.toFixed(1)+'" rx="2" fill="'+P3_CH.blue+'"><title>'+tip+'</title></rect>';
+    if(d.rain>0) b+='<rect x="'+x.toFixed(1)+'" y="'+Y(d.irr+d.rain).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,hr-(d.irr>0?2:0)).toFixed(1)+'" rx="2" fill="'+P3_CH.orange+'"><title>'+tip+'</title></rect>';
+    if(d.irr+d.rain>0) b+=p3SvgText(x+bw/2,Y(d.irr+d.rain)-4,p3Fmt(d.irr+d.rain,0),'middle',P3_CH.ink);
+    b+=p3SvgText(x+bw/2,123,String(+d.date.slice(8)));
+  });
+  // สะสม: ทั้งฤดู (พื้นที่ซ้อน)
+  var A=W.days, n=A.length, cmax=p3Nice(W.irr+W.rain), CX=function(i){ return 36+(n>1?i/(n-1):0)*304; }, CY=function(v){ return 96-v/cmax*80; }, c='';
+  [0,cmax/2,cmax].forEach(function(v){ c+=p3SvgLine(32,CY(v),350,CY(v))+p3SvgText(26,CY(v)+4,p3Fmt(v,0),'end'); });
+  function area(top,base,color){
+    var up=A.map(function(d,i){ return CX(i).toFixed(1)+','+CY(top(d)).toFixed(1); }), dn=A.map(function(d,i){ return CX(i).toFixed(1)+','+CY(base(d)).toFixed(1); }).reverse();
+    return '<polygon points="'+up.concat(dn).join(' ')+'" fill="'+color+'" fill-opacity=".85"/>';
+  }
+  c+=area(function(d){ return d.cumIrr; },function(){ return 0; },P3_CH.blue)+area(function(d){ return d.cumIrr+d.cumRain; },function(d){ return d.cumIrr; },P3_CH.orange);
+  c+=p3SvgText(350,CY(W.irr+W.rain)-4,p3Fmt(W.irr+W.rain,0),'end',P3_CH.ink);
+  c+=p3SvgText(36,111,p3ThDate(A[0].date),'start')+(n>1?p3SvgText(340,111,p3ThDate(A[n-1].date),'end'):'');
+  return p3ChartCard(title,tiles+'<div class="sr-sub">รายวัน 14 วันล่าสุด (มม.)</div>'+p3Svg(128,b,'กราฟแท่งน้ำรายวัน แยก '+irrName+' และน้ำฝน')
+    +'<div class="sr-sub" style="margin-top:8px">สะสมตั้งแต่เริ่มฤดู (มม.)</div>'+p3Svg(116,c,'กราฟพื้นที่น้ำสะสม แยก '+irrName+' และน้ำฝน'));
+}
+function p3PopChart(){
+  var S=P3Core.popSeries(p3Recs,p3Cfg(),todayISO()), title='🌱 นับต้น (ต้น/ฮ.)';
+  if(!S.points.length) return p3ChartCard(title,p3Empty('ยังไม่มีการนับต้น'+(S.seed?' · เมล็ดที่ปลูก '+p3Fmt(S.seed.perHa,0)+'/ฮ.':'')));
+  var pts=S.points.slice(-6), max=p3Nice(Math.max.apply(null,pts.map(function(p){ return p.perHa; }).concat([S.seed?S.seed.perHa:0]))*1.12);
+  var Y=function(v){ return 132-v/max*108; }, b='', slot=300/Math.max(pts.length,4), bw=Math.min(24,slot-14);
+  [0,max/2,max].forEach(function(v){ b+=p3SvgLine(40,Y(v),350,Y(v))+p3SvgText(34,Y(v)+4,v>=1000?p3Fmt(v/1000,1)+'k':p3Fmt(v,0),'end'); });
+  if(S.seed) b+=p3SvgLine(40,Y(S.seed.perHa),350,Y(S.seed.perHa),P3_CH.ink,'5 4');   // วาดก่อน ตัวเลขจะอยู่ทับเส้น
+  pts.forEach(function(p,i){
+    var x=46+i*slot+(slot-bw)/2;
+    b+='<rect x="'+x.toFixed(1)+'" y="'+Y(p.perHa).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(132-Y(p.perHa)).toFixed(1)+'" rx="4" fill="'+P3_CH.aqua+'"><title>'+p3ThDate(p.date)+' · '+p3Fmt(p.perHa,0)+' ต้น/ฮ. · '+p3Fmt(p.perM)+' ต้น/ม.</title></rect>'
+      +p3SvgText(x+bw/2,Y(p.perHa)-5,p3Fmt(p.perHa,0),'middle',P3_CH.ink)+p3SvgText(x+bw/2,148,p3ThDate(p.date));
+  });
+  var l=S.points[S.points.length-1];
+  return p3ChartCard(title,p3Legend([p3Swatch(P3_CH.aqua,'ต้นที่นับได้')].concat(S.seed?['<span>- - เมล็ดที่ปลูก '+p3Fmt(S.seed.perHa,0)+'</span>']:[]))
+    +p3Svg(154,b,'กราฟแท่งจำนวนต้นต่อเฮกตาร์ตามวันที่นับ')+'<div class="sr-sub" style="margin-top:4px">ล่าสุด '+p3ThDate(l.date)+' · '+p3Fmt(l.perM)+' ต้น/ม. = '+p3Fmt(l.perHa,0)+' ต้น/ฮ.</div>');
+}
 
 // ---------- RP-01: สรุปแปลง → คัดลอก / ส่ง LINE (ผ่าน Apps Script เดิม, token อยู่ฝั่งเซิร์ฟเวอร์) ----------
 function p3ReportDate(){ return srV('p3-sum-date')||todayISO(); }
