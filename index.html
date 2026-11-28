@@ -951,9 +951,9 @@ var P3Core = (function(){
         return '🧪 ใส่ปุ๋ย '+r.product+' รวม '+fmtN(c.totalKg,1)+' กก. = '+fmtN(c.kgPerHa)+' กก./ฮ.'
           +(nr.length?'\n     ธาตุ: '+nr.map(function(x){ return x[0]+' '+fmtN(x[2])+' กก./ฮ.'; }).join(' · '):''); }
       if(r.type==='irrigation') return '💧 ให้น้ำ '+(IRR_METHODS[r.method]||r.method)+' '+fmtN(r.waterMm,1)+' มม.'+(r.rainMm?' · ฝน '+fmtN(r.rainMm,1)+' มม.':'');
-      if(r.type==='landprep_plant') return '🚜 '+(LP_ACTS[r.activity]||r.activity)+(r.seedsPerMeter?' '+fmtN(r.seedsPerMeter)+' เมล็ด/ม. แถว '+fmtN(r.rowSpacingCm)+' ซม. = '+fmtN(seedsPerHa(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ฮ. · '+fmtN(seedsPerRai(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ไร่':'')+(seedKgOf(r,cfg)?' · เมล็ดพันธุ์รวม '+fmtN(seedKgOf(r,cfg).totalKg,1)+' กก. = '+fmtN(seedKgOf(r,cfg).kgPerHa)+' กก./ฮ. · '+fmtN(seedKgOf(r,cfg).kgPerRai)+' กก./ไร่':'');
+      if(r.type==='landprep_plant') return '🚜 '+(LP_ACTS[r.activity]||r.activity)+(r.seedsPerMeter?' '+fmtN(r.seedsPerMeter)+' เมล็ด/ม. แถว '+fmtN(r.rowSpacingCm)+' ซม. = '+fmtN(seedsPerHa(r.seedsPerMeter,r.rowSpacingCm),0)+' เมล็ด/ฮ.':'')+(seedKgOf(r,cfg)?' · เมล็ดพันธุ์รวม '+fmtN(seedKgOf(r,cfg).totalKg,1)+' กก. = '+fmtN(seedKgOf(r,cfg).kgPerHa)+' กก./ฮ.':'');
       if(r.type==='spray') return '🚿 พ่น'+(SPRAY_TYPES[r.sprayType]?'('+SPRAY_TYPES[r.sprayType]+')':'')+' '+(r.items||[]).map(function(it){ return sprayText(it,cfg,true); }).join(' + ');
-      if(r.type==='population'){ var pe=popEval(r); return '🌱 นับต้น '+(pe?fmtN(pe.plantsPerM)+' ต้น/ม. (แถว '+fmtN(r.rowSpacingCm)+' ซม.) = '+fmtN(pe.plantsPerHa,0)+' ต้น/ฮ. · '+fmtN(pe.plantsPerRai,0)+' ต้น/ไร่':''); }
+      if(r.type==='population'){ var pe=popEval(r); return '🌱 นับต้น '+(pe?fmtN(pe.plantsPerM)+' ต้น/ม. (แถว '+fmtN(r.rowSpacingCm)+' ซม.) = '+fmtN(pe.plantsPerHa,0)+' ต้น/ฮ.':''); }
       if(r.type==='scout'){ var ev=scoutEval(r,cfg); return '🔍 '+pestName(r)+' '+fmtN(r.pctFound)+'% ('+RESULTS[ev.result]+(ev.threshold!==null?' '+fmtN(ev.threshold)+'%':'')+') — '+(DECISIONS[r.decision]||r.decision||''); }
       return r.type;
     });
@@ -964,7 +964,7 @@ var P3Core = (function(){
     var ls=latestScouts(recs,date);
     L.push('สำรวจล่าสุด: '+(ls.length?ls.map(function(r){ var ev=scoutEval(r,cfg); return pestName(r)+' '+fmtN(r.pctFound)+'% — '+RESULTS[ev.result]; }).join(', ')+' ('+fmtD(ls[0].date)+')':'ยังไม่มี'));
     var lp=latestPop(recs,date);
-    if(lp){ var lpe=popEval(lp); L.push('นับต้นล่าสุด: '+fmtN(lpe.plantsPerHa,0)+' ต้น/ฮ. · '+fmtN(lpe.plantsPerRai,0)+' ต้น/ไร่ ('+fmtN(lpe.plantsPerM)+' ต้น/ม. · '+fmtD(lp.date)+')'); }
+    if(lp){ var lpe=popEval(lp); L.push('นับต้นล่าสุด: '+fmtN(lpe.plantsPerHa,0)+' ต้น/ฮ. ('+fmtN(lpe.plantsPerM)+' ต้น/ม. · '+fmtD(lp.date)+')'); }
     var rm=reminders(recs,mx,cfg,date);
     function due(x){ return fmtD(x.due)+(x.status==='overdue'?' ⚠️ เลยกำหนด '+x.daysOver+' วัน':(x.status==='due_today'?' (วันนี้)':'')); }
     var T=[' - กรอกข้อมูลครั้งถัดไป '+due(rm.dataEntry),' - นับหนอนครั้งถัดไป '+due(rm.weekly)];
@@ -1317,7 +1317,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.40.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.41.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -4072,7 +4072,7 @@ function p3ReportHtml(m,imgs){
   var pg=m.progress, h='';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid '+G+';padding-bottom:6px">'
     +'<div><div style="font-size:21px;font-weight:800;color:'+G+'">🌽 รายงานแปลง P3 · '+E(m.plotName)+'</div>'
-    +'<div style="font-size:11px;color:'+MUT+'">'+N(m.areaHa)+' ฮ. ('+N(m.areaRai)+' ไร่) · Mega Farm Cambodia</div></div>'
+    +'<div style="font-size:11px;color:'+MUT+'">'+N(m.areaHa)+' ฮ. · Mega Farm Cambodia</div></div>'
     +'<div style="text-align:right"><div style="font-size:15px;font-weight:700">'+E(srFmtDate(m.date))+'</div><div style="font-size:11px;color:'+MUT+'">DAE '+p3Mn(m.dae)+' · ระยะ '+E(m.stage)+'</div></div></div>';
   h+='<div style="margin:8px 0 2px;height:9px;background:'+LN+';border-radius:5px;position:relative"><i style="display:block;height:9px;width:'+pg.pct.toFixed(1)+'%;background:'+G+';border-radius:5px"></i></div>'
     +'<div style="position:relative;height:13px;font-size:9px;color:'+MUT+'">'+pg.ticks.map(function(k){ return '<span style="position:absolute;left:'+k.left.toFixed(1)+'%;'+(k.left>=99.5?'transform:translateX(-100%)':'')+'">'+k.label+'</span>'; }).join('')+'</div>';
@@ -4080,7 +4080,7 @@ function p3ReportHtml(m,imgs){
   function kpi(l,v,s,c){ return '<div style="flex:1;border:1px solid '+LN+';border-radius:8px;padding:5px 7px"><div style="font-size:10px;color:'+MUT+'">'+l+'</div><div style="font-size:17px;font-weight:800;color:'+(c||'#111')+'">'+v+'</div><div style="font-size:9.5px;color:'+MUT+'">'+(s||'&nbsp;')+'</div></div>'; }
   h+='<div style="display:flex;gap:6px;margin-top:4px">'
     +kpi('น้ำ+ฝนสะสม',N(m.mm,1)+' <span style="font-size:11px">มม.</span>','น้ำ '+N(m.cum.waterMm,1)+' · ฝน '+N(m.cum.rainMm,1))
-    +kpi('นับต้นล่าสุด',m.pop?N(m.pop.plantsPerHa,0)+' <span style="font-size:11px">ต้น/ฮ.</span>':'–',m.pop?N(m.pop.plantsPerRai,0)+' ต้น/ไร่ · '+p3ThDate(m.pop.date):'ยังไม่มี')
+    +kpi('นับต้นล่าสุด',m.pop?N(m.pop.plantsPerHa,0)+' <span style="font-size:11px">ต้น/ฮ.</span>':'–',m.pop?p3ThDate(m.pop.date)+' · '+N(m.pop.plantsPerM)+' ต้น/ม.':'ยังไม่มี')
     +(function(){
       var L=m.latestByPest.filter(function(x){ return x.key!=='weed'; });   // รายงานไม่แสดงวัชพืช
       if(!L.length) return kpi('สำรวจล่าสุด','–','ยังไม่มี');
@@ -4130,8 +4130,8 @@ function p3ReportHtml(m,imgs){
     :'<div style="font-size:11px;color:'+MUT+'">ยังไม่มีการสำรวจ</div>';
   h+='<div style="display:flex;gap:12px"><div style="flex:1.2">'+sec('🔍 สำรวจศัตรูพืช')+sc+'</div>'
     +'<div style="flex:1">'+sec('🌱 นับต้น / เมล็ด')
-    +'<div style="font-size:11px;line-height:1.55">'+(m.pop?'นับต้น <b>'+N(m.pop.plantsPerHa,0)+'</b> ต้น/ฮ.<br><span style="color:'+MUT+'">'+N(m.pop.plantsPerRai,0)+' ต้น/ไร่ · '+N(m.pop.plantsPerM)+' ต้น/ม.</span>':'<span style="color:'+MUT+'">ยังไม่มีการนับต้น</span>')
-    +(m.seed?'<br>ปลูก <b>'+N(m.seed.perHa,0)+'</b> เมล็ด/ฮ.<br><span style="color:'+MUT+'">'+N(m.seed.perRai,0)+' เมล็ด/ไร่ · '+N(m.seed.seedsPerMeter)+' เมล็ด/ม. · แถว '+N(m.seed.rowCm)+' ซม.</span>':'')+(m.seed&&m.seed.kg?'<br>เมล็ดพันธุ์ <b>'+N(m.seed.kg.totalKg,1)+'</b> กก.<br><span style="color:'+MUT+'">'+N(m.seed.kg.kgPerHa)+' กก./ฮ. · '+N(m.seed.kg.kgPerRai)+' กก./ไร่</span>':'')+'</div></div></div>';
+    +'<div style="font-size:11px;line-height:1.55">'+(m.pop?'นับต้น <b>'+N(m.pop.plantsPerHa,0)+'</b> ต้น/ฮ.<br><span style="color:'+MUT+'">'+N(m.pop.plantsPerM)+' ต้น/ม.</span>':'<span style="color:'+MUT+'">ยังไม่มีการนับต้น</span>')
+    +(m.seed?'<br>ปลูก <b>'+N(m.seed.perHa,0)+'</b> เมล็ด/ฮ.<br><span style="color:'+MUT+'">'+N(m.seed.seedsPerMeter)+' เมล็ด/ม. · แถว '+N(m.seed.rowCm)+' ซม.</span>':'')+(m.seed&&m.seed.kg?'<br>เมล็ดพันธุ์ <b>'+N(m.seed.kg.totalKg,1)+'</b> กก.<br><span style="color:'+MUT+'">'+N(m.seed.kg.kgPerHa)+' กก./ฮ.</span>':'')+'</div></div></div>';
   // (ไม่แสดง: ตาราง 13 วันล่าสุด, งานครบกำหนด/เลยกำหนด, กรอกข้อมูลครั้งถัดไป, นับหนอนครั้งต่อไป — ตามที่กำหนดสำหรับรายงาน)
   if(imgs.length) h+=sec('📷 รูปประกอบ')+'<div style="display:flex;gap:6px">'+imgs.map(function(u){ return '<div style="flex:1;height:105px;border-radius:6px;background:#eee url('+u+') center/cover no-repeat"></div>'; }).join('')+'</div>';
   return h.replace(/ฮ\./g,'เฮกตาร์');   // หน่วยพื้นที่ในรายงานเขียนเต็มว่า เฮกตาร์
@@ -4551,7 +4551,7 @@ function p3RenderSummary(){
     +'<div class="tl-tk">'+pg.ticks.map(function(k){ return '<span style="left:'+k.left.toFixed(1)+'%'+(k.left>=99.5?';transform:translateX(-100%)':'')+'">'+k.label+'</span>'; }).join('')+'</div>'
     +'<div class="tl-m">'
     +'<div><small>น้ำ+ฝนสะสม</small><b>'+p3Fmt(cum.totalMm,1)+' มม.</b></div>'
-    +'<div><small>นับต้นล่าสุด</small>'+(lpe?'<b>'+p3Fmt(lpe.plantsPerHa,0)+' ต้น/ฮ.</b><span class="sub">'+p3Fmt(lpe.plantsPerRai,0)+' ต้น/ไร่ · '+p3ThDate(lp.date)+'</span>':'<b style="color:var(--muted)">ยังไม่มี</b>')+'</div>'
+    +'<div><small>นับต้นล่าสุด</small>'+(lpe?'<b>'+p3Fmt(lpe.plantsPerHa,0)+' ต้น/ฮ.</b><span class="sub">'+p3ThDate(lp.date)+'</span>':'<b style="color:var(--muted)">ยังไม่มี</b>')+'</div>'
     +'<div><small>N · P₂O₅ · K₂O สะสม (กก.)</small><span class="sub">ต่อ ฮ.: '+p3Fmt(cum.NHa)+' · '+p3Fmt(cum.P2O5Ha)+' · '+p3Fmt(cum.K2OHa)+'</span></div>'
     +'<div><small>งานเลยกำหนด</small><b style="color:'+(over?'var(--danger)':'var(--acc)')+'">'+(over?over+' งาน':'ไม่มี')+'</b></div>'
     +'</div>'
