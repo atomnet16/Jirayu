@@ -806,11 +806,12 @@ var P3Core = (function(){
   // SC-01: เกณฑ์ % [DAP ≤ 40, DAP > 40] · null = ไม่มีเกณฑ์
   var PESTS = {
     FAW:{label:'หนอนกระทู้ข้าวโพด (FAW)', th:[10,30]},
+    eggFAW:{label:'ไข่หนอนกระทู้ข้าวโพด (Egg FAW)', th:[5,5]},
     cutworm:{label:'หนอนกระทู้หอม/หนอนตัดต้น', th:[5,5]},
     aphid:{label:'เพลี้ยอ่อน', th:[50,50]},
     downy_mildew:{label:'ราน้ำค้าง', th:[0.1,0.1]},
     weed:{label:'วัชพืช', th:[5,5], cover:true},
-    other:{label:'อื่น ๆ', th:null}
+    other:{label:'แมลง / ศัตรูพืชอื่น ๆ (ระบุชื่อ)', th:null}
   };
   var THRESHOLD_SPLIT_DAP = 40;
   var DECISIONS = {watch:'เฝ้าระวัง', spray:'พ่น', none:'ไม่ต้องทำอะไร'};
@@ -983,7 +984,7 @@ var P3Core = (function(){
   var CHIP_TYPE = {irrigation:'w', fertilizer:'f', spray:'s', scout:'k', population:'p', landprep_plant:'l'};
   var CHIP_ICON = {w:'💧', f:'🧪', s:'🚿', k:'🔍', p:'🌱', l:'🚜'};
   var CHIP_RANK = {l:0, k:1, s:2, f:3, p:4, w:5};   // ลำดับชิปในวันเดียวกัน: เตรียมดิน/ปลูก → สำรวจ → พ่น → ปุ๋ย → นับต้น → น้ำ
-  var PEST_SHORT = {FAW:'FAW', cutworm:'หนอนกระทู้หอม', aphid:'เพลี้ยอ่อน', downy_mildew:'ราน้ำค้าง', weed:'วัชพืช'};
+  var PEST_SHORT = {FAW:'FAW', eggFAW:'Egg FAW', cutworm:'หนอนกระทู้หอม', aphid:'เพลี้ยอ่อน', downy_mildew:'ราน้ำค้าง', weed:'วัชพืช'};
   function pestShort(r){ return r.pest==='other'?(r.pestOther||'อื่น ๆ'):(PEST_SHORT[r.pest]||pestName(r)); }
   // ข้อความสั้นของชิปแต่ละกิจกรรม (รายละเอียดเต็มอยู่ในแผงที่แตะดู)
   function chipOf(r,cfg,ferts){
@@ -1131,7 +1132,43 @@ var P3Core = (function(){
 
   // RP-01 PDF: โมเดลข้อมูลรายงาน 1 หน้า A4 (จำกัดจำนวนแถวให้พอดี 1 แผ่นเสมอ)
   // o = {recs, mxDates, cfg, ferts, date}
-  var RPT_MAX = {sprays:6, scouts:6, perPest:4, ferts:8, days:14, due:6, photos:4};
+  // ── เปรียบเทียบก่อน-หลังฉีด: 1 แถว = 1 รอบฉีด × 1 ชนิดแมลง (ไม่รวมวัชพืช / โรคพืช) ──
+  // ก่อนฉีด = ผลตรวจล่าสุดภายใน CMP_DAYS วันก่อนฉีด (วันเดียวกันนับ ถ้าไม่ได้ระบุว่า "หลังพ่น")
+  // หลังฉีด = ผลตรวจแรกภายใน CMP_DAYS วันหลังฉีด และก่อนการฉีดรอบถัดไป (วันฉีดรอบถัดไปนับ ถ้าตรวจก่อนพ่น)
+  var CMP_DAYS = 7;
+  var NOT_INSECT = {weed:1, downy_mildew:1};
+  function sprayCompare(recs,cfg,upTo){
+    cfg=cfgWith(cfg); var start=cfg.cropStartDate||cfg.plantDate;
+    var rs=(recs||[]).filter(function(r){ return r.date>=start && (!upTo || r.date<=upTo); });
+    var chem={};
+    rs.filter(function(r){ return r.type==='spray'; }).forEach(function(r){
+      var c=chem[r.date]||(chem[r.date]=[]); (r.items||[]).forEach(function(it){ if(it.product && c.indexOf(it.product)<0) c.push(it.product); });
+    });
+    var dates=Object.keys(chem).sort(), keys=[], by={};
+    rs.filter(function(r){ return r.type==='scout' && !NOT_INSECT[r.pest] && num(r.pctFound)!==null; })
+      .sort(function(a,b){ if(a.date!==b.date) return a.date<b.date?-1:1; return String(a.createdAt||'')<String(b.createdAt||'')?-1:String(a.createdAt||'')>String(b.createdAt||'')?1:0; })
+      .forEach(function(r){ var k=r.pest==='other'?'other:'+String(r.pestOther||'').trim().toLowerCase():r.pest; if(!by[k]){ by[k]=[]; keys.push(k); } by[k].push(r); });
+    var order=Object.keys(PESTS); keys.sort(function(a,b){ return order.indexOf(a.split(':')[0])-order.indexOf(b.split(':')[0]); });
+    var rows=[];
+    dates.forEach(function(D,i){
+      var prev=dates[i-1], next=dates[i+1], from=addDays(D,-CMP_DAYS), to=addDays(D,CMP_DAYS);
+      keys.forEach(function(k){
+        var b=by[k].filter(function(s){ return s.date>=from && s.date<=D && !(s.date===D && s.timing==='post_spray')
+          && (!prev || s.date>prev || (s.date===prev && s.timing==='post_spray')); }).pop()||null;
+        var a=by[k].filter(function(s){ return s.date>=D && s.date<=to && (s.date>D || s.timing==='post_spray')
+          && (!next || s.date<next || (s.date===next && s.timing!=='post_spray')); })[0]||null;
+        if(!b && !a) return;
+        function pt(s){ if(!s) return null; var ev=scoutEval(s,cfg); return {date:s.date, dae:ev.dae, pct:num(s.pctFound), threshold:ev.threshold, result:ev.result}; }
+        var B=pt(b), A=pt(a), diff=(B&&A)?A.pct-B.pct:null;
+        rows.push({sprayDate:D, sprayDae:dae(D,cfg), chems:chem[D].slice(), key:k.split(':')[0], pest:pestShort(b||a), before:B, after:A, diff:diff,
+          reducePct:(diff!==null && B.pct>0)?-diff/B.pct*100:null,
+          waiting: !A && (!upTo || to>=upTo) && !next});   // ยังอยู่ในช่วงรอตรวจหลังฉีด
+      });
+    });
+    return rows;
+  }
+
+  var RPT_MAX = {sprays:6, scouts:6, perPest:4, ferts:8, days:14, due:6, photos:4, compare:8};
   function reportModel(o){
     var cfg=cfgWith(o.cfg), date=o.date, recs=(o.recs||[]).filter(function(r){ return r.date<=date; }), ferts=o.ferts, mx=o.mxDates||[];
     var start=cfg.cropStartDate||cfg.plantDate, d=dap(date,cfg);
@@ -1183,11 +1220,12 @@ var P3Core = (function(){
       seed:seed?{date:seed.date, seedsPerMeter:num(seed.seedsPerMeter), rowCm:num(seed.rowSpacingCm), perHa:seedsPerHa(seed.seedsPerMeter,seed.rowSpacingCm), perRai:seedsPerRai(seed.seedsPerMeter,seed.rowSpacingCm), kg:seedKgOf(seed,cfg)}:null,
       ferts:fl.slice(-RPT_MAX.ferts), fertsTotal:fl.length, sprays:sprays.slice(-RPT_MAX.sprays), spraysTotal:sprays.length, scouts:scouts.slice(-RPT_MAX.scouts), scoutsTotal:scouts.length,
       scoutGroups:groups, latestByPest:latestBy,
+      compare:sprayCompare(o.recs,cfg,date).slice(-RPT_MAX.compare), compareTotal:sprayCompare(o.recs,cfg,date).length,
       latestScout:ls.map(function(r){ var ev=scoutEval(r,cfg); return {pest:pestShort(r), pct:num(r.pctFound), threshold:ev.threshold, result:ev.result, date:r.date}; }),
       days:days, due:due.slice(0,RPT_MAX.due), dueTotal:due.length, overdue:rm.overdueCount, photos:photos.slice(0,RPT_MAX.photos), photosTotal:photos.length};
   }
 
-  return {DEFAULT_CFG:DEFAULT_CFG, DEFAULT_FERTS:DEFAULT_FERTS, TYPES:TYPES, reportModel:reportModel, seedKgOf:seedKgOf, sprayItemCalc:sprayItemCalc, sprayText:sprayText, FERT_METHODS:FERT_METHODS, IRR_METHODS:IRR_METHODS, LP_ACTS:LP_ACTS,
+  return {DEFAULT_CFG:DEFAULT_CFG, DEFAULT_FERTS:DEFAULT_FERTS, TYPES:TYPES, reportModel:reportModel, sprayCompare:sprayCompare, seedKgOf:seedKgOf, sprayItemCalc:sprayItemCalc, sprayText:sprayText, FERT_METHODS:FERT_METHODS, IRR_METHODS:IRR_METHODS, LP_ACTS:LP_ACTS,
     PESTS:PESTS, DECISIONS:DECISIONS, TIMINGS:TIMINGS, RESULTS:RESULTS, threshold:threshold, scoutEval:scoutEval, latestScouts:latestScouts,
     timeline:timeline, chipOf:chipOf, fmtN:fmtN, fmtD:fmtD, pestName:pestName, HARVEST_DAP:HARVEST_DAP,
     fertOf:fertOf, dae:dae, popCalc:popCalc, popEval:popEval, latestPop:latestPop,
@@ -1280,7 +1318,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.38.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.39.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -3784,9 +3822,10 @@ function p3RenderFields(r){
      +'<div class="sr-info" style="margin:-4px 0 10px">กรอกค่าเฉลี่ยต่อ 1 เมตรของแถว · ระบบแปลงเป็น ต้น/ฮ. ให้</div>';
   } else if(p3Type==='scout'){
     var pest=r.pest||'FAW';
-    h='<div class="grp"><label>ศัตรูพืช (Pest)</label><select id="p3-pest" onchange="p3PestChanged()">'
+    h='<div class="grp"><label>ชนิดแมลง / ศัตรูพืช (Pest)</label><select id="p3-pest" onchange="p3PestChanged()">'
        +Object.keys(P3Core.PESTS).map(function(k){ return '<option value="'+k+'"'+(k===pest?' selected':'')+'>'+srE(P3Core.PESTS[k].label)+'</option>'; }).join('')+'</select></div>'
-     +'<div class="grp" id="p3-pestOther-box"><label>ชื่อศัตรูพืช</label><input type="text" id="p3-pestOther" value="'+v(r.pestOther)+'"></div>'
+     +'<div class="grp" id="p3-pestOther-box"><label>ระบุชื่อแมลง / ศัตรูพืช</label><input type="text" id="p3-pestOther" list="p3-pest-names" placeholder="เช่น หนอนเจาะฝัก, ด้วง, แมลงหวี่" value="'+v(r.pestOther)+'">'
+       +'<datalist id="p3-pest-names">'+p3Recs.map(function(x){ return x.type==='scout'&&x.pest==='other'?String(x.pestOther||'').trim():''; }).filter(function(n,i,a){ return n&&a.indexOf(n)===i; }).map(function(n){ return '<option value="'+srE(n)+'">'; }).join('')+'</datalist></div>'
      +'<div class="g2"><div class="grp"><label id="p3-pct-lbl">'+p3PctLabel(pest)+'</label><input type="number" inputmode="decimal" min="0" max="100" id="p3-pct" value="'+v(r.pctFound)+'" oninput="p3Preview()"></div>'
      +'<div class="grp"><label>จำนวนจุดสำรวจ</label><input type="number" inputmode="numeric" id="p3-points" value="'+v(r.samplePoints)+'"></div></div>'
      +'<div class="g2"><div class="grp"><label>ช่วงเวลา</label><select id="p3-timing">'+p3Opts(P3Core.TIMINGS,r.timing||'routine')+'</select></div>'
@@ -4030,7 +4069,7 @@ function p3ReportHtml(m,imgs){
   function sec(t){ return '<div style="font-weight:700;font-size:13px;color:'+G+';border-bottom:1.5px solid '+G+';padding-bottom:2px;margin:10px 0 5px">'+t+'</div>'; }
   function th(t,al){ return '<th style="text-align:'+(al||'right')+';font-weight:600;color:'+MUT+';padding:2px 5px;border-bottom:1px solid '+LN+'">'+t+'</th>'; }
   function td(t,al,x){ return '<td style="text-align:'+(al||'right')+';padding:2px 5px;border-bottom:1px solid '+LN+';'+(x||'')+'">'+t+'</td>'; }
-  function pn(p){ return p==='FAW'?'Insect':p; }   // รายงานเรียกแมลงศัตรูพืชว่า Insect
+  function pn(p){ return p; }   // แสดงชนิดแมลงตามจริง (FAW / Egg FAW / ชื่อที่ระบุ)
   var pg=m.progress, h='';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid '+G+';padding-bottom:6px">'
     +'<div><div style="font-size:21px;font-weight:800;color:'+G+'">🌽 รายงานแปลง P3 · '+E(m.plotName)+'</div>'
@@ -4047,8 +4086,10 @@ function p3ReportHtml(m,imgs){
       var L=m.latestByPest.filter(function(x){ return x.key!=='weed'; });   // รายงานไม่แสดงวัชพืช
       if(!L.length) return kpi('สำรวจล่าสุด','–','ยังไม่มี');
       var bad=L.some(function(x){ return x.result==='reached'; }), th=L.filter(function(x){ return x.threshold!==null; })[0];
-      return kpi('สำรวจล่าสุด',L.map(function(x){ return '<div style="font-size:'+(L.length>1?13:17)+'px;line-height:1.25">'+E(pn(x.pest))+' '+N(x.pct)+'%</div>'; }).join(''),
-        L.map(function(x){ return x.result==='below'?'มาตรฐาน':P3Core.RESULTS[x.result]; }).filter(function(v,i,a){ return a.indexOf(v)===i; }).join(' · ')+(th?' · เกณฑ์ &lt; '+N(th.threshold)+'%':''),bad?R:G);
+      var many=L.length>1;   // หลายชนิด: เกณฑ์ต่างกัน จึงแสดงเกณฑ์ต่อบรรทัดของแต่ละชนิด
+      return kpi('สำรวจล่าสุด',L.map(function(x){ return '<div style="font-size:'+(many?12.5:17)+'px;line-height:1.25;color:'+(x.result==='reached'?R:G)+'">'+E(pn(x.pest))+' '+N(x.pct)+'%'
+          +(many&&x.threshold!==null?' <span style="font-size:9px;font-weight:400;color:'+MUT+'">เกณฑ์ &lt; '+N(x.threshold)+'%</span>':'')+'</div>'; }).join(''),
+        L.map(function(x){ return x.result==='below'?'มาตรฐาน':P3Core.RESULTS[x.result]; }).filter(function(v,i,a){ return a.indexOf(v)===i; }).join(' · ')+(!many&&th?' · เกณฑ์ &lt; '+N(th.threshold)+'%':''),bad?R:G);
     })()+'</div>';
   // ปุ๋ย + ธาตุอาหาร
   h+=sec('🧪 ปุ๋ยและธาตุอาหารสะสม');
@@ -4065,6 +4106,19 @@ function p3ReportHtml(m,imgs){
     return '<div style="font-size:10.5px;padding:2px 0;border-bottom:1px solid '+LN+'"><b>'+p3ThDate(s.date)+'</b> '+(s.kind?'<span style="color:'+MUT+'">'+E(s.kind)+'</span> ':'')
       +(s.items.length?s.items.map(function(it){ return E(it.product)+' '+N(it.total,1)+' '+E(it.unit)+(it.perHa!==null?' <span style="color:'+MUT+'">('+N(it.perHa)+' '+E(it.unit)+'/ฮ. · '+N(it.perRai,1)+' '+E(it.perRaiUnit)+'/ไร่)</span>':''); }).join(' · '):'<span style="color:'+MUT+'">บันทึกใน MX-01</span>')+'</div>'; }).join('')
     :'<div style="font-size:11px;color:'+MUT+'">ยังไม่มีการพ่นสาร</div>';
+  // เปรียบเทียบก่อน-หลังฉีด (ต่อรอบฉีด × ชนิดแมลง)
+  h+=sec('📊 เปรียบเทียบก่อน-หลังฉีด'+(m.compareTotal>m.compare.length?' <span style="font-weight:400;font-size:10px;color:'+MUT+'">(แสดง '+m.compare.length+' แถวล่าสุดจาก '+m.compareTotal+')</span>':''));
+  if(m.compare.length){
+    var cell=function(p,none){ return p?p3ThDate(p.date)+' · <b style="color:'+(p.result==='reached'?R:'#111')+'">'+N(p.pct)+'%</b>':'<span style="color:'+MUT+'">'+none+'</span>'; };
+    h+='<table style="width:100%;border-collapse:collapse;font-size:10.5px"><tr>'+th('ชนิดแมลง','left')+th('วันที่ฉีด · สาร','left')+th('ตรวจก่อนฉีด','left')+th('ตรวจหลังฉีด','left')+th('ผล')+'</tr>'
+      +m.compare.map(function(x){
+        var res='–', c=MUT;
+        if(x.reducePct!==null){ if(x.reducePct>0){ res='ลดลง '+N(x.reducePct,1)+'%'; c=G; } else if(x.reducePct<0){ res='เพิ่มขึ้น '+N(-x.reducePct,1)+'%'; c=R; } else res='ไม่เปลี่ยน'; }
+        else if(x.diff!==null){ res=x.diff>0?'เพิ่มขึ้น '+N(x.diff,1)+' จุด':'ไม่เปลี่ยน'; c=x.diff>0?R:MUT; }
+        return '<tr>'+td('<b>'+E(x.pest)+'</b>','left')+td('<b>'+p3ThDate(x.sprayDate)+'</b> <span style="color:'+MUT+'">'+E(x.chems.join(', '))+'</span>','left')
+          +td(cell(x.before,'ไม่ได้ตรวจ'),'left','white-space:nowrap')+td(cell(x.after,x.waiting?'รอตรวจ':'ไม่ได้ตรวจ'),'left','white-space:nowrap')+td('<b style="color:'+c+'">'+res+'</b>','right','white-space:nowrap')+'</tr>';
+      }).join('')+'</table>';
+  } else h+='<div style="font-size:11px;color:'+MUT+'">ยังไม่มีผลตรวจแมลงก่อนหรือหลังการฉีด</div>';
   // สำรวจ + นับต้น/เมล็ด (2 คอลัมน์)
   var sgs=m.scoutGroups.filter(function(g){ return g.key!=='weed'; });   // รายงานไม่แสดงวัชพืช
   var sc=sgs.length?sgs.map(function(g){
@@ -4170,14 +4224,11 @@ function p3MakeReport(kind,ids){
     document.body.appendChild(host);
     // ปรับขนาดให้พอดี 1 แผ่น: ย่อเมื่อล้น ขยายเมื่อเนื้อหาน้อย (สูงสุด 1.6 เท่า)
     // เมื่อสเกลเปลี่ยน ความกว้างเลย์เอาต์เปลี่ยนตาม ข้อความขึ้นบรรทัดใหม่ ความสูงจึงเปลี่ยน — วัดซ้ำจนพอดี (เว้นที่ท้ายหน้า)
-    var inner=host.firstChild, room=1123-28-52, k=1;
-    for(var it=0; it<12; it++){
-      inner.style.transform='scale('+k.toFixed(4)+')'; inner.style.width=(100/k).toFixed(3)+'%';
-      var ratio=room/Math.max(1,inner.scrollHeight*k);
-      if((ratio<=1.0 && ratio>=0.97) || (k>=1.6 && ratio>1)) break;
-      k=Math.min(1.6,k*ratio*0.985);
-    }
-    if(inner.scrollHeight*k>room){ k=k*room/(inner.scrollHeight*k)*0.98; inner.style.transform='scale('+k.toFixed(4)+')'; inner.style.width=(100/k).toFixed(3)+'%'; }
+    // ความสูงกระโดดเป็นช่วงตามการตัดบรรทัด → ค้นแบบแบ่งครึ่งหา "สเกลใหญ่สุดที่ยังพอดี" (ใช้เฉพาะค่าที่วัดแล้วว่าพอดี)
+    var inner=host.firstChild, room=1123-28-52;
+    function setK(k){ inner.style.transform='scale('+k.toFixed(4)+')'; inner.style.width=(100/k).toFixed(3)+'%'; return inner.scrollHeight*k; }
+    var lo=0.35, hi=1.6;
+    if(setK(hi)>room){ for(var it=0; it<16; it++){ var mid=(lo+hi)/2; if(setK(mid)<=room) lo=mid; else hi=mid; } setK(lo); }
     return new Promise(function(r){ setTimeout(r,150); }).then(function(){ return window.html2canvas(host,{scale:2,backgroundColor:'#fff',useCORS:true,logging:false}); });
   }).then(function(canvas){
     var blobP;
