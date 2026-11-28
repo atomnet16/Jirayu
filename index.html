@@ -670,6 +670,7 @@ input[type=password]{width:100%;background:rgba(255,255,255,0.65);border:2px sol
   <div class="sec" style="margin-top:4px">Time Line · Pivot 3</div>
   <div id="p3-sum"></div>
   <div class="sr-filter" id="p3-tl-filter"></div>
+  <div id="p3-tl-chart"></div>
   <div id="p3-seed-box"></div>
   <div id="p3-list"></div>
   <div class="sr-btns" style="margin:10px 0 4px">
@@ -1370,7 +1371,7 @@ var _delRetried = {}; // กัน retry ลบซ้ำรัว ๆ ใน ses
 var curTankIdx = 0;
 var curChemIdx = 0;
 var curChemForm = '';
-var APP_VERSION = 'v14.9.44.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
+var APP_VERSION = 'v14.9.45.p3+lb+cu'; // อัปเดตทุกครั้งที่แก้ไฟล์ — ใช้เช็คว่าเครื่องโหลดตัวใหม่แล้ว
 // timeout ของ JSONP — Apps Script ตอบช้าได้ถึง 20-30 วิตอนชีตกำลัง recalc หรือโดน throttle
 // ค่าเดิม 9 วิ ทำให้ขึ้น 🔴 sync fail ทั้งที่ backend ตอบกลับมาจริง แค่ช้า
 var JSONP_TIMEOUT = 25000;
@@ -4069,9 +4070,12 @@ function p3ChartCard(title,body){ return '<div class="card" style="margin:12px 0
 function p3Legend(items){ return '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-bottom:6px">'+items.join('')+'</div>'; }
 function p3Empty(t){ return '<div class="sr-sub" style="text-align:center;padding:14px 0">'+t+'</div>'; }
 function p3SetChartPest(i){ var s=P3Core.scoutSeries(p3Recs,p3Cfg(),todayISO()); if(s.pests[i]) p3ChartPest=s.pests[i].key; p3RenderCharts(); }
+// แสดง 2 จุด: (1) ใต้แถบกรองไทม์ไลน์ ตามตัวกรองที่กด (น้ำ / สำรวจ / นับต้น)  (2) ใต้ปุ่มบันทึก ตามกิจกรรมที่เลือกในฟอร์ม
+function p3ChartFor(type){ return type==='scout' ? p3ScoutChart() : type==='irrigation' ? p3WaterChart() : type==='population' ? p3PopChart() : ''; }
 function p3RenderCharts(){
-  var box=document.getElementById('p3-charts'); if(!box) return;
-  box.innerHTML = p3Type==='scout' ? p3ScoutChart() : p3Type==='irrigation' ? p3WaterChart() : p3Type==='population' ? p3PopChart() : '';
+  var top=document.getElementById('p3-tl-chart');
+  if(top){ var h=p3ChartFor({w:'irrigation', k:'scout', p:'population'}[p3TlFilter]); top.innerHTML=h?'<div style="margin-bottom:12px">'+h+'</div>':''; }
+  var box=document.getElementById('p3-charts'); if(box) box.innerHTML=p3ChartFor(p3Type);
 }
 function p3ScoutChart(){
   var cfg=p3Cfg(), t=todayISO(), S=P3Core.scoutSeries(p3Recs,cfg,t), title='🐛 สำรวจแมลง เทียบกับการฉีด';
@@ -4719,7 +4723,7 @@ var P3_FILTERS=[['all','ทั้งหมด'],['w','💧 น้ำ'],['f','�
 var P3_TH_MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function p3ThDate(iso){ var p=String(iso).split('-'); return p.length===3?(+p[2])+' '+P3_TH_MON[+p[1]-1]:String(iso); }
 function p3Mn(x){ return x<0?'−'+(-x):String(x); }   // DAE ติดลบแสดงด้วยเครื่องหมายลบ
-function p3SetFilter(f){ p3TlFilter=f; p3RenderList(); }
+function p3SetFilter(f){ p3TlFilter=f; p3RenderList(); p3RenderCharts(); }
 function p3ToggleSort(){ p3TlDesc=!p3TlDesc; p3RenderList(); }
 function p3GoForm(){ var el=document.getElementById('p3-form'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 function p3GoReport(){ var el=document.getElementById('p3-rp'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
